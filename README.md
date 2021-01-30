@@ -1,8 +1,8 @@
 # iamfast
 
-:construction: Work In Progress!
+:construction: EXPERIMENTAL - WORK IN PROGRESS :construction:
 
-> IAM policy generation from code (using AST)
+> IAM policy generation from code
 
 ## Usage
 
