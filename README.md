@@ -18,6 +18,12 @@ node js/main.js yourfile.js
 node python/main.py yourfile.py
 ```
 
+### Go
+
+```
+go run go/main.go -- yourfile.go
+```
+
 ## Example
 
 ### Node (JavaScript)
@@ -77,11 +83,11 @@ sqs = boto3.client('sqs')
 
 # Create a SQS queue
 response = sqs.create_queue(
-    QueueName='SQS_QUEUE_NAME',
-    Attributes={
-        'DelaySeconds': '60',
-        'MessageRetentionPeriod': '86400'
-    }
+  QueueName='SQS_QUEUE_NAME',
+  Attributes={
+    'DelaySeconds': '60',
+    'MessageRetentionPeriod': '86400'
+  }
 )
 
 print(response['QueueUrl'])
@@ -98,6 +104,50 @@ print(response['QueueUrl'])
             "Resource": [
                 "arn:aws:sqs:us-east-1:123456789012:SQS_QUEUE_NAME"
             ]
+        }
+    ]
+}
+```
+
+### Go
+
+```
+% cat go/tests/test1.go
+package main
+
+import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+)
+
+func main() {
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-2")},
+	)
+
+	// Create S3 service client
+	svc := s3.New(sess)
+
+	// Create the S3 Bucket
+	_, err = svc.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String("abucket"),
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+```
+
+```
+% go run go/main.go -- go/tests/test1.go
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "s3:CreateBucket",
+            "Resource": "*"
         }
     ]
 }
