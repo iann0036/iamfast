@@ -2,99 +2,8 @@ const acorn = require("acorn");
 const walk = require("acorn-walk");
 const fs = require("fs");
 
-const iam_def = require("./iam_definition.json");
-
-let CODEBLOCK = `// Load the AWS SDK for Node.js
-var AWS = require('aws-sdk');
-// Set the region 
-AWS.config.update({region: 'REGION'});
-
-// Create S3 service object
-s3 = new AWS.S3({apiVersion: '2006-03-01'});
-
-// Call S3 to list the buckets
-s3.listBuckets(function(err, data) {
-  if (err) {
-    console.log("Error", err);
-  } else {
-    console.log("Success", data.Buckets);
-  }
-});`;
-
-let CODEBLOCK2 = `// Load the AWS SDK for Node.js
-var AWS = require('aws-sdk');
-// Set the region 
-AWS.config.update({region: 'REGION'});
-
-// Create the DynamoDB service object
-var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
-
-var params = {
-  TableName: 'CUSTOMER_LIST',
-  Item: {
-    'CUSTOMER_ID' : {N: '001'},
-    'CUSTOMER_NAME' : {S: 'Richard Roe'}
-  }
-};
-
-// Call DynamoDB to add the item to the table
-ddb.putItem(params, function(err, data) {
-  if (err) {
-    console.log("Error", err);
-  } else {
-    console.log("Success", data);
-  }
-});
-`;
-
-let CODEBLOCK3 = `// Load the AWS SDK for Node.js
-var AWS = require('aws-sdk');
-// Load credentials and set region from JSON file
-AWS.config.update({region: 'REGION'});
-
-// Create EC2 service object
-var ec2 = new AWS.EC2({apiVersion: '2016-11-15'});
-
-// AMI is amzn-ami-2011.09.1.x86_64-ebs
-var instanceParams = {
-   ImageId: 'AMI_ID', 
-   InstanceType: 't2.micro',
-   KeyName: 'KEY_PAIR_NAME',
-   MinCount: 1,
-   MaxCount: 1
-};
-
-// Create a promise on an EC2 service object
-var instancePromise = new AWS.EC2({apiVersion: '2016-11-15'}).runInstances(instanceParams).promise();
-
-// Handle promise's fulfilled/rejected states
-instancePromise.then(
-  function(data) {
-    console.log(data);
-    var instanceId = data.Instances[0].InstanceId;
-    console.log("Created instance", instanceId);
-    // Add tags to the instance
-    tagParams = {Resources: [instanceId], Tags: [
-       {
-          Key: 'Name',
-          Value: 'SDK Sample'
-       }
-    ]};
-    // Create a promise on an EC2 service object
-    var tagPromise = new AWS.EC2({apiVersion: '2016-11-15'}).createTags(tagParams).promise();
-    // Handle promise's fulfilled/rejected states
-    tagPromise.then(
-      function(data) {
-        console.log("Instance tagged");
-      }).catch(
-        function(err) {
-        console.error(err, err.stack);
-      });
-  }).catch(
-    function(err) {
-    console.error(err, err.stack);
-  });
-`;
+const iam_def = require("./lib/parliament/iam_definition.json");
+const mappings = require("./mappings.json");
 
 function subSARARN(arn, params) {
     arn = arn.replace(/\$\{Partition\}/g, aws_partition);
@@ -144,6 +53,32 @@ function objectWalk(node) {
     }
 
     return obj;
+}
+
+function mapCallToPrivilegeArray(service, call) {
+    let lower_priv = call.service.toLowerCase() + ":" + call.method.toLowerCase();
+
+    if (Object.keys(mappings.iam_actions).includes(lower_priv)) {
+        privileges = [];
+        for (var mapped_priv of mappings.iam_actions[lower_priv]) {
+            for (let privilege of service.privileges) {
+                if (service.prefix.toLowerCase() + ":" + privilege.privilege.toLowerCase() == mapped_priv.action.toLowerCase()) {
+                    privileges.push(privilege);
+                    break;
+                }
+            }
+        }
+        
+        return privileges;
+    } else {
+        for (let privilege of service.privileges) {
+            if (call.method.toLowerCase() == privilege.privilege.toLowerCase()) {
+                return [privilege];
+            }
+        }
+    }
+
+    return [];
 }
 
 function generateIAMPolicy(code) {
@@ -249,35 +184,35 @@ function generateIAMPolicy(code) {
 
         for (let service of iam_def) {
             if (service.prefix == tracked_call.service.toLowerCase()) {
-                for (let privilege of service.privileges) {
-                    if (privilege.privilege.toLowerCase() == tracked_call.method.toLowerCase()) { // TODO: Method mapping
-                        found_match = true;
+                let privilege_array = mapCallToPrivilegeArray(service, tracked_call);
 
-                        let resource_arns = [];
+                for (let privilege of privilege_array) {
+                    found_match = true;
 
-                        if (privilege.resource_types.length) {
-                            for (let resource_type of privilege.resource_types) {
-                                for (let resource of service.resources) {
-                                    if (resource.resource == resource_type.resource_type.replace(/\*/g, "") && resource.resource != "") {
-                                        let subbed_arn = subSARARN(resource.arn, tracked_call.params);
-                                        if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
-                                            resource_arns.push(subbed_arn);
-                                        }
+                    let resource_arns = [];
+
+                    if (privilege.resource_types.length) {
+                        for (let resource_type of privilege.resource_types) {
+                            for (let resource of service.resources) {
+                                if (resource.resource == resource_type.resource_type.replace(/\*/g, "") && resource.resource != "") {
+                                    let subbed_arn = subSARARN(resource.arn, tracked_call.params);
+                                    if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
+                                        resource_arns.push(subbed_arn);
                                     }
                                 }
                             }
                         }
-
-                        if (resource_arns.length == 0) {
-                            resource_arns = ["*"];
-                        }
-
-                        privs.push({
-                            'action': service.prefix + ":" + privilege.privilege,
-                            'explanation': privilege.description,
-                            'resource': resource_arns
-                        });
                     }
+
+                    if (resource_arns.length == 0) {
+                        resource_arns = ["*"];
+                    }
+
+                    privs.push({
+                        'action': service.prefix + ":" + privilege.privilege,
+                        'explanation': privilege.description,
+                        'resource': resource_arns
+                    });
                 }
             }
         }
