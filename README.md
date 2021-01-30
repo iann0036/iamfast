@@ -2,7 +2,7 @@
 
 :construction: EXPERIMENTAL - WORK IN PROGRESS :construction:
 
-> IAM policy generation from code
+> IAM policy generation from application code
 
 ## Usage
 
