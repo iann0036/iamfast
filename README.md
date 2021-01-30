@@ -6,14 +6,24 @@
 
 ## Usage
 
+### Node (JavaScript)
+
 ```
-node index.js yourfile.js
+node js/main.js yourfile.js
+```
+
+### Python
+
+```
+node python/main.py yourfile.py
 ```
 
 ## Example
 
+### Node (JavaScript)
+
 ```
-% cat tests/test1.js
+% cat js/tests/test1.js
 // Load the AWS SDK for Node.js
 var AWS = require('aws-sdk');
 // Set the region 
@@ -39,7 +49,7 @@ ddb.putItem(params, function(err, data) {
   }
 });
 
-% node index.js tests/test1.js
+% node js/main.js js/tests/test1.js
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -48,6 +58,41 @@ ddb.putItem(params, function(err, data) {
             "Action": "dynamodb:PutItem",
             "Resource": [
                 "arn:aws:dynamodb:us-east-1:123456789012:table/CUSTOMER_LIST"
+            ]
+        }
+    ]
+}
+```
+
+### Python
+
+```
+% cat python/tests/test1.py
+import boto3
+
+# Create SQS client
+sqs = boto3.client('sqs')
+
+# Create a SQS queue
+response = sqs.create_queue(
+    QueueName='SQS_QUEUE_NAME',
+    Attributes={
+        'DelaySeconds': '60',
+        'MessageRetentionPeriod': '86400'
+    }
+)
+
+print(response['QueueUrl'])
+
+% python3 python/main.py python/tests/test1.py
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "sqs:CreateQueue",
+            "Resource": [
+                "arn:aws:sqs:us-east-1:123456789012:SQS_QUEUE_NAME"
             ]
         }
     ]
