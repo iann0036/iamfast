@@ -23,6 +23,7 @@
   "homepage": "https://github.com/iann0036/iamfast#readme",
   "dependencies": {
     "acorn": "^8.0.5",
-    "acorn-walk": "^8.0.2"
+    "acorn-walk": "^8.0.2",
+    "commander": "^7.0.0"
   }
 }

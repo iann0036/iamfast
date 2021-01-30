@@ -1,7 +1,8 @@
 const acorn = require("acorn");
 const walk = require("acorn-walk");
+const fs = require("fs");
 
-const iam_def = require('./iam_definition.json');
+const iam_def = require("./iam_definition.json");
 
 let CODEBLOCK = `// Load the AWS SDK for Node.js
 var AWS = require('aws-sdk');
@@ -131,7 +132,6 @@ let aws_partition = 'aws';
 let aws_region = 'us-east-1';
 let aws_accountid = '123456789012';
 
-// start at the level where type: ObjectExpression is defined
 function objectWalk(node) {
     let obj = {};
 
@@ -290,4 +290,6 @@ function generateIAMPolicy(code) {
     console.log(toIAMPolicy(privs));
 }
 
-generateIAMPolicy(CODEBLOCK3);
+const code = fs.readFileSync(process.argv[2], {encoding:'utf8', flag:'r'});
+
+generateIAMPolicy(code);
