@@ -9,24 +9,62 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
+
+const AWSPartition = "aws"
+const AWSRegion = "us-east-1"
+const AWSAccountID = "123456789012"
+
+type resource struct {
+	Resource string `json:"resource"`
+	Arn      string `json:"arn"`
+}
+
+type iamDefinition struct {
+	Prefix     string      `json:"prefix"`
+	Resources  []resource  `json:"resources"`
+	Privileges []privilege `json:"privileges"`
+}
+
+type priv struct {
+	action      string
+	explanation string
+	resource    []string
+}
+
+type resourceType struct {
+	ResourceType string `json:"resourceType"`
+}
+
+type privilege struct {
+	Privilege     string         `json:"privilege"`
+	ResourceTypes []resourceType `json:"resourceTypes"`
+	Description   string         `json:"description"`
+}
 
 type awsService struct {
 	variable string
 	service  string
 }
 
+type keyValue struct {
+	key   string
+	value string
+}
+
 type awsCall struct {
 	service    string
 	serviceVar string
 	method     string
+	params     []keyValue
 }
 
 type statement struct {
-	Effect   string `json:"Effect"`
-	Action   string `json:"Action"`
-	Resource string `json:"Resource"`
+	Effect   string   `json:"Effect"`
+	Action   string   `json:"Action"`
+	Resource []string `json:"Resource"`
 }
 
 type iamPolicy struct {
@@ -34,15 +72,15 @@ type iamPolicy struct {
 	Statement []statement `json:"Statement"`
 }
 
-func toIAMPolicy(calls []awsCall) string {
+func toIAMPolicy(privs []priv) string {
 	var policy iamPolicy
 
 	policy.Version = "2012-10-17"
-	for _, call := range calls {
+	for _, privstmt := range privs {
 		policy.Statement = append(policy.Statement, statement{
 			Effect:   "Allow",
-			Action:   fmt.Sprintf("%s:%s", call.service, call.method),
-			Resource: "*",
+			Action:   privstmt.action,
+			Resource: privstmt.resource,
 		})
 	}
 
@@ -54,10 +92,34 @@ func toIAMPolicy(calls []awsCall) string {
 	return string(b)
 }
 
+func mapCallToPrivilegeArray(service iamDefinition, call awsCall) []privilege {
+	var privileges []privilege
+
+	//lowerPriv := fmt.Sprintf("%s:%s", strings.ToLower(call.service), strings.ToLower(call.method))
+
+	// TODO: Mappings
+
+	if len(privileges) == 0 {
+		for _, servicePrivilege := range service.Privileges {
+			if strings.ToLower(call.method) == strings.ToLower(servicePrivilege.Privilege) {
+				return []privilege{servicePrivilege}
+			}
+		}
+	}
+
+	return []privilege{}
+}
+
+func subSARARN(arn string, params []keyValue) string {
+	// TODO
+	return arn
+}
+
 func parseAST(filecontents string) {
 	var imports []string
 	var services []awsService
 	var calls []awsCall
+	var privs []priv
 
 	// Create the AST
 	fset := token.NewFileSet()
@@ -129,7 +191,62 @@ func parseAST(filecontents string) {
 		return true
 	})
 
-	fmt.Println(toIAMPolicy(calls))
+	//
+
+	path, _ := filepath.Abs("./lib/parliament/iam_definition.json")
+	iamfile, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var iamdef []iamDefinition
+	err = json.Unmarshal(iamfile, &iamdef)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, call := range calls {
+		foundmatch := false
+
+		for _, service := range iamdef {
+			if service.Prefix == strings.ToLower(call.service) {
+				privilegearray := mapCallToPrivilegeArray(service, call)
+
+				for _, privilege := range privilegearray {
+					foundmatch = true
+
+					resourcearns := []string{}
+
+					for _, resourceType := range privilege.ResourceTypes {
+						for _, resource := range service.Resources {
+							if resource.Resource == strings.Replace(resourceType.ResourceType, "*", "", -1) && resource.Resource != "" {
+								subbedArn := subSARARN(resource.Arn, call.params)
+								if resourceType.ResourceType[len(resourceType.ResourceType)-1:] == "*" || subbedArn[len(subbedArn)-1:] != "*" {
+									resourcearns = append(resourcearns, subbedArn)
+								}
+							}
+						}
+					}
+
+					if len(resourcearns) == 0 {
+						resourcearns = []string{"*"}
+					}
+
+					privs = append(privs, priv{
+						action:      fmt.Sprintf("%s:%s", service.Prefix, privilege.Privilege),
+						explanation: privilege.Description,
+						resource:    resourcearns,
+					})
+				}
+			}
+		}
+
+		if !foundmatch {
+			fmt.Println(fmt.Sprintf("WARNING: Could not find privilege match for %s:%s", strings.ToLower(call.service), call.method))
+		}
+	}
+
+	fmt.Println(toIAMPolicy(privs))
 }
 
 func main() {

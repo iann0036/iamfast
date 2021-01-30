@@ -21,7 +21,9 @@ node python/main.py yourfile.py
 ### Go
 
 ```
-go run go/main.go -- yourfile.go
+cd go
+go build -o iamfast
+./iamfast yourfile.go
 ```
 
 ## Example
@@ -140,14 +142,18 @@ func main() {
 ```
 
 ```
-% go run go/main.go -- go/tests/test1.go
+% cd go
+% go build -o iamfast
+% ./iamfast tests/test1.go
 {
     "Version": "2012-10-17",
     "Statement": [
         {
             "Effect": "Allow",
             "Action": "s3:CreateBucket",
-            "Resource": "*"
+            "Resource": [
+                "*"
+            ]
         }
     ]
 }
