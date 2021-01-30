@@ -48,7 +48,9 @@ ddb.putItem(params, function(err, data) {
     console.log("Success", data);
   }
 });
+```
 
+```
 % node js/main.js js/tests/test1.js
 {
     "Version": "2012-10-17",
@@ -83,7 +85,9 @@ response = sqs.create_queue(
 )
 
 print(response['QueueUrl'])
+```
 
+```
 % python3 python/main.py python/tests/test1.py
 {
     "Version": "2012-10-17",
