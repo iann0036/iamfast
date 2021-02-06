@@ -105,3 +105,4 @@ dist
 
 # Custom
 .DS_Store
+go/iamfast

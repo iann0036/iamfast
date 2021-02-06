@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"go/ast"
@@ -9,13 +10,18 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 )
 
 const AWSPartition = "aws"
 const AWSRegion = "us-east-1"
 const AWSAccountID = "123456789012"
+
+//go:embed lib/parliament/iam_definition.json
+var iamfile []byte
+
+//go:embed mappings.json
+var mappingsfile []byte
 
 type resource struct {
 	Resource string `json:"resource"`
@@ -92,12 +98,48 @@ func toIAMPolicy(privs []priv) string {
 	return string(b)
 }
 
+type mappingsFile struct {
+	SDKMethodIAMMappings map[string]interface{} `json:"sdk_method_iam_mappings"`
+	SDKServiceMappings   map[string]string      `json:"sdk_service_mappings"`
+}
+
+func mapServicePrefix(prefix string, mappings mappingsFile) string {
+	for sdkprefix, mappedprefix := range mappings.SDKServiceMappings {
+		if sdkprefix == prefix {
+			return mappedprefix
+		}
+	}
+
+	return prefix
+}
+
+type callMapping struct {
+	Action string `json:"action"`
+}
+
 func mapCallToPrivilegeArray(service iamDefinition, call awsCall) []privilege {
+	lowerPriv := fmt.Sprintf("%s:%s", strings.ToLower(call.service), strings.ToLower(call.method))
+
 	var privileges []privilege
 
-	//lowerPriv := fmt.Sprintf("%s:%s", strings.ToLower(call.service), strings.ToLower(call.method))
+	var mappings mappingsFile
+	err := json.Unmarshal(mappingsfile, &mappings)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// TODO: Mappings
+	for callName, call := range mappings.SDKMethodIAMMappings {
+		if callName == lowerPriv { // TODO: SDKMethodIAMMappings not lower, check this works?
+			for _, mappedPriv := range call.([]callMapping) {
+				for _, privilege := range service.Privileges {
+					if fmt.Sprintf("%s:%s", strings.ToLower(mapServicePrefix(service.Prefix, mappings)), strings.ToLower(privilege.Privilege)) == strings.ToLower(mappedPriv.Action) {
+						privileges = append(privileges, privilege)
+						break
+					}
+				}
+			}
+		}
+	}
 
 	if len(privileges) == 0 {
 		for _, servicePrivilege := range service.Privileges {
@@ -112,6 +154,7 @@ func mapCallToPrivilegeArray(service iamDefinition, call awsCall) []privilege {
 
 func subSARARN(arn string, params []keyValue) string {
 	// TODO
+
 	return arn
 }
 
@@ -192,12 +235,6 @@ func parseAST(filecontents string) {
 	})
 
 	//
-
-	path, _ := filepath.Abs("./lib/parliament/iam_definition.json")
-	iamfile, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	var iamdef []iamDefinition
 	err = json.Unmarshal(iamfile, &iamdef)
