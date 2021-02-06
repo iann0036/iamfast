@@ -41,6 +41,14 @@ let aws_partition = 'aws';
 let aws_region = 'us-east-1';
 let aws_accountid = '123456789012';
 
+function mapServicePrefix(prefix) {
+    if (mappings['sdk_service_mappings'][prefix]) {
+        return mappings['sdk_service_mappings'][prefix];
+    }
+
+    return prefix;
+}
+
 function objectWalk(node) {
     let obj = {};
 
@@ -58,11 +66,11 @@ function objectWalk(node) {
 function mapCallToPrivilegeArray(service, call) {
     let lower_priv = call.service.toLowerCase() + ":" + call.method.toLowerCase();
 
-    if (Object.keys(mappings.iam_actions).includes(lower_priv)) {
+    if (Object.keys(mappings.sdk_method_iam_mappings).includes(lower_priv)) {
         privileges = [];
-        for (var mapped_priv of mappings.iam_actions[lower_priv]) {
+        for (var mapped_priv of mappings.sdk_method_iam_mappings[lower_priv]) {
             for (let privilege of service.privileges) {
-                if (service.prefix.toLowerCase() + ":" + privilege.privilege.toLowerCase() == mapped_priv.action.toLowerCase()) {
+                if (mapServicePrefix(service.prefix).toLowerCase() + ":" + privilege.privilege.toLowerCase() == mapped_priv.action.toLowerCase()) {
                     privileges.push(privilege);
                     break;
                 }
@@ -185,7 +193,7 @@ function generateIAMPolicy(code) {
         let found_match = false;
 
         for (let service of iam_def) {
-            if (service.prefix == tracked_call.service.toLowerCase()) {
+            if (mapServicePrefix(service.prefix) == tracked_call.service.toLowerCase()) {
                 let privilege_array = mapCallToPrivilegeArray(service, tracked_call);
 
                 for (let privilege of privilege_array) {
@@ -211,7 +219,7 @@ function generateIAMPolicy(code) {
                     }
 
                     privs.push({
-                        'action': service.prefix + ":" + privilege.privilege,
+                        'action': mapServicePrefix(service.prefix) + ":" + privilege.privilege,
                         'explanation': privilege.description,
                         'resource': resource_arns
                     });

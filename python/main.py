@@ -90,9 +90,9 @@ def sub_sar_arn(arn, params):
 def map_call_to_privilege_array(service, call):
     lower_priv = call['service'].lower() + ":" + call['method'].lower()
 
-    if lower_priv in mappings['iam_actions'].keys():
+    if lower_priv in mappings['sdk_method_iam_mappings'].keys():
         privileges = []
-        for mapped_priv in mappings['iam_actions'][lower_priv]:
+        for mapped_priv in mappings['sdk_method_iam_mappings'][lower_priv]:
             for privilege in service['privileges']:
                 if service['prefix'].lower() + ":" + privilege['privilege'].lower() == mapped_priv.action.lower():
                     privileges.push(privilege)

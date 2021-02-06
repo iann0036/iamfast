@@ -8,7 +8,7 @@ import (
 
 func main() {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-west-2")},
+		Region: aws.String("us-east-1")},
 	)
 
 	// Create S3 service client
