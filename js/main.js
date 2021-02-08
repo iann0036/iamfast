@@ -5,7 +5,14 @@ const fs = require("fs");
 const iam_def = require("./lib/parliament/iam_definition.json");
 const mappings = require("./mappings.json");
 
-function subSARARN(arn, params) {
+function subSARARN(arn, params, mapped_priv) {
+    if (mapped_priv && mapped_priv.resource_mappings) {
+        for (let param of Object.keys(mapped_priv.resource_mappings)) {
+            let r = new RegExp("\\$\\{" + param + "\\}", "gi");
+            arn = arn.replace(r, mapped_priv.resource_mappings[param].template);
+        }
+    }
+
     arn = arn.replace(/\$\{Partition\}/g, aws_partition);
     arn = arn.replace(/\$\{Region\}/g, aws_region);
     arn = arn.replace(/\$\{Account\}/g, aws_accountid);
@@ -64,24 +71,37 @@ function objectWalk(node) {
 }
 
 function mapCallToPrivilegeArray(service, call) {
-    let lower_priv = call.service.toLowerCase() + ":" + call.method.toLowerCase();
+    let lower_priv = call.service.toLowerCase() + "." + call.method.toLowerCase();
 
-    if (Object.keys(mappings.sdk_method_iam_mappings).includes(lower_priv)) {
-        privileges = [];
-        for (var mapped_priv of mappings.sdk_method_iam_mappings[lower_priv]) {
-            for (let privilege of service.privileges) {
-                if (mapServicePrefix(service.prefix).toLowerCase() + ":" + privilege.privilege.toLowerCase() == mapped_priv.action.toLowerCase()) {
-                    privileges.push(privilege);
-                    break;
+    let privileges = [];
+
+    // check if it's in the mapping
+    for (let mappingkey of Object.keys(mappings.sdk_method_iam_mappings)) {
+        if (lower_priv == mappingkey.toLowerCase()) {
+            for (var mapped_priv of mappings.sdk_method_iam_mappings[mappingkey]) {
+                for (let privilege of service.privileges) {
+                    if (mapServicePrefix(service.prefix).toLowerCase() + ":" + privilege.privilege.toLowerCase() == mapped_priv.action.toLowerCase()) {
+                        privileges.push({
+                            'sarpriv': privilege,
+                            'mappedpriv': mapped_priv
+                        });
+                        break;
+                    }
                 }
             }
+
+            return privileges;
         }
-        
-        return privileges;
-    } else {
+    }
+
+    // last resort check the SAR directly
+    if (!privileges.length) {
         for (let privilege of service.privileges) {
             if (call.method.toLowerCase() == privilege.privilege.toLowerCase()) {
-                return [privilege];
+                return [{
+                    'sarpriv': privilege,
+                    'mappedpriv': null
+                }];
             }
         }
     }
@@ -193,7 +213,7 @@ function generateIAMPolicy(code) {
         let found_match = false;
 
         for (let service of iam_def) {
-            if (mapServicePrefix(service.prefix) == tracked_call.service.toLowerCase()) {
+            if (mapServicePrefix(service.prefix).toLowerCase() == tracked_call.service.toLowerCase()) {
                 let privilege_array = mapCallToPrivilegeArray(service, tracked_call);
 
                 for (let privilege of privilege_array) {
@@ -201,11 +221,11 @@ function generateIAMPolicy(code) {
 
                     let resource_arns = [];
 
-                    if (privilege.resource_types.length) {
-                        for (let resource_type of privilege.resource_types) {
+                    if (privilege.sarpriv.resource_types.length) {
+                        for (let resource_type of privilege.sarpriv.resource_types) {
                             for (let resource of service.resources) {
-                                if (resource.resource == resource_type.resource_type.replace(/\*/g, "") && resource.resource != "") {
-                                    let subbed_arn = subSARARN(resource.arn, tracked_call.params);
+                                if (resource.resource.toLowerCase() == resource_type.resource_type.replace(/\*/g, "").toLowerCase() && resource.resource != "") {
+                                    let subbed_arn = subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv);
                                     if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
                                         resource_arns.push(subbed_arn);
                                     }
@@ -219,8 +239,8 @@ function generateIAMPolicy(code) {
                     }
 
                     privs.push({
-                        'action': mapServicePrefix(service.prefix) + ":" + privilege.privilege,
-                        'explanation': privilege.description,
+                        'action': mapServicePrefix(service.prefix) + ":" + privilege.sarpriv.privilege,
+                        'explanation': privilege.sarpriv.description,
                         'resource': resource_arns
                     });
                 }
