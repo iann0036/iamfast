@@ -1,4 +1,4 @@
-<p align="center"><b>JavaScript</b> • <a href="https://github.com/iann0036/iamfast-python">Python</a> • <a href="https://github.com/iann0036/iamfast-go">Go</a></p>
+<p align="center"><b>JavaScript</b> • <a href="https://github.com/iann0036/iamfast-python">Python</a> • <a href="https://github.com/iann0036/iamfast-go">Go</a> • <a href="https://github.com/iann0036/iamfast-vscode">VSCode</a></p>
 
 # iamfast (JavaScript)
 
