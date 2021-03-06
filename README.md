@@ -6,16 +6,22 @@
 
 > IAM policy generation from application code
 
+## Installation
+
+```
+npm i -g iamfast
+```
+
 ## Usage
 
 ```
-node main.js yourfile.js
+iamfast-js yourfile.js
 ```
 
 ## Example
 
 ```
-% cat tests/test1.js
+> cat tests/test1.js
 // Load the AWS SDK for Node.js
 var AWS = require('aws-sdk');
 // Set the region 
@@ -43,7 +49,7 @@ ddb.putItem(params, function(err, data) {
 ```
 
 ```
-% node main.js tests/test1.js
+> iamfast-js tests/test1.js
 {
     "Version": "2012-10-17",
     "Statement": [
