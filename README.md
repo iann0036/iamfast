@@ -9,13 +9,13 @@
 ## Usage
 
 ```
-node js/main.js yourfile.js
+node main.js yourfile.js
 ```
 
 ## Example
 
 ```
-% cat js/tests/test1.js
+% cat tests/test1.js
 // Load the AWS SDK for Node.js
 var AWS = require('aws-sdk');
 // Set the region 
@@ -43,7 +43,7 @@ ddb.putItem(params, function(err, data) {
 ```
 
 ```
-% node js/main.js js/tests/test1.js
+% node main.js tests/test1.js
 {
     "Version": "2012-10-17",
     "Statement": [
