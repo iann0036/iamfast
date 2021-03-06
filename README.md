@@ -1,3 +1,5 @@
+<p align="center"><b>JavaScript</b> • <a href="https://github.com/iann0036/iamfast-python">Python</a> • <a href="https://github.com/iann0036/iamfast-go">Go</a></p>
+
 # iamfast (JavaScript)
 
 :construction: EXPERIMENTAL - WORK IN PROGRESS :construction:
@@ -6,29 +8,11 @@
 
 ## Usage
 
-### Node (JavaScript)
-
 ```
 node js/main.js yourfile.js
 ```
 
-### Python
-
-```
-node python/main.py yourfile.py
-```
-
-### Go
-
-```
-cd go
-go build -o iamfast
-./iamfast yourfile.go
-```
-
 ## Example
-
-### Node (JavaScript)
 
 ```
 % cat js/tests/test1.js
@@ -68,91 +52,6 @@ ddb.putItem(params, function(err, data) {
             "Action": "dynamodb:PutItem",
             "Resource": [
                 "arn:aws:dynamodb:us-east-1:123456789012:table/CUSTOMER_LIST"
-            ]
-        }
-    ]
-}
-```
-
-### Python
-
-```
-% cat python/tests/test1.py
-import boto3
-
-# Create SQS client
-sqs = boto3.client('sqs')
-
-# Create a SQS queue
-response = sqs.create_queue(
-  QueueName='SQS_QUEUE_NAME',
-  Attributes={
-    'DelaySeconds': '60',
-    'MessageRetentionPeriod': '86400'
-  }
-)
-
-print(response['QueueUrl'])
-```
-
-```
-% python3 python/main.py python/tests/test1.py
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": "sqs:CreateQueue",
-            "Resource": [
-                "arn:aws:sqs:us-east-1:123456789012:SQS_QUEUE_NAME"
-            ]
-        }
-    ]
-}
-```
-
-### Go
-
-```
-% cat go/tests/test1.go
-package main
-
-import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-)
-
-func main() {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-west-2")},
-	)
-
-	// Create S3 service client
-	svc := s3.New(sess)
-
-	// Create the S3 Bucket
-	_, err = svc.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String("abucket"),
-	})
-	if err != nil {
-		panic(err)
-	}
-}
-```
-
-```
-% cd go
-% go build -o iamfast
-% ./iamfast tests/test1.go
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": "s3:CreateBucket",
-            "Resource": [
-                "*"
             ]
         }
     ]
