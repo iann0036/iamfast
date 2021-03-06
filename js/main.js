@@ -21,14 +21,14 @@ class IAMFast {
             }
         }
     
-        arn = arn.replace(/\$\{Partition\}/g, this.aws_partition);
-        arn = arn.replace(/\$\{Region\}/g, this.aws_region);
-        arn = arn.replace(/\$\{Account\}/g, this.aws_accountid);
-    
         for (let param of Object.keys(params)) {
             let r = new RegExp("\\$\\{" + param + "\\}", "gi");
             arn = arn.replace(r, params[param]);
         }
+    
+        arn = arn.replace(/\$\{Partition\}/g, this.aws_partition);
+        arn = arn.replace(/\$\{Region\}/g, this.aws_region);
+        arn = arn.replace(/\$\{Account\}/g, this.aws_accountid);
     
         arn = arn.replace(/\$\{.*\}/g, "*");
     

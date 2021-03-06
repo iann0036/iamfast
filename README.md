@@ -1,4 +1,4 @@
-# iamfast
+# iamfast (JavaScript)
 
 :construction: EXPERIMENTAL - WORK IN PROGRESS :construction:
 

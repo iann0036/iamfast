@@ -74,13 +74,13 @@ class MyVisitor(ast.NodeVisitor):
 
 
 def sub_sar_arn(arn, params):
-    arn = re.sub(r"\$\{Partition\}", aws_partition, arn)
-    arn = re.sub(r"\$\{Region\}", aws_region, arn)
-    arn = re.sub(r"\$\{Account\}", aws_accountid, arn)
-    
     for param in params.keys():
         regex = re.compile("\\$\\{" + param + "\\}")
         arn = regex.sub(params[param], arn)
+
+    arn = re.sub(r"\$\{Partition\}", aws_partition, arn)
+    arn = re.sub(r"\$\{Region\}", aws_region, arn)
+    arn = re.sub(r"\$\{Account\}", aws_accountid, arn)
 
     arn = re.sub(r"\$\{.*\}", "*", arn)
 

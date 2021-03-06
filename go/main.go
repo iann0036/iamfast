@@ -128,7 +128,7 @@ func mapCallToPrivilegeArray(service iamDefinition, call awsCall) []privilege {
 		log.Fatal(err)
 	}
 
-	for callName, call := range mappings.SDKMethodIAMMappings {
+	for callName, call := range mappings.SDKMethodIAMMappings { // double use of call
 		if callName == lowerPriv { // TODO: SDKMethodIAMMappings not lower, check this works?
 			for _, mappedPriv := range call.([]callMapping) {
 				for _, privilege := range service.Privileges {
