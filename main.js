@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const acorn = require("acorn");
 const walk = require("acorn-walk");
 const fs = require("fs");
@@ -114,6 +116,12 @@ class IAMFast {
     }
     
     generateIAMPolicy(code) {
+        if (code[0] == '#') {
+            let lines = code.split("\n");
+            lines.shift();
+            code = lines.join("\n");
+        }
+
         const parser = acorn.parse(code, {ecmaVersion: 2020});
     
         let sdk_names = [];
@@ -127,7 +135,7 @@ class IAMFast {
             VariableDeclarator(node, ancestors) {
                 let varname = node.id.name;
     
-                if (node.init.type == "ObjectExpression") {
+                if (node.init && node.init.type == "ObjectExpression") {
                     let varresult = IAMFast.objectWalk(node.init);
     
                     tracked_variable_declarations.push({
@@ -270,6 +278,11 @@ class IAMFast {
 }
 
 if (require.main === module) {
+    if (process.argv.length < 3) {
+        console.log("Usage: iamfast-js filename");
+        process.exit(1);
+    }
+
     const code = fs.readFileSync(process.argv[2], {encoding:'utf8', flag:'r'});
 
     let iamfast = new IAMFast();

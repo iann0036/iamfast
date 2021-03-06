@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iann0036/iamfast.git"
+    "url": "git+https://github.com/iann0036/iamfast-js.git"
   },
   "keywords": [
     "aws",
@@ -18,12 +18,15 @@
   "author": "Ian Mckay",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/iann0036/iamfast/issues"
+    "url": "https://github.com/iann0036/iamfast-js/issues"
   },
-  "homepage": "https://github.com/iann0036/iamfast#readme",
+  "homepage": "https://github.com/iann0036/iamfast-js#readme",
   "dependencies": {
     "acorn": "^8.0.5",
     "acorn-walk": "^8.0.2",
     "commander": "^7.0.0"
+  },
+  "bin": {
+    "iamfast-js": "./main.js"
   }
 }
