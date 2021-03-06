@@ -3,7 +3,7 @@ const walk = require("acorn-walk");
 const fs = require("fs");
 
 const iam_def = require("./lib/parliament/iam_definition.json");
-const mappings = require("./mappings.json");
+const mappings = require("./map.json");
 
 class IAMFast {
 
