@@ -114,25 +114,17 @@ class IAMFast {
     
         return [];
     }
-    
-    generateIAMPolicy(code) {
-        if (code[0] == '#') {
-            let lines = code.split("\n");
-            lines.shift();
-            code = lines.join("\n");
-        }
 
+    walkCode(code) {
         const parser = acorn.parse(code, {ecmaVersion: 2020});
     
+        let tracked_calls = [];
         let sdk_names = [];
         let service_objects = [];
-        let tracked_calls = [];
-        let privs = [];
-    
         let tracked_variable_declarations = [];
-    
+
         walk.ancestor(parser, {
-            VariableDeclarator(node, ancestors) {
+            VariableDeclarator(node, ancestors) { // variable tracker
                 let varname = node.id.name;
     
                 if (node.init && node.init.type == "ObjectExpression") {
@@ -144,7 +136,7 @@ class IAMFast {
                     });
                 }
             },
-            Literal(node, ancestors) {
+            Literal(node, ancestors) { // sdk require tracker
                 if (node.value == "aws-sdk") {
                     if (ancestors[ancestors.length - 2].type == "CallExpression" && ancestors[ancestors.length - 2].callee.name == "require") {
                         if (ancestors[ancestors.length - 3].type == "VariableDeclarator") {
@@ -156,13 +148,13 @@ class IAMFast {
             Identifier(node, ancestors) {
                 for (let sdk_name of sdk_names) {
                     if (node.name == sdk_name) {
-                        if (ancestors[ancestors.length - 2].type == "MemberExpression" && ancestors[ancestors.length - 3].type == "NewExpression" && ancestors[ancestors.length - 4].type == "AssignmentExpression") {
+                        if (ancestors[ancestors.length - 2].type == "MemberExpression" && ancestors[ancestors.length - 3].type == "NewExpression" && ancestors[ancestors.length - 4].type == "AssignmentExpression") { // service client declaration
                             service_objects.push({
                                 'service': ancestors[ancestors.length - 2].property.name,
                                 'variable': ancestors[ancestors.length - 4].left.name,
                                 'sdk': sdk_name
                             });
-                        } else if (ancestors[ancestors.length - 2].type == "MemberExpression" && ancestors[ancestors.length - 3].type == "NewExpression" && ancestors[ancestors.length - 4].type == "VariableDeclarator") {
+                        } else if (ancestors[ancestors.length - 2].type == "MemberExpression" && ancestors[ancestors.length - 3].type == "NewExpression" && ancestors[ancestors.length - 4].type == "VariableDeclarator") { // service client declaration
                             service_objects.push({
                                 'service': ancestors[ancestors.length - 2].property.name,
                                 'variable': ancestors[ancestors.length - 4].id.name,
@@ -218,8 +210,20 @@ class IAMFast {
                 }
             }
         });
+
+        return tracked_calls;
+    }
     
-        //
+    generateIAMPolicy(code) {
+        let privs = [];
+
+        if (code.trim()[0] == '#') {
+            let lines = code.split("\n");
+            lines.shift();
+            code = lines.join("\n");
+        }
+
+        let tracked_calls = this.walkCode(code);
     
         for (let tracked_call of tracked_calls) {
             let found_match = false;
