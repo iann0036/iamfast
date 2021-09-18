@@ -27,6 +27,6 @@
     "commander": "^7.0.0"
   },
   "bin": {
-    "iamfast-js": "./main.js"
+    "iamfast-js": "main.js"
   }
 }

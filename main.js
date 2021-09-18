@@ -123,6 +123,7 @@ class IAMFast {
         let service_objects = [];
         let tracked_variable_declarations = [];
 
+        // find variable and SDK declarations
         walk.ancestor(parser, {
             VariableDeclarator(node, ancestors) { // variable tracker
                 let varname = node.id.name;
@@ -132,7 +133,9 @@ class IAMFast {
     
                     tracked_variable_declarations.push({
                         'name': varname,
-                        'value': varresult
+                        'value': varresult,
+                        'start': node.start,
+                        'end': node.end
                     });
                 }
             },
@@ -144,7 +147,11 @@ class IAMFast {
                         }
                     }
                 }
-            },
+            }
+        });
+
+        // find service objects
+        walk.ancestor(parser, {
             Identifier(node, ancestors) {
                 for (let sdk_name of sdk_names) {
                     if (node.name == sdk_name) {
@@ -152,15 +159,30 @@ class IAMFast {
                             service_objects.push({
                                 'service': ancestors[ancestors.length - 2].property.name,
                                 'variable': ancestors[ancestors.length - 4].left.name,
-                                'sdk': sdk_name
+                                'sdk': sdk_name,
+                                'start': node.start,
+                                'end': node.end
                             });
                         } else if (ancestors[ancestors.length - 2].type == "MemberExpression" && ancestors[ancestors.length - 3].type == "NewExpression" && ancestors[ancestors.length - 4].type == "VariableDeclarator") { // service client declaration
                             service_objects.push({
                                 'service': ancestors[ancestors.length - 2].property.name,
                                 'variable': ancestors[ancestors.length - 4].id.name,
-                                'sdk': sdk_name
+                                'sdk': sdk_name,
+                                'start': node.start,
+                                'end': node.end
                             });
-                        } else if (ancestors[ancestors.length - 2].type == "MemberExpression" && ancestors[ancestors.length - 3].type == "NewExpression" && ancestors[ancestors.length - 4].type == "MemberExpression" && ancestors[ancestors.length - 5].type == "CallExpression") {
+                        }
+                    }
+                }
+            }
+        });
+
+        // find calls
+        walk.ancestor(parser, {
+            Identifier(node, ancestors) {
+                for (let sdk_name of sdk_names) {
+                    if (node.name == sdk_name) {
+                        if (ancestors[ancestors.length - 2].type == "MemberExpression" && ancestors[ancestors.length - 3].type == "NewExpression" && ancestors[ancestors.length - 4].type == "MemberExpression" && ancestors[ancestors.length - 5].type == "CallExpression") {
                             let params = {};
     
                             if (ancestors[ancestors.length - 5].arguments.length && ancestors[ancestors.length - 5].arguments[0].type == "Identifier") {
@@ -174,7 +196,9 @@ class IAMFast {
                             tracked_calls.push({
                                 'service': ancestors[ancestors.length - 2].property.name,
                                 'method': ancestors[ancestors.length - 4].property.name,
-                                'params': params
+                                'params': params,
+                                'start': node.start,
+                                'end': node.end
                             });
                         }
                     }
@@ -203,7 +227,9 @@ class IAMFast {
                             tracked_calls.push({
                                 'service': service_object.service,
                                 'method': ancestors[ancestors.length - 2].property.name,
-                                'params': params
+                                'params': params,
+                                'start': node.start,
+                                'end': node.end
                             });
                         }
                     }
