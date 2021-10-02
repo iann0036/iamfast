@@ -42,12 +42,22 @@ class IAMFast {
             'Version': '2012-10-17',
             'Statement': []
         };
-    
+
+        // dedup
+        let byAction = {};
         for (let priv of privs) {
+            if (!byAction[priv.action]) {
+                byAction[priv.action] = [];
+            }
+
+            byAction[priv.action] = byAction[priv.action].concat(priv.resource);
+        }
+    
+        for (let k of Object.keys(byAction)) {
             policy.Statement.push({
                 'Effect': 'Allow',
-                'Action': priv.action,
-                'Resource': priv.resource
+                'Action': k,
+                'Resource': [...new Set(byAction[k])]
             })
         }
     
