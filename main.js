@@ -15,6 +15,138 @@ class IAMFast {
         this.aws_accountid = aws_accountid || '123456789012';
     }
 
+    resolveSpecials(arn, call, mandatory, mapped_priv) {
+        let start_index = arn.indexOf("%%");
+        let end_index = arn.lastIndexOf("%%");
+        let arns = [];
+
+        if (start_index > -1 && end_index != start_index) {
+            let parts = arn.substr(start_index+2, end_index-start_index+2).split("%");
+
+            if (parts.length < 2) {
+                return [arn.substr(0, startIndex) + "*" + arn.substr(end_index+2)];
+            }
+
+            switch(parts[0]) {
+                case "iftruthy":
+                    if (parts.length == 3) { // weird bug for empty string false values
+                        parts.push("");
+                    }
+
+                    if (parts.length != 4) {
+                        return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                    }
+
+                    arns = this.subSARARN(parts[1], call['params'], mapped_priv);
+
+                    if (arns.length < 1 || arns[0] == "") {
+                        if (parts[3] == "") {
+                            if (mandatory) {
+                                return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                            }
+                            return [arn.substr(0, start_index) + arn.substr(end_index+2)];
+                        }
+                        return [arn.substr(0, start_index) + parts[3] + arn.substr(end_index+2)];
+                    }
+
+                    if (parts[2] == "" && mandatory) {
+                        return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                    }
+
+                    return [arn.substr(0, start_index) + parts[2] + arn.substr(end_index+2)];
+                case "urlencode":
+                    if (parts.length != 2) {
+                        return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                    }
+
+                    arns = this.subSARARN(parts[1], call['params'], mapped_priv);
+
+                    if (arns.length < 1 || arns[0] == "") {
+                        if (mandatory) {
+                            return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                        }
+                        return [arn.substr(0, start_index) + arn.substr(end_index+2)];
+                    }
+
+                    return [arn.substr(0, start_index) + encodeURIComponent(arns[0]) + arn.substr(end_index+2)];
+                case "iftemplatematch":
+                    if (parts.length != 2) {
+                        return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                    }
+
+                    arns = this.subSARARN(parts[1], call['params'], mapped_priv);
+
+                    if (arns.length < 1 || arns[0] == "") {
+                        if (mandatory) {
+                            return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                        }
+                        return [arn.substr(0, start_index) + arn.substr(end_index+2)];
+                    }
+
+                    //console.log("Check Map");
+                    //console.log(mapped_priv);
+
+                    /*
+                    template := regexp.MustCompile(`\\\$\\\{.+?\\\}`).ReplaceAllString(regexp.QuoteMeta(*resourceArnTemplate), ".*?")
+            
+                        if regexp.MustCompile(template).MatchString(arns[0]) {
+                            return []string{arn[0:startIndex] + arns[0] + arn[endIndex+2:]}
+                        }
+                    */
+
+                    return [arn.substr(0, start_index) + arn.substr(end_index+2)];
+                case "many":
+                    let many_parts = [];
+
+                    for (let part of parts.slice(1)) {
+                        arns = this.subSARARN(part, call['params'], mapped_priv);
+                        if (arns.length < 1 || arns[0] == "") {
+                            if (mandatory) {
+                                return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                            }
+                            return [arn.substr(0, start_index) + arn.substr(end_index+2)];
+                        }
+
+                        many_parts.push(arns[0]);
+                    }
+
+                    return many_parts;
+                case "regex":
+                    if (parts.length != 3) {
+                        return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                    }
+
+                    arns = this.subSARARN(parts[1], call['params'], mapped_priv);
+
+                    if (arns.length < 1 || arns[0] == "") {
+                        if (mandatory) {
+                            return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                        }
+                        return [arn.substr(0, start_index) + arn.substr(end_index+2)];
+                    }
+
+                    if (parts[2][0] == "/") {
+                        parts[2] = parts[2].substr(1, -2);
+                    }
+
+                    let groups = parts[2].matchAll(arns[0].replace(/\$/g, "$$"));
+
+                    if (groups.length < 2 || groups[1] == "") {
+                        if (mandatory) {
+                            return [arn.substr(0, start_index) + "*" + arn.substr(end_index+2)];
+                        }
+                        return [arn.substr(0, start_index) + arn.substr(end_index+2)];
+                    }
+
+                    return [arn.substr(0, start_index) + groups[1] + arn.substr(end_index+2)];
+                default:
+                    throw "Unknown special function";
+            }
+        }
+
+        return [arn];
+    }
+
     subSARARN(arn, params, mapped_priv) {
         if (mapped_priv && mapped_priv.resource_mappings) {
             for (let param of Object.keys(mapped_priv.resource_mappings)) {
@@ -279,7 +411,7 @@ class IAMFast {
                                     if (resource.resource.toLowerCase() == resource_type.resource_type.replace(/\*/g, "").toLowerCase() && resource.resource != "") {
                                         let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv);
                                         if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
-                                            resource_arns.push(subbed_arn);
+                                            resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, false, privilege.mappedpriv));
                                         }
                                     }
                                 }
