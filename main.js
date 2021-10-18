@@ -7,6 +7,14 @@ const fs = require("fs");
 const iam_def = require("./lib/parliament/iam_definition.json");
 const mappings = require("./map.json");
 
+const GENERIC_SERVICE_METHODS = new Set([
+    "endpoint",
+    "defineservice",
+    "makerequest",
+    "makeunauthenticatedrequest",
+    "setuprequestlisteners",
+    "waitfor"]);
+
 class IAMFast {
 
     constructor(aws_partition, aws_region, aws_accountid) {
@@ -159,14 +167,11 @@ class IAMFast {
             let r = new RegExp("\\$\\{" + param + "\\}", "gi");
             arn = arn.replace(r, params[param]);
         }
-    
-        arn = arn.replace(/\$\{Partition\}/g, this.aws_partition);
-        arn = arn.replace(/\$\{Region\}/g, this.aws_region);
-        arn = arn.replace(/\$\{Account\}/g, this.aws_accountid);
-    
-        arn = arn.replace(/\$\{.*\}/g, "*");
-    
-        return arn;
+
+        return arn.replace(/\$\{Partition\}/g, this.aws_partition)
+                  .replace(/\$\{Region\}/g, this.aws_region)
+                  .replace(/\$\{Account\}/g, this.aws_accountid)
+                  .replace(/\$\{.*\}/g, "*");
     }
     
     toIAMPolicy(privs) {
@@ -405,19 +410,17 @@ class IAMFast {
     
                         let resource_arns = [];
     
-                        if (privilege.sarpriv.resource_types.length) {
-                            for (let resource_type of privilege.sarpriv.resource_types) {
-                                for (let resource of service.resources) {
-                                    if (resource.resource.toLowerCase() == resource_type.resource_type.replace(/\*/g, "").toLowerCase() && resource.resource != "") {
-                                        let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv);
-                                        if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
-                                            resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, false, privilege.mappedpriv));
-                                        }
+                        for (let resource_type of privilege.sarpriv.resource_types) {
+                            for (let resource of service.resources) {
+                                if (resource.resource.toLowerCase() == resource_type.resource_type.replace(/\*/g, "").toLowerCase() && resource.resource != "") {
+                                    let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv);
+                                    if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
+                                        resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, false, privilege.mappedpriv));
                                     }
                                 }
                             }
                         }
-    
+
                         if (resource_arns.length == 0) {
                             resource_arns = ["*"];
                         }
@@ -430,21 +433,13 @@ class IAMFast {
                     }
                 }
             }
-    
-            if (
-                !found_match && ![
-                    "endpoint",
-                    "defineservice",
-                    "makerequest",
-                    "makeunauthenticatedrequest",
-                    "setuprequestlisteners",
-                    "waitfor"
-                ].includes(tracked_call.method.toLowerCase()) // generic service methods
-            ) {
-                console.warn("WARNING: Could not find privilege match for " + tracked_call.service.toLowerCase() + ":" + tracked_call.method);
+
+            if (!found_match &&
+                !GENERIC_SERVICE_METHODS.has(tracked_call.method.toLowerCase())) {
+                console.warn(`WARNING: Could not find privilege match for ${tracked_call.service.toLowerCase()}:${tracked_call.method}`);
             }
         }
-    
+
         return this.toIAMPolicy(privs);
     }
 }
