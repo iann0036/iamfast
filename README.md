@@ -63,3 +63,16 @@ ddb.putItem(params, function(err, data) {
     ]
 }
 ```
+## Development 
+Current solution uses [acorn](https://github.com/acornjs/acorn) parser. The following links could be helpful to visualize parser's output
+1) [AST Explorer](https://astexplorer.net/)
+2) [AST Visulaizer](https://resources.jointjs.com/demos/javascript-ast)
+
+For the reference ESTree AST types could be found [here](https://github.com/estree/estree/blob/master/es2022.md)
+
+## Test
+the command to run tests
+
+```node
+npm test
+```
