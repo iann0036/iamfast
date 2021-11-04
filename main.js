@@ -148,7 +148,7 @@ class IAMFast {
 
                     return [arn.substr(0, start_index) + groups[1] + arn.substr(end_index+2)];
                 default:
-                    throw "Unknown special function";
+                    throw "Unknown special function: " + parts[0];
             }
         }
 
@@ -224,8 +224,8 @@ class IAMFast {
     }
     
     mapCallToPrivilegeArray(service, call) {
-        let lower_priv = call.service.toLowerCase() + "." + call.method.toLowerCase();
-    
+        let lower_priv = `${call.service}.${call.method}`;
+
         let privileges = [];
     
         // check if it's in the mapping
@@ -341,8 +341,8 @@ class IAMFast {
                             }
                             
                             tracked_calls.push({
-                                'service': ancestors[ancestors.length - 2].property.name,
-                                'method': ancestors[ancestors.length - 4].property.name,
+                                'service': ancestors[ancestors.length - 2].property.name.toLowerCase(),
+                                'method': ancestors[ancestors.length - 4].property.name.toLowerCase(),
                                 'params': params,
                                 'start': node.start,
                                 'end': node.end
@@ -372,8 +372,8 @@ class IAMFast {
                             }
     
                             tracked_calls.push({
-                                'service': service_object.service,
-                                'method': ancestors[ancestors.length - 2].property.name,
+                                'service': service_object.service.toLowerCase(),
+                                'method': ancestors[ancestors.length - 2].property.name.toLowerCase(),
                                 'params': params,
                                 'start': node.start,
                                 'end': node.end
@@ -402,17 +402,20 @@ class IAMFast {
             let found_match = false;
     
             for (let service of iam_def) {
-                if (this.mapServicePrefix(service.prefix).toLowerCase() == tracked_call.service.toLowerCase()) {
+                if (this.mapServicePrefix(service.prefix).toLowerCase() == tracked_call.service) {
                     let privilege_array = this.mapCallToPrivilegeArray(service, tracked_call);
     
                     for (let privilege of privilege_array) {
                         found_match = true;
     
                         let resource_arns = [];
+                        //  initialize with resource_arns = ["*"];, so we don't need to have the check
     
                         for (let resource_type of privilege.sarpriv.resource_types) {
                             for (let resource of service.resources) {
-                                if (resource.resource.toLowerCase() == resource_type.resource_type.replace(/\*/g, "").toLowerCase() && resource.resource != "") {
+                                if (resource.resource.toLowerCase()
+                                    == resource_type.resource_type.replace(/\*/g, "").toLowerCase()
+                                    && resource.resource != "") {
                                     let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv);
                                     if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
                                         resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, false, privilege.mappedpriv));
@@ -435,8 +438,8 @@ class IAMFast {
             }
 
             if (!found_match &&
-                !GENERIC_SERVICE_METHODS.has(tracked_call.method.toLowerCase())) {
-                console.warn(`WARNING: Could not find privilege match for ${tracked_call.service.toLowerCase()}:${tracked_call.method}`);
+                !GENERIC_SERVICE_METHODS.has(tracked_call.method)) {
+                console.warn(`WARNING: Could not find privilege match for ${tracked_call.service}:${tracked_call.method}`);
             }
         }
 

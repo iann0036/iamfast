@@ -160,5 +160,21 @@ describe('main.js', function () {
 
             )
         })
+        it('should produce a valid iam definition for Route53', () => {
+            let route53Policy = generatePolicyAsJson("./tests/test8.js");
+            expect(route53Policy).to.deep.equal({
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": "route53:ChangeResourceRecordSets",
+                            "Resource": [
+                                "arn:aws:route53:::hostedzone/*"
+                            ]
+                        }
+                    ]
+                }
+            )
+        })
     })
 })
