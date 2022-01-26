@@ -14,3 +14,5 @@ s3.listBuckets(function(err, data) {
     console.log("Success", data.Buckets);
   }
 });
+
+s3.listBuckets();

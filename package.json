@@ -24,11 +24,19 @@
   "dependencies": {
     "acorn": "^8.0.5",
     "acorn-walk": "^8.0.2",
-    "commander": "^7.0.0"
+    "commander": "^7.0.0",
+    "gulp": "^4.0.2",
+    "yaml": "2.0.0-9"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babelify": "^10.0.0",
+    "browserify": "^17.0.0",
     "chai": "^4.3.4",
-    "mocha": "^9.1.3"
+    "mocha": "^9.1.3",
+    "yaml-cfn": "^0.3.1"
   },
   "bin": {
     "iamfast-js": "main.js"
