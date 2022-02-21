@@ -1,16 +1,31 @@
 'use strict'
 
-const fs = require("fs");
-const chai = require('chai')
+import * as fs from "fs";
+import * as chai from "chai";
 const expect = chai.expect
 
-const IAMFast = require("../main");
+import IAMFast from "../IAMFast.js";
+
+
 const sut = new IAMFast("aws", "us-east-1", "123456789012");
 
 
 const generatePolicyAsJson = (filePath) => {
+    let language = 'unknown';
+    if (filePath.endsWith(".js") || filePath.endsWith(".cjs")) {
+        language = 'js';
+    } else if (filePath.endsWith(".py")) {
+        language = 'python';
+    } else if (filePath.endsWith(".java")) {
+        language = 'java';
+    } else if (filePath.endsWith(".go")) {
+        language = 'go';
+    } else if (filePath.endsWith(".cpp") || filePath.endsWith(".c")) {
+        language = 'cplusplus';
+    }
+
     let code = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' });
-    let policy = sut.generateIAMPolicy(code);
+    let policy = sut.GenerateIAMPolicy(code, language);
     return JSON.parse(policy);
 }
 
@@ -18,7 +33,7 @@ const generatePolicyAsJson = (filePath) => {
 describe('main.js', function () {
     describe('generateIAMPolicy', () => {
         it('should produce a valid iam definition for DynamoDB', () => {
-            let dynamoPolicy = generatePolicyAsJson("./tests/test1.js");
+            let dynamoPolicy = generatePolicyAsJson("./tests/js/test1.js");
             expect(dynamoPolicy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
@@ -33,7 +48,7 @@ describe('main.js', function () {
             })
         })
         it('should produce a valid iam definition for S3 (generic resource)', () => {
-            let s3Policy = generatePolicyAsJson("./tests/test2.js");
+            let s3Policy = generatePolicyAsJson("./tests/js/test2.js");
             expect(s3Policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
@@ -48,7 +63,7 @@ describe('main.js', function () {
             })
         })
         it('should produce a valid iam definition for EC2', () => {
-            let ec2Policy = generatePolicyAsJson("./tests/test3.js");
+            let ec2Policy = generatePolicyAsJson("./tests/js/test3.js");
             expect(ec2Policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
@@ -78,7 +93,7 @@ describe('main.js', function () {
             })
         })
         it('should produce a valid iam definition for S3', () => {
-            let s3Policy = generatePolicyAsJson("./tests/test4.js");
+            let s3Policy = generatePolicyAsJson("./tests/js/test4.js");
             expect(s3Policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
@@ -93,7 +108,7 @@ describe('main.js', function () {
             })
         })
         it('should produce a valid iam definition for Chime', () => {
-            let chimePolicy = generatePolicyAsJson("./tests/test5.js");
+            let chimePolicy = generatePolicyAsJson("./tests/js/test5.js");
             expect(chimePolicy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
@@ -123,7 +138,7 @@ describe('main.js', function () {
             )
         })
         it('should produce a valid iam definition for API GW', () => {
-            let apiGWPolicy = generatePolicyAsJson("./tests/test6.js");
+            let apiGWPolicy = generatePolicyAsJson("./tests/js/test6.js");
             expect(apiGWPolicy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
@@ -144,7 +159,7 @@ describe('main.js', function () {
             )
         })
         it('should produce a valid iam definition for ECR', () => {
-            let ecrPolicy = generatePolicyAsJson("./tests/test7.js");
+            let ecrPolicy = generatePolicyAsJson("./tests/js/test7.js");
             expect(ecrPolicy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
@@ -161,7 +176,7 @@ describe('main.js', function () {
             )
         })
         it('should produce a valid iam definition for Route53', () => {
-            let route53Policy = generatePolicyAsJson("./tests/test8.js");
+            let route53Policy = generatePolicyAsJson("./tests/js/test8.js");
             expect(route53Policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
@@ -177,7 +192,7 @@ describe('main.js', function () {
             )
         })
         it('should produce a valid iam definition for SQS and Lambda', () => {
-            let route53Policy = generatePolicyAsJson("./tests/test9.js");
+            let route53Policy = generatePolicyAsJson("./tests/js/test9.js");
             expect(route53Policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [

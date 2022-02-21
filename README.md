@@ -1,6 +1,4 @@
-<p align="center"><b>JavaScript</b> • <a href="https://github.com/iann0036/iamfast-python">Python</a> • <a href="https://github.com/iann0036/iamfast-go">Go</a> • <a href="https://github.com/iann0036/iamfast-java">Java</a> • <a href="https://github.com/iann0036/iamfast-vscode">VS Code</a></p>
-
-# iamfast (JavaScript)
+# iamfast
 
 :construction: EXPERIMENTAL - WORK IN PROGRESS :construction:
 
@@ -15,13 +13,13 @@ npm i -g iamfast
 ## Usage
 
 ```
-iamfast-js yourfile.js
+iamfast yourfile.js
 ```
 
 ## Example
 
 ```
-> cat tests/test1.js
+> cat tests/js/test1.js
 // Load the AWS SDK for Node.js
 var AWS = require('aws-sdk');
 // Set the region 
@@ -49,7 +47,7 @@ ddb.putItem(params, function(err, data) {
 ```
 
 ```
-> iamfast-js tests/test1.js
+> iamfast tests/js/test1.js
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -63,14 +61,6 @@ ddb.putItem(params, function(err, data) {
     ]
 }
 ```
-
-## Development 
-
-Current solution uses [acorn](https://github.com/acornjs/acorn) parser. The following links could be helpful to visualize parser's output
-1) [AST Explorer](https://astexplorer.net/)
-2) [AST Visulaizer](https://resources.jointjs.com/demos/javascript-ast)
-
-For the reference ESTree AST types could be found [here](https://github.com/estree/estree/blob/master/es2022.md)
 
 ## Test
 

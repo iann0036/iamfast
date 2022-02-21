@@ -1,14 +1,15 @@
 {
   "name": "iamfast",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "IAM policy generation from code (using AST)",
   "main": "main.js",
+  "type": "module",
   "scripts": {
     "test": "mocha tests/*.test.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iann0036/iamfast-js.git"
+    "url": "git+https://github.com/iann0036/iamfast.git"
   },
   "keywords": [
     "aws",
@@ -18,12 +19,13 @@
   "author": "Ian Mckay",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/iann0036/iamfast-js/issues"
+    "url": "https://github.com/iann0036/iamfast/issues"
   },
-  "homepage": "https://github.com/iann0036/iamfast-js#readme",
+  "homepage": "https://github.com/iann0036/iamfast#readme",
   "dependencies": {
     "acorn": "^8.0.5",
     "acorn-walk": "^8.0.2",
+    "antlr4": "^4.9.3",
     "commander": "^7.0.0",
     "gulp": "^4.0.2",
     "yaml": "2.0.0-9"
@@ -39,6 +41,6 @@
     "yaml-cfn": "^0.3.1"
   },
   "bin": {
-    "iamfast-js": "main.js"
+    "iamfast": "main.js"
   }
 }
