@@ -17,6 +17,24 @@ export default class IAMFast {
         this.debug = false;
     }
 
+    static getLanguageByPath(path) {
+        let language = 'unknown';
+
+        if (path.endsWith(".js") || path.endsWith(".cjs")) {
+            language = 'js';
+        } else if (path.endsWith(".py")) {
+            language = 'python';
+        } else if (path.endsWith(".java")) {
+            language = 'java';
+        } else if (path.endsWith(".go")) {
+            language = 'go';
+        } else if (path.endsWith(".cpp") || path.endsWith(".c")) {
+            language = 'cplusplus';
+        }
+
+        return language;
+    }
+
     resolveSpecials(arn, call, mandatory, mapped_priv) {
         let start_index = arn.indexOf("%%");
         let end_index = arn.lastIndexOf("%%");

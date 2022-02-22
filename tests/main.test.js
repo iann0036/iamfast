@@ -11,18 +11,7 @@ const sut = new IAMFast("aws", "us-east-1", "123456789012");
 
 
 const generatePolicyAsJson = (filePath) => {
-    let language = 'unknown';
-    if (filePath.endsWith(".js") || filePath.endsWith(".cjs")) {
-        language = 'js';
-    } else if (filePath.endsWith(".py")) {
-        language = 'python';
-    } else if (filePath.endsWith(".java")) {
-        language = 'java';
-    } else if (filePath.endsWith(".go")) {
-        language = 'go';
-    } else if (filePath.endsWith(".cpp") || filePath.endsWith(".c")) {
-        language = 'cplusplus';
-    }
+    let language = IAMFast.getLanguageByPath(filePath);
 
     let code = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' });
     let policy = sut.GenerateIAMPolicy(code, language);

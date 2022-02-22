@@ -11,18 +11,7 @@ if (process.argv.length < 3) {
 
 const code = readFileSync(process.argv[2], { encoding: 'utf8', flag: 'r' });
 
-let language = 'unknown';
-if (process.argv[2].endsWith(".js") || process.argv[2].endsWith(".cjs")) {
-    language = 'js';
-} else if (process.argv[2].endsWith(".py")) {
-    language = 'python';
-} else if (process.argv[2].endsWith(".java")) {
-    language = 'java';
-} else if (process.argv[2].endsWith(".go")) {
-    language = 'go';
-} else if (process.argv[2].endsWith(".cpp") || process.argv[2].endsWith(".c")) {
-    language = 'cplusplus';
-}
+let language = IAMFast.getLanguageByPath(process.argv[2]);
 
 let iamfast = new IAMFast();
 
