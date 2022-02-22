@@ -5,8 +5,7 @@
   "main": "src/main.js",
   "type": "module",
   "scripts": {
-    "test": "mocha tests/*.test.js",
-    "prepare": "npx browserify -p esmify src/IAMFast.js -o dist/IAMFast.js"
+    "test": "mocha tests/*.test.js"
   },
   "repository": {
     "type": "git",
