@@ -3,6 +3,8 @@
 import fs from 'fs';
 import YAML from 'yaml';
 import AWSParser from './AWSParser.js';
+import iam_def from './lib/iam_definition.js';
+import mappings from './lib/map.js';
 
 export default class IAMFast {
 
@@ -11,8 +13,8 @@ export default class IAMFast {
         this.aws_region = aws_region || 'us-east-1';
         this.aws_accountid = aws_accountid || '123456789012';
         this.tracked_environment_variables = [];
-        this.iam_def = JSON.parse(fs.readFileSync('./lib/iam_definition.json'));
-        this.mappings = JSON.parse(fs.readFileSync('./lib/map.json'));
+        this.iam_def = iam_def;
+        this.mappings = mappings;
     }
 
     resolveSpecials(arn, call, mandatory, mapped_priv) {
