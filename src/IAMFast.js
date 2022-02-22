@@ -219,7 +219,7 @@ export default class IAMFast {
     }
 
     mapCallToPrivilegeArray(service, call) {
-        let lower_priv = `${call.service}.${call.method}`;
+        let lower_priv = `${call.service}.${call.method}`.toLowerCase();
 
         let privileges = [];
 
@@ -364,6 +364,9 @@ export default class IAMFast {
             for (let service of this.iam_def) {
                 if (this.mapServicePrefix(service.prefix).toLowerCase() == tracked_call.service) {
                     let privilege_array = this.mapCallToPrivilegeArray(service, tracked_call);
+                    this.debug && console.log("Mapped Service Prefix: ", service.prefix);
+                    this.debug && console.log("Tracked Call: ", tracked_call);
+                    this.debug && console.log("Privilege Array: ", privilege_array);
 
                     for (let privilege of privilege_array) {
                         found_match = true;
@@ -402,6 +405,8 @@ export default class IAMFast {
                 console.warn(`WARNING: Could not find privilege match for ${tracked_call.service}:${tracked_call.method}`);
             }
         }
+
+        this.debug && console.log("Privs: ", privs);
 
         return this.toIAMPolicy(privs);
     }

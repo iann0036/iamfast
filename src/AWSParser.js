@@ -69,11 +69,14 @@ export default class AWSParser {
                 parser.buildParseTrees = true;
     
                 tree = parser.file_input();
+                this.debug && this.treeWalker(tree, 0);
     
                 listener = new Python3AWSListener();
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+
+                this.debug && console.log(listener);
 
                 break;
             case 'java':
@@ -85,11 +88,14 @@ export default class AWSParser {
                 parser.buildParseTrees = true;
     
                 tree = parser.compilationUnit();
+                this.debug && this.treeWalker(tree, 0);
     
                 listener = new JavaAWSListener();
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+
+                this.debug && console.log(listener);
 
                 break;
             case 'go':
@@ -101,11 +107,14 @@ export default class AWSParser {
                 parser.buildParseTrees = true;
     
                 tree = parser.sourceFile();
+                this.debug && this.treeWalker(tree, 0);
     
                 listener = new GoAWSListener();
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+
+                this.debug && console.log(listener);
 
                 break;
             case 'cplusplus':
@@ -117,11 +126,14 @@ export default class AWSParser {
                 parser.buildParseTrees = true;
     
                 tree = parser.translationUnit();
+                this.debug && this.treeWalker(tree, 0);
     
                 listener = new CPP14AWSListener();
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+
+                this.debug && console.log(listener);
 
                 break;
             default:
