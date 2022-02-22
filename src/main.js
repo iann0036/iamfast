@@ -26,5 +26,9 @@ if (process.argv[2].endsWith(".js") || process.argv[2].endsWith(".cjs")) {
 
 let iamfast = new IAMFast();
 
+if (process.env.DEBUG == "true") {
+    iamfast.debug = true;
+}
+
 console.log(iamfast.GenerateIAMPolicy(code, language));
 //console.log(iamfast.GenerateSAMTemplate(code, language));

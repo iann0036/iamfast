@@ -21,6 +21,7 @@ export default class AWSParser {
 
     constructor() {
         this.client_calls = [];
+        this.debug = false;
     }
 
     treeWalker(tree, depth) {
@@ -49,17 +50,14 @@ export default class AWSParser {
                 parser.buildParseTrees = true;
 
                 tree = parser.program();
-                //this.treeWalker(tree, 0);
+                this.debug && this.treeWalker(tree, 0);
 
                 listener = new JavaScriptAWSListener();
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
 
-                //console.log(listener.SDKDeclarations);
-                //console.log(listener.ClientDeclarations);
-                //console.log(listener.VariableDeclarations);
-                //console.log(listener.ClientCalls);
+                this.debug && console.log(listener);
 
                 break;
             case 'python':

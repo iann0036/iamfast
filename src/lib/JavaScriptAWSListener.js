@@ -75,7 +75,15 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         return args;
     }
 
+    exitAssignmentExpression(ctx) {
+        this.aggregateVariableOrAssignmentDeclaration(ctx);
+    }
+
     exitVariableDeclaration(ctx) {
+        this.aggregateVariableOrAssignmentDeclaration(ctx);
+    }
+
+    aggregateVariableOrAssignmentDeclaration(ctx) {
         const assignable = ctx.children[0]; // ### = blah
         if (assignable.children.length && assignable.children[0] instanceof JavaScriptParser.IdentifierContext) {
             if (ctx.children.length == 3) {

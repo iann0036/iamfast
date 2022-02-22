@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
 import YAML from 'yaml';
 import AWSParser from './AWSParser.js';
 import iam_def from './lib/iam_definition.js';
@@ -15,6 +14,7 @@ export default class IAMFast {
         this.tracked_environment_variables = [];
         this.iam_def = iam_def;
         this.mappings = mappings;
+        this.debug = false;
     }
 
     resolveSpecials(arn, call, mandatory, mapped_priv) {
@@ -335,6 +335,7 @@ export default class IAMFast {
         }
 
         let parser = new AWSParser();
+        parser.debug = this.debug;
         parser.ParseInput(code, language);
 
         let tracked_calls = parser.GetNormalizedServiceCalls();
