@@ -98,35 +98,62 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                 }
 
                 if (expression instanceof JavaScriptParser.NewExpressionContext) { // find client instantiations
-                    const className = expression.children[1]; // new ### (...)
+                    let className = expression.children[1]; // new ### (...)
                     let argsRaw = null;
+                    let argsRawPrev = null;
+                    let anonymousDeclaration = false;
+                    let prevMethodName = null;
                     if (expression.children.length == 3) {
-                        argsRaw = expression.children[2]; // new blah###(...)###
+                        argsRaw = expression.children[2]; // new blah###(...)###  TODO: compensate for new blah###(...)###.someMethod()
                     }
-                    if (className instanceof JavaScriptParser.MemberDotExpressionContext) { // blah.blah
-                        const namespace = className.children[0] // ###.blah
-                        const method = className.children[className.children.length - 1] // blah.###
-                        let foundDeclaration = false;
+                    while (className instanceof JavaScriptParser.MemberDotExpressionContext) { // blah.blah
+                        if (className.children[0] instanceof JavaScriptParser.IdentifierExpressionContext) {
+                            const namespace = className.children[0]; // ###.blah
+                            const method = className.children[className.children.length - 1]; // blah.###
+                            let foundDeclaration = false;
 
-                        for (let sdkDeclaration of this.SDKDeclarations) {
-                            if (namespace.getText() == sdkDeclaration['variable']) {
+                            for (let sdkDeclaration of this.SDKDeclarations) {
+                                if (namespace.getText() == sdkDeclaration['variable']) {
+                                    this.ClientDeclarations.push({
+                                        'type': method.getText(),
+                                        'variable': (anonymousDeclaration ? null : assignable.getText()),
+                                        'argsRaw': argsRaw,
+                                        'sdk': sdkDeclaration
+                                    });
+                                    foundDeclaration = true;
+                                    break;
+                                }
+                            }
+                            if (!foundDeclaration && namespace.getText() == "AWS") { // 2nd chance default
                                 this.ClientDeclarations.push({
                                     'type': method.getText(),
-                                    'variable': assignable.getText(),
+                                    'variable': (anonymousDeclaration ? null : assignable.getText()),
                                     'argsRaw': argsRaw,
-                                    'sdk': sdkDeclaration
+                                    'sdk': null
                                 });
-                                foundDeclaration = true;
-                                break;
                             }
-                        }
-                        if (!foundDeclaration && namespace.getText() == "AWS") { // 2nd chance default
-                            this.ClientDeclarations.push({
-                                'type': method.getText(),
-                                'variable': assignable.getText(),
-                                'argsRaw': argsRaw,
-                                'sdk': null
-                            });
+                            if (anonymousDeclaration && prevMethodName) { // new AWS.Service().methodName(args)
+                                this.ClientCalls.push({
+                                    'client': this.ClientDeclarations[this.ClientDeclarations.length - 1],
+                                    'method': prevMethodName,
+                                    'argsRaw': argsRawPrev,
+                                    'args': this.resolveArgs(argsRawPrev)
+                                });
+                            }
+                            break;
+                        } else if (className.children[0] instanceof JavaScriptParser.ArgumentsExpressionContext) {
+                            anonymousDeclaration = true;
+                            prevMethodName = null;
+                            if (className.children.length == 3 && className.children[1].getText() == "." && className.children[2] instanceof JavaScriptParser.IdentifierNameContext) {
+                                prevMethodName = className.children[2].getText();
+                            }
+                            if (className.children[0].children[0] instanceof JavaScriptParser.MemberDotExpressionContext) {
+                                argsRawPrev = argsRaw;
+                                argsRaw = className.children[0].children[1];
+                                className = className.children[0].children[0];
+                            }
+                        } else {
+                            break;
                         }
                     }
                 }

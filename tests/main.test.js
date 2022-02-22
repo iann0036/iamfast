@@ -20,6 +20,7 @@ const generatePolicyAsJson = (filePath) => {
 
 
 describe('main.js', function () {
+    this.timeout(10000);
     describe('generateIAMPolicy', () => {
         it('should produce a valid iam definition for DynamoDB', () => {
             let policy = generatePolicyAsJson("./tests/js/test1.js");
