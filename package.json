@@ -2,8 +2,8 @@
   "name": "iamfast",
   "version": "0.2.0",
   "description": "AWS IAM policy generation from code",
-  "main": "src/main.js",
-  "type": "module",
+  "main": "dist/main.js",
+  "module": "src/main.js",
   "scripts": {
     "test": "mocha tests/*.test.js"
   },
