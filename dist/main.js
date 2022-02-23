@@ -31,4 +31,3 @@ if (process.env.DEBUG == "true") {
   iamfast.debug = true;
 }
 console.log(iamfast.GenerateIAMPolicy(code, language));
-module.exports = import_IAMFast.default;
