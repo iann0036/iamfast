@@ -5,7 +5,8 @@
   "main": "dist/main.js",
   "module": "src/main.js",
   "scripts": {
-    "test": "mocha tests/*.test.js"
+    "test": "mocha tests/*.test.js",
+    "prepare": "./node_modules/esbuild/bin/esbuild src/*.js --outdir=dist --format=cjs && ./node_modules/esbuild/bin/esbuild src/lib/*.js --outdir=dist/lib --format=cjs"
   },
   "repository": {
     "type": "git",

@@ -21,3 +21,5 @@ if (process.env.DEBUG == "true") {
 
 console.log(iamfast.GenerateIAMPolicy(code, language));
 //console.log(iamfast.GenerateSAMTemplate(code, language));
+
+module.exports = IAMFast;
