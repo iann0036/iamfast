@@ -86,7 +86,9 @@ export default class Python3AWSListener extends Python3ParserListener {
                                         'method': method.getText(),
                                         'argsRaw': argsRaw,
                                         'args': this.resolveArgs(argsRaw),
-                                        'variable': assignable.getText()
+                                        'variable': assignable.getText(),
+                                        'start': method.start.start,
+                                        'stop': method.stop.stop
                                     });
                                     break;
                                 }

@@ -15,6 +15,7 @@ export default class IAMFast {
         this.iam_def = iam_def;
         this.mappings = mappings;
         this.debug = false;
+        this.last_privs = [];
     }
 
     static getLanguageByPath(path) {
@@ -394,7 +395,8 @@ export default class IAMFast {
                         privs.push({
                             'action': this.mapServicePrefix(service.prefix) + ":" + privilege.sarpriv.privilege,
                             'explanation': privilege.sarpriv.description,
-                            'resource': resource_arns
+                            'resource': resource_arns,
+                            'position': tracked_call.position
                         });
                     }
                 }
@@ -407,6 +409,8 @@ export default class IAMFast {
         }
 
         this.debug && console.log("Privs: ", privs);
+
+        this.last_privs = privs;
 
         return this.toIAMPolicy(privs);
     }

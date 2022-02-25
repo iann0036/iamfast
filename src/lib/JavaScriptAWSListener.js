@@ -102,7 +102,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                     let argsRaw = null;
                     let argsRawPrev = null;
                     let anonymousDeclaration = false;
-                    let prevMethodName = null;
+                    let prevMethod = null;
                     if (expression.children.length == 3) {
                         argsRaw = expression.children[2]; // new blah###(...)###  TODO: compensate for new blah###(...)###.someMethod()
                     }
@@ -132,20 +132,22 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                                     'sdk': null
                                 });
                             }
-                            if (anonymousDeclaration && prevMethodName) { // new AWS.Service().methodName(args)
+                            if (anonymousDeclaration && prevMethod.getText()) { // new AWS.Service().methodName(args)
                                 this.ClientCalls.push({
                                     'client': this.ClientDeclarations[this.ClientDeclarations.length - 1],
-                                    'method': prevMethodName,
+                                    'method': prevMethod.getText(),
                                     'argsRaw': argsRawPrev,
-                                    'args': this.resolveArgs(argsRawPrev)
+                                    'args': this.resolveArgs(argsRawPrev),
+                                    'start': prevMethod.start.start,
+                                    'stop': prevMethod.stop.stop
                                 });
                             }
                             break;
                         } else if (className.children[0] instanceof JavaScriptParser.ArgumentsExpressionContext) {
                             anonymousDeclaration = true;
-                            prevMethodName = null;
+                            prevMethod = null;
                             if (className.children.length == 3 && className.children[1].getText() == "." && className.children[2] instanceof JavaScriptParser.IdentifierNameContext) {
-                                prevMethodName = className.children[2].getText();
+                                prevMethod = className.children[2];
                             }
                             if (className.children[0].children[0] instanceof JavaScriptParser.MemberDotExpressionContext) {
                                 argsRawPrev = argsRaw;
@@ -182,7 +184,9 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                         'client': clientDeclaration,
                         'method': method.getText(),
                         'argsRaw': argsRaw,
-                        'args': this.resolveArgs(argsRaw)
+                        'args': this.resolveArgs(argsRaw),
+                        'start': method.start.start,
+                        'stop': method.stop.stop
                     });
                     break;
                 }

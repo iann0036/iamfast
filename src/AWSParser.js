@@ -150,7 +150,11 @@ export default class AWSParser {
             calls.push({
                 'service': client_call.client.type.toLowerCase(),
                 'method': method,
-                'params': client_call.args
+                'params': client_call.args,
+                'position': {
+                    'start': client_call.start,
+                    'stop': client_call.stop
+                }
             })
         }
 
