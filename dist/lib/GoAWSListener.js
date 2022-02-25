@@ -29,8 +29,8 @@ var GoAWSListener_exports = {};
 __export(GoAWSListener_exports, {
   default: () => GoAWSListener
 });
-var import_GoParser = __toESM(require("./GoParser.js"), 1);
-var import_GoParserListener = __toESM(require("./GoParserListener.js"), 1);
+var import_GoParser = __toESM(require("./GoParser.js"));
+var import_GoParserListener = __toESM(require("./GoParserListener.js"));
 class GoAWSListener extends import_GoParserListener.default {
   constructor() {
     super();

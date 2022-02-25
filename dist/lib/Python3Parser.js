@@ -29,9 +29,9 @@ var Python3Parser_exports = {};
 __export(Python3Parser_exports, {
   default: () => Python3Parser
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
-var import_Python3ParserListener = __toESM(require("./Python3ParserListener.js"), 1);
-var import_Python3ParserVisitor = __toESM(require("./Python3ParserVisitor.js"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
+var import_Python3ParserListener = __toESM(require("./Python3ParserListener.js"));
+var import_Python3ParserVisitor = __toESM(require("./Python3ParserVisitor.js"));
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964e\u0452		",

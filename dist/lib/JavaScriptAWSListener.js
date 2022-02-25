@@ -29,8 +29,8 @@ var JavaScriptAWSListener_exports = {};
 __export(JavaScriptAWSListener_exports, {
   default: () => JavaScriptAWSListener
 });
-var import_JavaScriptParser = __toESM(require("./JavaScriptParser.js"), 1);
-var import_JavaScriptParserListener = __toESM(require("./JavaScriptParserListener.js"), 1);
+var import_JavaScriptParser = __toESM(require("./JavaScriptParser.js"));
+var import_JavaScriptParserListener = __toESM(require("./JavaScriptParserListener.js"));
 class JavaScriptAWSListener extends import_JavaScriptParserListener.default {
   constructor() {
     super();

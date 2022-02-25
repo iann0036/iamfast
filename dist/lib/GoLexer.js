@@ -29,7 +29,7 @@ var GoLexer_exports = {};
 __export(GoLexer_exports, {
   default: () => GoLexer
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964Z\u0349\b\b	",

@@ -29,7 +29,7 @@ var JavaParserListener_exports = {};
 __export(JavaParserListener_exports, {
   default: () => JavaParserListener
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
 class JavaParserListener extends import_antlr4.default.tree.ParseTreeListener {
   enterCompilationUnit(ctx) {
   }

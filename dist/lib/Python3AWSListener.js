@@ -29,8 +29,8 @@ var Python3AWSListener_exports = {};
 __export(Python3AWSListener_exports, {
   default: () => Python3AWSListener
 });
-var import_Python3Parser = __toESM(require("./Python3Parser.js"), 1);
-var import_Python3ParserListener = __toESM(require("./Python3ParserListener.js"), 1);
+var import_Python3Parser = __toESM(require("./Python3Parser.js"));
+var import_Python3ParserListener = __toESM(require("./Python3ParserListener.js"));
 class Python3AWSListener extends import_Python3ParserListener.default {
   constructor() {
     super();

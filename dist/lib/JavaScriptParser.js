@@ -29,10 +29,10 @@ var JavaScriptParser_exports = {};
 __export(JavaScriptParser_exports, {
   default: () => JavaScriptParser
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
-var import_JavaScriptParserListener = __toESM(require("./JavaScriptParserListener.js"), 1);
-var import_JavaScriptParserVisitor = __toESM(require("./JavaScriptParserVisitor.js"), 1);
-var import_JavaScriptParserBase = __toESM(require("./JavaScriptParserBase.js"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
+var import_JavaScriptParserListener = __toESM(require("./JavaScriptParserListener.js"));
+var import_JavaScriptParserVisitor = __toESM(require("./JavaScriptParserVisitor.js"));
+var import_JavaScriptParserBase = __toESM(require("./JavaScriptParserBase.js"));
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964\x81\u0407		",

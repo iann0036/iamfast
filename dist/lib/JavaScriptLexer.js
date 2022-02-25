@@ -29,8 +29,8 @@ var JavaScriptLexer_exports = {};
 __export(JavaScriptLexer_exports, {
   default: () => JavaScriptLexer
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
-var import_JavaScriptLexerBase = __toESM(require("./JavaScriptLexerBase.js"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
+var import_JavaScriptLexerBase = __toESM(require("./JavaScriptLexerBase.js"));
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964\x81\u0489\b\b	",

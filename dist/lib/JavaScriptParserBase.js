@@ -29,8 +29,8 @@ var JavaScriptParserBase_exports = {};
 __export(JavaScriptParserBase_exports, {
   default: () => JavaScriptParserBase
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
-var import_JavaScriptParser = __toESM(require("./JavaScriptParser.js"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
+var import_JavaScriptParser = __toESM(require("./JavaScriptParser.js"));
 class JavaScriptParserBase extends import_antlr4.default.Parser {
   constructor(input) {
     super(input);

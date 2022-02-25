@@ -30,22 +30,22 @@ var AWSParser_exports = {};
 __export(AWSParser_exports, {
   default: () => AWSParser
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
-var import_JavaScriptLexer = __toESM(require("./lib/JavaScriptLexer.js"), 1);
-var import_JavaScriptParser = __toESM(require("./lib/JavaScriptParser.js"), 1);
-var import_JavaScriptAWSListener = __toESM(require("./lib/JavaScriptAWSListener.js"), 1);
-var import_Python3Lexer = __toESM(require("./lib/Python3Lexer.js"), 1);
-var import_Python3Parser = __toESM(require("./lib/Python3Parser.js"), 1);
-var import_Python3AWSListener = __toESM(require("./lib/Python3AWSListener.js"), 1);
-var import_JavaLexer = __toESM(require("./lib/JavaLexer.js"), 1);
-var import_JavaParser = __toESM(require("./lib/JavaParser.js"), 1);
-var import_JavaAWSListener = __toESM(require("./lib/JavaAWSListener.js"), 1);
-var import_CPP14Lexer = __toESM(require("./lib/CPP14Lexer.js"), 1);
-var import_CPP14Parser = __toESM(require("./lib/CPP14Parser.js"), 1);
-var import_CPP14AWSListener = __toESM(require("./lib/CPP14AWSListener.js"), 1);
-var import_GoLexer = __toESM(require("./lib/GoLexer.js"), 1);
-var import_GoParser = __toESM(require("./lib/GoParser.js"), 1);
-var import_GoAWSListener = __toESM(require("./lib/GoAWSListener.js"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
+var import_JavaScriptLexer = __toESM(require("./lib/JavaScriptLexer.js"));
+var import_JavaScriptParser = __toESM(require("./lib/JavaScriptParser.js"));
+var import_JavaScriptAWSListener = __toESM(require("./lib/JavaScriptAWSListener.js"));
+var import_Python3Lexer = __toESM(require("./lib/Python3Lexer.js"));
+var import_Python3Parser = __toESM(require("./lib/Python3Parser.js"));
+var import_Python3AWSListener = __toESM(require("./lib/Python3AWSListener.js"));
+var import_JavaLexer = __toESM(require("./lib/JavaLexer.js"));
+var import_JavaParser = __toESM(require("./lib/JavaParser.js"));
+var import_JavaAWSListener = __toESM(require("./lib/JavaAWSListener.js"));
+var import_CPP14Lexer = __toESM(require("./lib/CPP14Lexer.js"));
+var import_CPP14Parser = __toESM(require("./lib/CPP14Parser.js"));
+var import_CPP14AWSListener = __toESM(require("./lib/CPP14AWSListener.js"));
+var import_GoLexer = __toESM(require("./lib/GoLexer.js"));
+var import_GoParser = __toESM(require("./lib/GoParser.js"));
+var import_GoAWSListener = __toESM(require("./lib/GoAWSListener.js"));
 class AWSParser {
   constructor() {
     this.client_calls = [];

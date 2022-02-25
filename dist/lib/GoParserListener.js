@@ -29,7 +29,7 @@ var GoParserListener_exports = {};
 __export(GoParserListener_exports, {
   default: () => GoParserListener
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
 class GoParserListener extends import_antlr4.default.tree.ParseTreeListener {
   enterSourceFile(ctx) {
   }

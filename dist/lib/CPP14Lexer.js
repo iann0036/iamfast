@@ -29,7 +29,7 @@ var CPP14Lexer_exports = {};
 __export(CPP14Lexer_exports, {
   default: () => CPP14Lexer
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964\x93\u05B6\b		",

@@ -29,7 +29,7 @@ var Python3ParserListener_exports = {};
 __export(Python3ParserListener_exports, {
   default: () => Python3ParserListener
 });
-var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_antlr4 = __toESM(require("antlr4"));
 class Python3ParserListener extends import_antlr4.default.tree.ParseTreeListener {
   enterSingle_input(ctx) {
   }
