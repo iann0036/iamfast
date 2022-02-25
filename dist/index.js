@@ -1,1 +1,0 @@
-exports.IAMFast = require("./IAMFast");
