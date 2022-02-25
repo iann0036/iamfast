@@ -29,8 +29,8 @@ var JavaAWSListener_exports = {};
 __export(JavaAWSListener_exports, {
   default: () => JavaAWSListener
 });
-var import_JavaParser = __toESM(require("./JavaParser.js"));
-var import_JavaParserListener = __toESM(require("./JavaParserListener.js"));
+var import_JavaParser = __toESM(require("./JavaParser.js"), 1);
+var import_JavaParserListener = __toESM(require("./JavaParserListener.js"), 1);
 class JavaAWSListener extends import_JavaParserListener.default {
   constructor() {
     super();

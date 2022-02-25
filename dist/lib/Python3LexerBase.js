@@ -29,8 +29,8 @@ var Python3LexerBase_exports = {};
 __export(Python3LexerBase_exports, {
   default: () => Python3LexerBase
 });
-var import_antlr4 = __toESM(require("antlr4"));
-var import_Python3Parser = __toESM(require("./Python3Parser.js"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_Python3Parser = __toESM(require("./Python3Parser.js"), 1);
 class Python3LexerBase extends import_antlr4.default.Lexer {
   constructor(input) {
     super(input);

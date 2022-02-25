@@ -29,7 +29,7 @@ var CPP14ParserListener_exports = {};
 __export(CPP14ParserListener_exports, {
   default: () => CPP14ParserListener
 });
-var import_antlr4 = __toESM(require("antlr4"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
 class CPP14ParserListener extends import_antlr4.default.tree.ParseTreeListener {
   enterTranslationUnit(ctx) {
   }

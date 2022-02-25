@@ -29,7 +29,7 @@ var JavaLexer_exports = {};
 __export(JavaLexer_exports, {
   default: () => JavaLexer
 });
-var import_antlr4 = __toESM(require("antlr4"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964\x82\u045A\b		",

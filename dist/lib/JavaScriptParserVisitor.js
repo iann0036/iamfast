@@ -29,7 +29,7 @@ var JavaScriptParserVisitor_exports = {};
 __export(JavaScriptParserVisitor_exports, {
   default: () => JavaScriptParserVisitor
 });
-var import_antlr4 = __toESM(require("antlr4"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
 class JavaScriptParserVisitor extends import_antlr4.default.tree.ParseTreeVisitor {
   visitProgram(ctx) {
     return this.visitChildren(ctx);

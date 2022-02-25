@@ -29,7 +29,7 @@ var JavaScriptParserListener_exports = {};
 __export(JavaScriptParserListener_exports, {
   default: () => JavaScriptParserListener
 });
-var import_antlr4 = __toESM(require("antlr4"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
 class JavaScriptParserListener extends import_antlr4.default.tree.ParseTreeListener {
   enterProgram(ctx) {
   }

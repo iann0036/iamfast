@@ -29,9 +29,9 @@ var CPP14Parser_exports = {};
 __export(CPP14Parser_exports, {
   default: () => CPP14Parser
 });
-var import_antlr4 = __toESM(require("antlr4"));
-var import_CPP14ParserListener = __toESM(require("./CPP14ParserListener.js"));
-var import_CPP14ParserVisitor = __toESM(require("./CPP14ParserVisitor.js"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_CPP14ParserListener = __toESM(require("./CPP14ParserListener.js"), 1);
+var import_CPP14ParserVisitor = __toESM(require("./CPP14ParserVisitor.js"), 1);
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964\x93\u0840		",

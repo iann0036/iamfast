@@ -29,7 +29,7 @@ var JavaParserVisitor_exports = {};
 __export(JavaParserVisitor_exports, {
   default: () => JavaParserVisitor
 });
-var import_antlr4 = __toESM(require("antlr4"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
 class JavaParserVisitor extends import_antlr4.default.tree.ParseTreeVisitor {
   visitCompilationUnit(ctx) {
     return this.visitChildren(ctx);

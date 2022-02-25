@@ -29,10 +29,10 @@ var GoParser_exports = {};
 __export(GoParser_exports, {
   default: () => GoParser
 });
-var import_antlr4 = __toESM(require("antlr4"));
-var import_GoParserListener = __toESM(require("./GoParserListener.js"));
-var import_GoParserVisitor = __toESM(require("./GoParserVisitor.js"));
-var import_GoParserBase = __toESM(require("./GoParserBase.js"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_GoParserListener = __toESM(require("./GoParserListener.js"), 1);
+var import_GoParserVisitor = __toESM(require("./GoParserVisitor.js"), 1);
+var import_GoParserBase = __toESM(require("./GoParserBase.js"), 1);
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964Z\u03BA		",

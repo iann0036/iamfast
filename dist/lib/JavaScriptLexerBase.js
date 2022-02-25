@@ -29,8 +29,8 @@ var JavaScriptLexerBase_exports = {};
 __export(JavaScriptLexerBase_exports, {
   default: () => JavaScriptLexerBase
 });
-var import_antlr4 = __toESM(require("antlr4"));
-var import_JavaScriptLexer = __toESM(require("./JavaScriptLexer.js"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_JavaScriptLexer = __toESM(require("./JavaScriptLexer.js"), 1);
 class JavaScriptLexerBase extends import_antlr4.default.Lexer {
   constructor(input) {
     super(input);

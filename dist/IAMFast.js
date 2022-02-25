@@ -30,10 +30,10 @@ var IAMFast_exports = {};
 __export(IAMFast_exports, {
   default: () => IAMFast
 });
-var import_yaml = __toESM(require("yaml"));
-var import_AWSParser = __toESM(require("./AWSParser.js"));
-var import_iam_definition = __toESM(require("./lib/iam_definition.js"));
-var import_map = __toESM(require("./lib/map.js"));
+var import_yaml = __toESM(require("yaml"), 1);
+var import_AWSParser = __toESM(require("./AWSParser.js"), 1);
+var import_iam_definition = __toESM(require("./lib/iam_definition.js"), 1);
+var import_map = __toESM(require("./lib/map.js"), 1);
 class IAMFast {
   constructor(aws_partition, aws_region, aws_accountid) {
     this.aws_partition = aws_partition || "aws";

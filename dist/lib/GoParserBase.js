@@ -29,8 +29,8 @@ var GoParserBase_exports = {};
 __export(GoParserBase_exports, {
   default: () => GoParserBase
 });
-var import_antlr4 = __toESM(require("antlr4"));
-var import_GoParser = __toESM(require("./GoParser.js"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_GoParser = __toESM(require("./GoParser.js"), 1);
 class GoParserBase extends import_antlr4.default.Parser {
   constructor(input) {
     super(input);

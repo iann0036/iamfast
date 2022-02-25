@@ -29,7 +29,7 @@ var GoParserVisitor_exports = {};
 __export(GoParserVisitor_exports, {
   default: () => GoParserVisitor
 });
-var import_antlr4 = __toESM(require("antlr4"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
 class GoParserVisitor extends import_antlr4.default.tree.ParseTreeVisitor {
   visitSourceFile(ctx) {
     return this.visitChildren(ctx);

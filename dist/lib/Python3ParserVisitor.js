@@ -29,7 +29,7 @@ var Python3ParserVisitor_exports = {};
 __export(Python3ParserVisitor_exports, {
   default: () => Python3ParserVisitor
 });
-var import_antlr4 = __toESM(require("antlr4"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
 class Python3ParserVisitor extends import_antlr4.default.tree.ParseTreeVisitor {
   visitSingle_input(ctx) {
     return this.visitChildren(ctx);

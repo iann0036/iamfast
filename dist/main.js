@@ -19,7 +19,7 @@ var __toESM = (module2, isNodeMode) => {
 };
 var import_fs = require("fs");
 var import_commander = require("commander");
-var import_IAMFast = __toESM(require("./IAMFast.js"));
+var import_IAMFast = __toESM(require("./IAMFast.js"), 1);
 if (process.argv.length < 3) {
   console.log("Usage: iamfast filename");
   process.exit(1);

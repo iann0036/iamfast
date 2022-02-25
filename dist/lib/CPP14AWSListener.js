@@ -29,8 +29,8 @@ var CPP14AWSListener_exports = {};
 __export(CPP14AWSListener_exports, {
   default: () => CPP14AWSListener
 });
-var import_CPP14Parser = __toESM(require("./CPP14Parser.js"));
-var import_CPP14ParserListener = __toESM(require("./CPP14ParserListener.js"));
+var import_CPP14Parser = __toESM(require("./CPP14Parser.js"), 1);
+var import_CPP14ParserListener = __toESM(require("./CPP14ParserListener.js"), 1);
 class CPP14AWSListener extends import_CPP14ParserListener.default {
   constructor() {
     super();

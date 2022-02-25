@@ -29,7 +29,7 @@ var CPP14ParserVisitor_exports = {};
 __export(CPP14ParserVisitor_exports, {
   default: () => CPP14ParserVisitor
 });
-var import_antlr4 = __toESM(require("antlr4"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
 class CPP14ParserVisitor extends import_antlr4.default.tree.ParseTreeVisitor {
   visitTranslationUnit(ctx) {
     return this.visitChildren(ctx);

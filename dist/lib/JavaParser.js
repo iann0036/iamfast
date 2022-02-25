@@ -29,9 +29,9 @@ var JavaParser_exports = {};
 __export(JavaParser_exports, {
   default: () => JavaParser
 });
-var import_antlr4 = __toESM(require("antlr4"));
-var import_JavaParserListener = __toESM(require("./JavaParserListener.js"));
-var import_JavaParserVisitor = __toESM(require("./JavaParserVisitor.js"));
+var import_antlr4 = __toESM(require("antlr4"), 1);
+var import_JavaParserListener = __toESM(require("./JavaParserListener.js"), 1);
+var import_JavaParserVisitor = __toESM(require("./JavaParserVisitor.js"), 1);
 const serializedATN = [
   "\u608B\uA72A\u8133\uB9ED\u417C\u3BE7\u7786",
   "\u5964\x82\u06E2		",
