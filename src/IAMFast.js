@@ -58,7 +58,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = this.subSARARN(parts[1], call['params'], mapped_priv);
+                    arns = this.subSARARN(parts[1], call['params'], mapped_priv, '');
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (parts[3] == "") {
@@ -80,7 +80,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = this.subSARARN(parts[1], call['params'], mapped_priv);
+                    arns = this.subSARARN(parts[1], call['params'], mapped_priv, '');
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -95,7 +95,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = this.subSARARN(parts[1], call['params'], mapped_priv);
+                    arns = this.subSARARN(parts[1], call['params'], mapped_priv, '');
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -117,7 +117,7 @@ export default class IAMFast {
                     let many_parts = [];
 
                     for (let part of parts.slice(1)) {
-                        arns = this.subSARARN(part, call['params'], mapped_priv);
+                        arns = this.subSARARN(part, call['params'], mapped_priv, '');
                         if (arns.length < 1 || arns[0] == "") {
                             if (mandatory) {
                                 return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
@@ -134,7 +134,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = this.subSARARN(parts[1], call['params'], mapped_priv);
+                    arns = this.subSARARN(parts[1], call['params'], mapped_priv, '');
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -165,7 +165,13 @@ export default class IAMFast {
         return [arn];
     }
 
-    subSARARN(arn, params, mapped_priv) {
+    subSARARN(arn, params, mapped_priv, arntype) {
+        if (arntype != '' && mapped_priv && mapped_priv.resourcearn_mappings) {
+            if (mapped_priv.resourcearn_mappings[arntype]) {
+                arn = mapped_priv.resourcearn_mappings[arntype];
+            }
+        }
+
         if (mapped_priv && mapped_priv.resource_mappings) {
             for (let param of Object.keys(mapped_priv.resource_mappings)) {
                 let r = new RegExp("\\$\\{" + param + "\\}", "gi");
@@ -380,7 +386,7 @@ export default class IAMFast {
                                 if (resource.resource.toLowerCase()
                                     == resource_type.resource_type.replace(/\*/g, "").toLowerCase()
                                     && resource.resource != "") {
-                                    let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv);
+                                    let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv, resource.resource.toLowerCase());
                                     if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
                                         resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, false, privilege.mappedpriv));
                                     }

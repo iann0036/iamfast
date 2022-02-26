@@ -249,7 +249,7 @@ describe('main.js', function () {
                         "Effect": "Allow",
                         "Action": "iam:AttachRolePolicy",
                         "Resource": [
-                            "arn:aws:iam::123456789012:role/*"
+                            "arn:aws:iam::123456789012:role/AmazonDynamoDBFullAccess"
                         ]
                     }
                 ]
@@ -307,9 +307,16 @@ describe('main.js', function () {
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "ec2:StartInstances",
                         "Resource": [
-                            "*"
+                            "arn:aws:ec2:us-east-1:123456789012:instance/*"
+                        ]
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "ec2:StopInstances",
+                        "Resource": [
+                            "arn:aws:ec2:us-east-1:123456789012:instance/*"
                         ]
                     }
                 ]
@@ -322,9 +329,9 @@ describe('main.js', function () {
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "cloudtrail:CreateTrail",
                         "Resource": [
-                            "*"
+                            "arn:aws:cloudtrail:us-east-1:123456789012:trail/*"
                         ]
                     }
                 ]
@@ -352,7 +359,21 @@ describe('main.js', function () {
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "ec2:RunInstances",
+                        "Resource": [
+                            "arn:aws:ec2:us-east-1::image/*",
+                            "arn:aws:ec2:us-east-1:123456789012:instance/*",
+                            "arn:aws:ec2:us-east-1:123456789012:network-interface/*",
+                            "arn:aws:ec2:us-east-1:123456789012:security-group/*",
+                            "arn:aws:ec2:us-east-1:123456789012:subnet/*",
+                            "arn:aws:ec2:us-east-1:123456789012:volume/*",
+                            "arn:aws:ec2:us-east-1:123456789012:elastic-gpu/*",
+                            "arn:aws:elastic-inference:us-east-1:123456789012:elastic-inference-accelerator/*"
+                        ]
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "ec2:CreateTags",
                         "Resource": [
                             "*"
                         ]
@@ -367,9 +388,16 @@ describe('main.js', function () {
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "sts:GetCallerIdentity",
                         "Resource": [
                             "*"
+                        ]
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "s3:PutBucketPolicy",
+                        "Resource": [
+                            "arn:aws:s3:::*"
                         ]
                     }
                 ]
@@ -412,7 +440,21 @@ describe('main.js', function () {
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "ec2:RunInstances",
+                        "Resource": [
+                            "arn:aws:ec2:us-east-1::image/*",
+                            "arn:aws:ec2:us-east-1:123456789012:instance/*",
+                            "arn:aws:ec2:us-east-1:123456789012:network-interface/*",
+                            "arn:aws:ec2:us-east-1:123456789012:security-group/*",
+                            "arn:aws:ec2:us-east-1:123456789012:subnet/*",
+                            "arn:aws:ec2:us-east-1:123456789012:volume/*",
+                            "arn:aws:ec2:us-east-1:123456789012:elastic-gpu/*",
+                            "arn:aws:elastic-inference:us-east-1:123456789012:elastic-inference-accelerator/*"
+                        ]
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "ec2:CreateTags",
                         "Resource": [
                             "*"
                         ]

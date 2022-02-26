@@ -14,7 +14,21 @@ export default class Python3AWSListener extends Python3ParserListener {
     resolveArgs(argsRaw) {
         let args = {};
 
-        // TBC
+        if (argsRaw.children.length == 3 && argsRaw.children[0].getText() == "(" && argsRaw.children[1] instanceof Python3Parser.ArglistContext && argsRaw.children[2].getText() == ")") {
+            for (let arg of argsRaw.children[1].children) {
+                if (arg instanceof Python3Parser.ArgumentContext) {
+                    if (arg.children.length == 3 && arg.children[1].getText() == "=") {
+                        let variables = this.drillToAtomExprs(arg.children[0]);
+                        let values = this.drillToAtomExprs(arg.children[2]);
+                        for (let variable of variables) {
+                            for (let value of values) {
+                                args[variable.getText()] = value.getText().replace(/^['"](.*)['"]$/g, '$1');
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         return args;
     }

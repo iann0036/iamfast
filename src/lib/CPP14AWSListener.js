@@ -47,7 +47,7 @@ export default class CPP14AWSListener extends CPP14ParserListener {
                             'client': clientDeclaration,
                             'method': method.getText(),
                             'argsRaw': argsRaw,
-                            'args': null,
+                            'args': {},
                             'start': method.start.start,
                             'stop': method.stop.stop
                         });

@@ -66,7 +66,7 @@ export default class JavaAWSListener extends JavaParserListener {
                             'client': clientDeclaration,
                             'method': method.getText(),
                             'argsRaw': argsRaw,
-                            'args': null,
+                            'args': {},
                             'start': method.start.start,
                             'stop': method.stop.stop
                         });
