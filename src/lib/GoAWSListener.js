@@ -62,8 +62,8 @@ export default class GoAWSListener extends GoParserListener {
                                 'method': method.getText(),
                                 'argsRaw': argsRaw,
                                 'args': null,
-                                'start': method.start.start,
-                                'stop': method.stop.stop
+                                'start': method.symbol.start,
+                                'stop': method.symbol.stop
                             });
                             break;
                         }

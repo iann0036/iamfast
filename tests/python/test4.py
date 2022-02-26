@@ -17,8 +17,8 @@ s3_client = boto3.client('sts',
 try:
 
   response = s3_client.assume_role(
-      RoleArn='arn:x:ignored:by:weka-s3:',
-      RoleSessionName='ignored-by-weka-s3',
+      RoleArn='arn:aws:iam::123456789012:role/myrole',
+      RoleSessionName='myrolesession',
       DurationSeconds=900
   )
 
