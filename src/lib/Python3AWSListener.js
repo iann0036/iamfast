@@ -7,7 +7,9 @@ export default class Python3AWSListener extends Python3ParserListener {
         super();
         this.SDKDeclarations = [];
         this.ClientDeclarations = [];
+        this.ResourceDeclarations = [];
         this.ClientCalls = [];
+        this.ResourceCalls = [];
         this.VariableDeclarations = [];
     }
 
@@ -83,6 +85,19 @@ export default class Python3AWSListener extends Python3ParserListener {
                                         let arg1filtered = arg1.getText().replace(/^['"](.*)['"]$/g, '$1');
 
                                         this.ClientDeclarations.push({
+                                            'type': arg1filtered,
+                                            'variable': assignable.getText(),
+                                            'argsRaw': argsRaw,
+                                            'sdk': sdkDeclaration
+                                        });
+                                        break;
+                                    }
+                                } else if (namespace.getText() == sdkDeclaration['variable'] && method.getText() == 'resource') { // boto3.resource('servicename', ...)
+                                    if (argsRaw.children.length == 3 && argsRaw.children[1] instanceof Python3Parser.ArglistContext && argsRaw.children[1].children && argsRaw.children[1].children[0].children) {
+                                        let arg1 = this.drillToAtomExprs(argsRaw.children[1].children[0])[0];
+                                        let arg1filtered = arg1.getText().replace(/^['"](.*)['"]$/g, '$1');
+
+                                        this.ResourceDeclarations.push({
                                             'type': arg1filtered,
                                             'variable': assignable.getText(),
                                             'argsRaw': argsRaw,
