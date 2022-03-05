@@ -15,7 +15,7 @@ export default class IAMFast {
         this.iam_def = iam_def;
         this.mappings = mappings;
         this.debug = false;
-        this.last_privs = [];
+        this.privs = [];
     }
 
     static getLanguageByPath(path) {
@@ -342,6 +342,10 @@ export default class IAMFast {
         return YAML.stringify(sam_template, custom_tags);
     }
 
+    Clear() {
+        this.privs = [];
+    }
+
     GenerateIAMPolicy(code, language) {
         const GENERIC_SERVICE_METHODS = new Set([
             "endpoint",
@@ -416,8 +420,8 @@ export default class IAMFast {
 
         this.debug && console.log("Privs: ", privs);
 
-        this.last_privs = privs;
+        this.privs = this.privs.concat(privs);
 
-        return this.toIAMPolicy(privs);
+        return this.toIAMPolicy(this.privs);
     }
 }
