@@ -16,6 +16,7 @@ export default class IAMFast {
         this.mappings = mappings;
         this.debug = false;
         this.privs = [];
+        this.last_privs = [];
     }
 
     static getLanguageByPath(path) {
@@ -420,6 +421,7 @@ export default class IAMFast {
 
         this.debug && console.log("Privs: ", privs);
 
+        this.last_privs = privs;
         this.privs = this.privs.concat(privs);
 
         return this.toIAMPolicy(this.privs);

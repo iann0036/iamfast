@@ -2,7 +2,7 @@
 
 import * as fs from "fs";
 import * as chai from "chai";
-const expect = chai.expect
+const expect = chai.expect;
 
 import IAMFast from "../src/IAMFast.js";
 
