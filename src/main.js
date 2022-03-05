@@ -49,8 +49,8 @@ if (stat.isDirectory()) {
         process.exit(1);
     }
 } else if (stat.isFile()) {
-    if (EXTS.includes(path.extname(filename))) {
-        console.log("error: Unknown file type");
+    if (!EXTS.includes(path.extname(filename))) {
+        console.log("error: unknown file type " + path.extname(filename));
         process.exit(1);
     }
 
