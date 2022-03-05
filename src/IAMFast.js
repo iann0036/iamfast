@@ -278,6 +278,20 @@ export default class IAMFast {
                 resolve: str => str
             }]
         };
+        const LANG_MAP = {
+            'js': 'nodejs14.x',
+            'python': 'python3.9',
+            'java': 'java11',
+            'go': 'provided.al2',
+            'cplusplus': 'provided.al2'
+        };
+        const HANDLER_MAP = {
+            'js': 'index.handler',
+            'python': 'lambda_function.lambda_handler',
+            'java': 'app.Handler',
+            'go': 'bootstrap',
+            'cplusplus': 'bootstrap'
+        };
 
         let sam_template = YAML.parseDocument(`
             AWSTemplateFormatVersion: '2010-09-09'
@@ -290,11 +304,11 @@ export default class IAMFast {
                 LambdaFunction:
                     Type: AWS::Serverless::Function
                     Properties:
-                        Handler: index.handler
-                        Runtime: nodejs10.x
+                        Handler: ${HANDLER_MAP[language]}
+                        Runtime: ${LANG_MAP[language]}
                         CodeUri: .
-                        MemorySize: 128
-                        Timeout: 10
+                        MemorySize: 256
+                        Timeout: 30
                         Environment:
                             Variables:
                                 "%%$": ""

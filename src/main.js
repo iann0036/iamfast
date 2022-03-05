@@ -42,6 +42,11 @@ var walk = function(dir) {
 }
 
 if (stat.isDirectory()) {
+    if (outputSam) {
+        console.log("error: directory support for SAM output not yet supported");
+        process.exit(1);
+    }
+
     files = walk(filename);
 
     if (files.length == 0) {
