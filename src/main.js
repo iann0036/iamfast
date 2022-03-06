@@ -66,7 +66,7 @@ if (stat.isDirectory()) {
 }
 
 let iamfast = new IAMFast();
-if (process.env.DEBUG == "true") {
+if (process.env.DEBUG == "true" || process.env.DEBUG == "1") {
     iamfast.debug = true;
 }
 

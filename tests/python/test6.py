@@ -24,6 +24,6 @@ s34.objects.all()
 
 s3name = 's3'
 s35 = Session().client(s3name)
-s35.list_objects_v2(Bucket='yourbucket3')
+s35.list_objects_v2(Bucket='yourbucket4')
 
-sessionroot.Session().client('s3').list_objects_v2(Bucket='yourbucket3').keys()
+sessionroot.Session().client('s3').list_objects_v2(Bucket='yourbucket5').keys()
