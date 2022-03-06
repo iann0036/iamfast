@@ -9,6 +9,7 @@ export default class Python3AWSListener extends Python3ParserListener {
         this.ClientDeclarations = [];
         this.ResourceDeclarations = [];
         this.ClientCalls = [];
+        this.ResourceObjects = [];
         this.ResourceCalls = [];
         this.VariableDeclarations = [];
     }
@@ -164,9 +165,9 @@ export default class Python3AWSListener extends Python3ParserListener {
 
                             for (let resourceDeclaration of this.ResourceDeclarations) {
                                 if (namespace.getText() == resourceDeclaration['variable']) {
-                                    this.ResourceCalls.push({
+                                    this.ResourceObjects.push({
                                         'resource': resourceDeclaration,
-                                        'method': method.getText(),
+                                        'object': method.getText(),
                                         'argsRaw': argsRaw,
                                         'args': this.resolveArgs(argsRaw),
                                         'variable': assignable.getText(),
@@ -234,9 +235,9 @@ export default class Python3AWSListener extends Python3ParserListener {
 
                         for (let resourceDeclaration of this.ResourceDeclarations) {
                             if (namespace.getText() == resourceDeclaration['variable']) {
-                                this.ResourceCalls.push({
+                                this.ResourceObjects.push({
                                     'resource': resourceDeclaration,
-                                    'method': method.getText(),
+                                    'object': method.getText(),
                                     'argsRaw': argsRaw,
                                     'args': this.resolveArgs(argsRaw),
                                     'start': method.symbol.start,
