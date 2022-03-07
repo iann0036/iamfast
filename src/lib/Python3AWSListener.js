@@ -165,15 +165,27 @@ export default class Python3AWSListener extends Python3ParserListener {
 
                             for (let resourceDeclaration of this.ResourceDeclarations) {
                                 if (namespace.getText() == resourceDeclaration['variable']) {
-                                    this.ResourceObjects.push({
-                                        'resource': resourceDeclaration,
-                                        'object': method.getText(),
-                                        'argsRaw': argsRaw,
-                                        'args': this.resolveArgs(argsRaw),
-                                        'variable': assignable.getText(),
-                                        'start': method.symbol.start,
-                                        'stop': method.symbol.stop
-                                    });
+                                    if (method.getText()[0] == method.getText()[0].toLowerCase()) {
+                                        this.ResourceCalls.push({
+                                            'resource': resourceDeclaration,
+                                            'method': method.getText(),
+                                            'argsRaw': argsRaw,
+                                            'args': this.resolveArgs(argsRaw),
+                                            'variable': assignable.getText(),
+                                            'start': method.symbol.start,
+                                            'stop': method.symbol.stop
+                                        });
+                                    } else {
+                                        this.ResourceObjects.push({
+                                            'resource': resourceDeclaration,
+                                            'object': method.getText(),
+                                            'argsRaw': argsRaw,
+                                            'args': this.resolveArgs(argsRaw),
+                                            'variable': assignable.getText(),
+                                            'start': method.symbol.start,
+                                            'stop': method.symbol.stop
+                                        });
+                                    }
                                     break;
                                 }
                             }
@@ -235,14 +247,25 @@ export default class Python3AWSListener extends Python3ParserListener {
 
                         for (let resourceDeclaration of this.ResourceDeclarations) {
                             if (namespace.getText() == resourceDeclaration['variable']) {
-                                this.ResourceObjects.push({
-                                    'resource': resourceDeclaration,
-                                    'object': method.getText(),
-                                    'argsRaw': argsRaw,
-                                    'args': this.resolveArgs(argsRaw),
-                                    'start': method.symbol.start,
-                                    'stop': method.symbol.stop
-                                });
+                                if (method.getText()[0] == method.getText()[0].toLowerCase()) {
+                                    this.ResourceCalls.push({
+                                        'resource': resourceDeclaration,
+                                        'method': method.getText(),
+                                        'argsRaw': argsRaw,
+                                        'args': this.resolveArgs(argsRaw),
+                                        'start': method.symbol.start,
+                                        'stop': method.symbol.stop
+                                    });
+                                } else {
+                                    this.ResourceObjects.push({
+                                        'resource': resourceDeclaration,
+                                        'object': method.getText(),
+                                        'argsRaw': argsRaw,
+                                        'args': this.resolveArgs(argsRaw),
+                                        'start': method.symbol.start,
+                                        'stop': method.symbol.stop
+                                    });
+                                }
                                 break;
                             }
                         }

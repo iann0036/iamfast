@@ -178,7 +178,7 @@ export default class AWSParser {
 
                     if (method) {
                         calls.push({
-                            'service': "dynamodb",
+                            'service': 'dynamodb',
                             'method': method,
                             'params': resource_call.args,
                             'position': {
@@ -190,7 +190,188 @@ export default class AWSParser {
                 } else if (resource_call.resource.type == "ManagedUpload" && resource_call.resource.parentType == "S3") {
                     for (let method of ['PutObject', 'CreateMultipartUpload', 'UploadPart', 'AbortMultipartUpload', 'CompleteMultipartUpload', 'PutObjectTagging']) {
                         calls.push({
-                            'service': "s3",
+                            'service': 's3',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                }
+            }
+        } else if (language == "python") {
+            for (let resource_call of this.resource_calls) {
+                if (resource_call.resource && resource_call.resource.type == "cloudformation" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "create_stack") { method = "CreateStack" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 'cloudformation',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource && resource_call.resource.type == "cloudwatch" && !resource_call.resourceObject) {
+                    // N/A
+                } else if (resource_call.resource && resource_call.resource.type == "dynamodb" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "batch_get_item") { method = "BatchGetItem" }
+                    if (resource_call.method == "batch_write_item") { method = "BatchWriteItem" }
+                    if (resource_call.method == "create_table") { method = "CreateTable" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 'dynamodb',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource && resource_call.resource.type == "ec2" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "create_dhcp_options") { method = "CreateDhcpOptions" }
+                    if (resource_call.method == "create_instances") { method = "RunInstances" }
+                    if (resource_call.method == "create_internet_gateway") { method = "CreateInternetGateway" }
+                    if (resource_call.method == "create_key_pair") { method = "CreateKeyPair" }
+                    if (resource_call.method == "create_network_acl") { method = "CreateNetworkAcl" }
+                    if (resource_call.method == "create_network_interface") { method = "CreateNetworkInterface" }
+                    if (resource_call.method == "create_placement_group") { method = "CreatePlacementGroup" }
+                    if (resource_call.method == "create_route_table") { method = "CreateRouteTable" }
+                    if (resource_call.method == "create_security_group") { method = "CreateSecurityGroup" }
+                    if (resource_call.method == "create_snapshot") { method = "CreateSnapshot" }
+                    if (resource_call.method == "create_subnet") { method = "CreateSubnet" }
+                    if (resource_call.method == "create_tags") { method = "CreateTags" }
+                    if (resource_call.method == "create_volume") { method = "CreateVolume" }
+                    if (resource_call.method == "create_vpc") { method = "CreateVpc" }
+                    if (resource_call.method == "create_vpc_peering_connection") { method = "CreateVpcPeeringConnection" }
+                    if (resource_call.method == "disassociate_route_table") { method = "DisassociateRouteTable" }
+                    if (resource_call.method == "import_key_pair") { method = "ImportKeyPair" }
+                    if (resource_call.method == "register_image") { method = "RegisterImage" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 'ec2',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource && resource_call.resource.type == "glacier" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "create_vault") { method = "CreateVault" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 'glacier',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource && resource_call.resource.type == "iam" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "change_password") { method = "ChangePassword" }
+                    if (resource_call.method == "create_account_alias") { method = "CreateAccountAlias" }
+                    if (resource_call.method == "create_account_password_policy") { method = "UpdateAccountPasswordPolicy" }
+                    if (resource_call.method == "create_group") { method = "CreateGroup" }
+                    if (resource_call.method == "create_instance_profile") { method = "CreateInstanceProfile" }
+                    if (resource_call.method == "create_policy") { method = "CreatePolicy" }
+                    if (resource_call.method == "create_role") { method = "CreateRole" }
+                    if (resource_call.method == "create_saml_provider") { method = "CreateSAMLProvider" }
+                    if (resource_call.method == "create_server_certificate") { method = "UploadServerCertificate" }
+                    if (resource_call.method == "create_signing_certificate") { method = "UploadSigningCertificate" }
+                    if (resource_call.method == "create_user") { method = "CreateUser" }
+                    if (resource_call.method == "create_virtual_mfa_device") { method = "CreateVirtualMFADevice" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 'iam',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource && resource_call.resource.type == "opsworks" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "create_stack") { method = "CreateStack" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 'opsworks',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource && resource_call.resource.type == "s3" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "create_bucket") { method = "CreateBucket" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 's3',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource && resource_call.resource.type == "sns" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "create_platform_application") { method = "CreatePlatformApplication" }
+                    if (resource_call.method == "create_topic") { method = "CreateTopic" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 'sns',
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource && resource_call.resource.type == "sqs" && !resource_call.resourceObject) {
+                    let method = null;
+
+                    if (resource_call.method == "create_queue") { method = "CreateQueue" }
+
+                    if (method) {
+                        calls.push({
+                            'service': 'sqs',
                             'method': method,
                             'params': resource_call.args,
                             'position': {

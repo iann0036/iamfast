@@ -5,7 +5,12 @@ from boto3 import session as sessionroot
 
 session = Session()
 s3 = session.resource('s3')
+
+s3.create_bucket(Bucket='mybucket')
+
 your_bucket = s3.Bucket('yourbucket')
+
+your_bucket.create()
 
 for s3_file in your_bucket.objects.all():
     print(s3_file.key)
