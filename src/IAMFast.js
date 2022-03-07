@@ -382,7 +382,7 @@ export default class IAMFast {
         parser.debug = this.debug;
         parser.ParseInput(code, language);
 
-        let tracked_calls = parser.GetNormalizedServiceCalls();
+        let tracked_calls = parser.GetNormalizedServiceCalls(language);
 
         for (let tracked_call of tracked_calls) {
             let found_match = false;

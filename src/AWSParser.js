@@ -21,6 +21,7 @@ export default class AWSParser {
 
     constructor() {
         this.client_calls = [];
+        this.resource_calls = [];
         this.debug = false;
     }
 
@@ -56,6 +57,7 @@ export default class AWSParser {
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+                this.resource_calls = listener.ResourceCalls;
 
                 this.debug && console.log(listener);
 
@@ -141,7 +143,7 @@ export default class AWSParser {
         }
     }
 
-    GetNormalizedServiceCalls() {
+    GetNormalizedServiceCalls(language) {
         let calls = [];
 
         for (let client_call of this.client_calls) {
@@ -155,7 +157,50 @@ export default class AWSParser {
                     'start': client_call.start,
                     'stop': client_call.stop
                 }
-            })
+            });
+        }
+
+        if (language == "js") {
+            for (let resource_call of this.resource_calls) {
+                if (resource_call.resource.type == "DocumentClient" && resource_call.resource.parentType == "DynamoDB") {
+                    let method = null;
+
+                    if (resource_call.method == "batchGet") { method = "BatchGetItem" }
+                    if (resource_call.method == "batchWrite") { method = "BatchWriteItem" }
+                    if (resource_call.method == "delete") { method = "DeleteItem" }
+                    if (resource_call.method == "get") { method = "GetItem" }
+                    if (resource_call.method == "put") { method = "PutItem" }
+                    if (resource_call.method == "query") { method = "Query" }
+                    if (resource_call.method == "scan") { method = "Scan" }
+                    if (resource_call.method == "transactGet") { method = "TransactGetItems" }
+                    if (resource_call.method == "transactWrite") { method = "TransactWriteItems" }
+                    if (resource_call.method == "update") { method = "UpdateItem" }
+
+                    if (method) {
+                        calls.push({
+                            'service': "dynamodb",
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                } else if (resource_call.resource.type == "ManagedUpload" && resource_call.resource.parentType == "S3") {
+                    for (let method of ['PutObject', 'CreateMultipartUpload', 'UploadPart', 'AbortMultipartUpload', 'CompleteMultipartUpload', 'PutObjectTagging']) {
+                        calls.push({
+                            'service': "s3",
+                            'method': method,
+                            'params': resource_call.args,
+                            'position': {
+                                'start': resource_call.start,
+                                'stop': resource_call.stop
+                            }
+                        });
+                    }
+                }
+            }
         }
 
         return calls;
