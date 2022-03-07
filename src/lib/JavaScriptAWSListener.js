@@ -7,7 +7,10 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         super();
         this.SDKDeclarations = [];
         this.ClientDeclarations = [];
+        this.ResourceDeclarations = [];
         this.ClientCalls = [];
+        this.ResourceObjects = [];
+        this.ResourceCalls = [];
         this.VariableDeclarations = [];
     }
 
@@ -95,9 +98,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                             'variable': assignable.getText()
                         });
                     }
-                }
-
-                if (expression instanceof JavaScriptParser.NewExpressionContext) { // find client instantiations
+                } else if (expression instanceof JavaScriptParser.NewExpressionContext) { // find client instantiations
                     let className = expression.children[1]; // new ### (...)
                     let argsRaw = null;
                     let argsRawPrev = null;
@@ -143,6 +144,45 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                                 });
                             }
                             break;
+                        } else if (className.children[0] instanceof JavaScriptParser.MemberDotExpressionContext) { // blah.blah.blah
+                            const namespace = className.children[0]; // ###.blah.blah
+                            const method = className.children[className.children.length - 1]; // blah.###.blah ??
+                            let foundDeclaration = false;
+
+                            console.log("xx");
+                            console.log(namespace.getText());
+                            console.log(method.getText());
+
+                            if (namespace.getText().match(/^[^\.]+\.[^\.]+$/)) {
+                                let parentNamespace = namespace.getText().split(".")[0];
+                                let childNamespace = namespace.getText().split(".")[1];
+
+                                for (let sdkDeclaration of this.SDKDeclarations) {
+                                    if (parentNamespace == sdkDeclaration['variable']) {
+                                        this.ResourceDeclarations.push({
+                                            'type': method.getText(),
+                                            'parentType': childNamespace,
+                                            'variable': (anonymousDeclaration ? null : assignable.getText()),
+                                            'argsRaw': argsRaw,
+                                            'sdk': sdkDeclaration
+                                        });
+                                        foundDeclaration = true;
+                                        break;
+                                    }
+                                }
+                                if (anonymousDeclaration && prevMethod.getText()) { // new AWS.Service().methodName(args)
+                                    this.ResourceCalls.push({
+                                        'resource': this.ResourceDeclarations[this.ResourceDeclarations.length - 1],
+                                        'method': prevMethod.getText(),
+                                        'argsRaw': argsRawPrev,
+                                        'args': this.resolveArgs(argsRawPrev),
+                                        'start': prevMethod.start.start,
+                                        'stop': prevMethod.stop.stop
+                                    });
+                                }
+                            }
+
+                            break;
                         } else if (className.children[0] instanceof JavaScriptParser.ArgumentsExpressionContext) {
                             anonymousDeclaration = true;
                             prevMethod = null;
@@ -158,9 +198,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                             break;
                         }
                     }
-                }
-
-                if (expression instanceof JavaScriptParser.ObjectLiteralExpressionContext) { // blah = ###{...}###
+                } else if (expression instanceof JavaScriptParser.ObjectLiteralExpressionContext) { // blah = ###{...}###
                     this.VariableDeclarations.push({
                         'variable': assignable.getText(),
                         'type': 'object',
@@ -182,6 +220,20 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                 if (namespace.getText() == clientDeclaration['variable']) {
                     this.ClientCalls.push({
                         'client': clientDeclaration,
+                        'method': method.getText(),
+                        'argsRaw': argsRaw,
+                        'args': this.resolveArgs(argsRaw),
+                        'start': method.start.start,
+                        'stop': method.stop.stop
+                    });
+                    break;
+                }
+            }
+
+            for (let resourceDeclaration of this.ResourceDeclarations) {
+                if (namespace.getText() == resourceDeclaration['variable']) {
+                    this.ResourceCalls.push({
+                        'resource': resourceDeclaration,
                         'method': method.getText(),
                         'argsRaw': argsRaw,
                         'args': this.resolveArgs(argsRaw),
