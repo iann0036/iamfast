@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import antlr4 from 'antlr4';
+
 import JavaScriptLexer from './lib/JavaScriptLexer.js';
 import JavaScriptParser from './lib/JavaScriptParser.js';
 import JavaScriptAWSListener from './lib/JavaScriptAWSListener.js';
@@ -16,6 +17,17 @@ import CPP14AWSListener from './lib/CPP14AWSListener.js';
 import GoLexer from './lib/GoLexer.js'
 import GoParser from './lib/GoParser.js';
 import GoAWSListener from './lib/GoAWSListener.js';
+
+import PyCloudFormationService from './lib/py-cloudformation-service.js';
+import PyCloudWatchService from './lib/py-cloudwatch-service.js';
+import PyDynamoDBService from './lib/py-dynamodb-service.js';
+import PyEC2Service from './lib/py-ec2-service.js';
+import PyGlacierService from './lib/py-glacier-service.js';
+import PyIAMService from './lib/py-iam-service.js';
+import PyOpsWorksService from './lib/py-opsworks-service.js';
+import PyS3Service from './lib/py-s3-service.js';
+import PySNSService from './lib/py-sns-service.js';
+import PySQSService from './lib/py-sqs-service.js';
 
 export default class AWSParser {
 
@@ -77,6 +89,7 @@ export default class AWSParser {
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+                this.resource_calls = listener.ResourceCalls;
 
                 this.debug && console.log(listener);
 
@@ -206,7 +219,11 @@ export default class AWSParser {
                 if (resource_call.resource && resource_call.resource.type == "cloudformation" && !resource_call.resourceObject) {
                     let method = null;
 
-                    if (resource_call.method == "create_stack") { method = "CreateStack" }
+                    for (let actionname of Object.keys(PyCloudFormationService.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PyCloudFormationService.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
@@ -224,9 +241,11 @@ export default class AWSParser {
                 } else if (resource_call.resource && resource_call.resource.type == "dynamodb" && !resource_call.resourceObject) {
                     let method = null;
 
-                    if (resource_call.method == "batch_get_item") { method = "BatchGetItem" }
-                    if (resource_call.method == "batch_write_item") { method = "BatchWriteItem" }
-                    if (resource_call.method == "create_table") { method = "CreateTable" }
+                    for (let actionname of Object.keys(PyDynamoDBService.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PyDynamoDBService.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
@@ -242,24 +261,11 @@ export default class AWSParser {
                 } else if (resource_call.resource && resource_call.resource.type == "ec2" && !resource_call.resourceObject) {
                     let method = null;
 
-                    if (resource_call.method == "create_dhcp_options") { method = "CreateDhcpOptions" }
-                    if (resource_call.method == "create_instances") { method = "RunInstances" }
-                    if (resource_call.method == "create_internet_gateway") { method = "CreateInternetGateway" }
-                    if (resource_call.method == "create_key_pair") { method = "CreateKeyPair" }
-                    if (resource_call.method == "create_network_acl") { method = "CreateNetworkAcl" }
-                    if (resource_call.method == "create_network_interface") { method = "CreateNetworkInterface" }
-                    if (resource_call.method == "create_placement_group") { method = "CreatePlacementGroup" }
-                    if (resource_call.method == "create_route_table") { method = "CreateRouteTable" }
-                    if (resource_call.method == "create_security_group") { method = "CreateSecurityGroup" }
-                    if (resource_call.method == "create_snapshot") { method = "CreateSnapshot" }
-                    if (resource_call.method == "create_subnet") { method = "CreateSubnet" }
-                    if (resource_call.method == "create_tags") { method = "CreateTags" }
-                    if (resource_call.method == "create_volume") { method = "CreateVolume" }
-                    if (resource_call.method == "create_vpc") { method = "CreateVpc" }
-                    if (resource_call.method == "create_vpc_peering_connection") { method = "CreateVpcPeeringConnection" }
-                    if (resource_call.method == "disassociate_route_table") { method = "DisassociateRouteTable" }
-                    if (resource_call.method == "import_key_pair") { method = "ImportKeyPair" }
-                    if (resource_call.method == "register_image") { method = "RegisterImage" }
+                    for (let actionname of Object.keys(PyEC2Service.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PyEC2Service.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
@@ -275,7 +281,11 @@ export default class AWSParser {
                 } else if (resource_call.resource && resource_call.resource.type == "glacier" && !resource_call.resourceObject) {
                     let method = null;
 
-                    if (resource_call.method == "create_vault") { method = "CreateVault" }
+                    for (let actionname of Object.keys(PyGlacierService.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PyGlacierService.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
@@ -291,18 +301,11 @@ export default class AWSParser {
                 } else if (resource_call.resource && resource_call.resource.type == "iam" && !resource_call.resourceObject) {
                     let method = null;
 
-                    if (resource_call.method == "change_password") { method = "ChangePassword" }
-                    if (resource_call.method == "create_account_alias") { method = "CreateAccountAlias" }
-                    if (resource_call.method == "create_account_password_policy") { method = "UpdateAccountPasswordPolicy" }
-                    if (resource_call.method == "create_group") { method = "CreateGroup" }
-                    if (resource_call.method == "create_instance_profile") { method = "CreateInstanceProfile" }
-                    if (resource_call.method == "create_policy") { method = "CreatePolicy" }
-                    if (resource_call.method == "create_role") { method = "CreateRole" }
-                    if (resource_call.method == "create_saml_provider") { method = "CreateSAMLProvider" }
-                    if (resource_call.method == "create_server_certificate") { method = "UploadServerCertificate" }
-                    if (resource_call.method == "create_signing_certificate") { method = "UploadSigningCertificate" }
-                    if (resource_call.method == "create_user") { method = "CreateUser" }
-                    if (resource_call.method == "create_virtual_mfa_device") { method = "CreateVirtualMFADevice" }
+                    for (let actionname of Object.keys(PyIAMService.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PyIAMService.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
@@ -318,7 +321,11 @@ export default class AWSParser {
                 } else if (resource_call.resource && resource_call.resource.type == "opsworks" && !resource_call.resourceObject) {
                     let method = null;
 
-                    if (resource_call.method == "create_stack") { method = "CreateStack" }
+                    for (let actionname of Object.keys(PyOpsWorksService.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PyOpsWorksService.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
@@ -333,8 +340,12 @@ export default class AWSParser {
                     }
                 } else if (resource_call.resource && resource_call.resource.type == "s3" && !resource_call.resourceObject) {
                     let method = null;
-
-                    if (resource_call.method == "create_bucket") { method = "CreateBucket" }
+                    
+                    for (let actionname of Object.keys(PyS3Service.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PyS3Service.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
@@ -350,8 +361,11 @@ export default class AWSParser {
                 } else if (resource_call.resource && resource_call.resource.type == "sns" && !resource_call.resourceObject) {
                     let method = null;
 
-                    if (resource_call.method == "create_platform_application") { method = "CreatePlatformApplication" }
-                    if (resource_call.method == "create_topic") { method = "CreateTopic" }
+                    for (let actionname of Object.keys(PySNSService.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PySNSService.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
@@ -367,7 +381,11 @@ export default class AWSParser {
                 } else if (resource_call.resource && resource_call.resource.type == "sqs" && !resource_call.resourceObject) {
                     let method = null;
 
-                    if (resource_call.method == "create_queue") { method = "CreateQueue" }
+                    for (let actionname of Object.keys(PySQSService.service.actions)) {
+                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            method = PySQSService.service.actions[actionname].request.operation;
+                        }
+                    }
 
                     if (method) {
                         calls.push({
