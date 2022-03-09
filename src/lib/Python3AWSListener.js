@@ -67,11 +67,23 @@ export default class Python3AWSListener extends Python3ParserListener {
         }
         
         if (extra && extra.resourceObject && extra.method) {
-            for (let actionname of Object.keys(pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions)) {
-                if (extra.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                    for (let requestParam of pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions[actionname].request.params) {
-                        if (requestParam.source == "identifier" && extra.resourceObject.args[requestParam.name]) {
-                            args[requestParam.target] = extra.resourceObject.args[requestParam.name];
+            if (extra.subnamespace) {
+                for (let collectionname of Object.keys(pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].hasMany)) {
+                    if (extra.subnamespace.replace(/_/g, "").toLowerCase() == collectionname.toLowerCase()) {
+                        for (let requestParam of pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].hasMany[collectionname].request.params) {
+                            if (requestParam.source == "identifier" && extra.resourceObject.args[requestParam.name]) {
+                                args[requestParam.target] = extra.resourceObject.args[requestParam.name];
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (let actionname of Object.keys(pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions)) {
+                    if (extra.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                        for (let requestParam of pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions[actionname].request.params) {
+                            if (requestParam.source == "identifier" && extra.resourceObject.args[requestParam.name]) {
+                                args[requestParam.target] = extra.resourceObject.args[requestParam.name];
+                            }
                         }
                     }
                 }
@@ -253,7 +265,48 @@ export default class Python3AWSListener extends Python3ParserListener {
             let atomExpr = this.drillToAtomExprs(ctx.children[0]);
 
             for (let rhs of atomExpr) {
-                if (rhs.children.length == 3 && rhs.children[0] instanceof Python3Parser.AtomContext && rhs.children[1] instanceof Python3Parser.TrailerContext && rhs.children[2] instanceof Python3Parser.TrailerContext && rhs.children[2].getText().startsWith("(") && rhs.children[2].getText().endsWith(")")) { // x.y(z)
+                if (rhs.children.length >= 4 && rhs.children[0] instanceof Python3Parser.AtomContext && rhs.children[1] instanceof Python3Parser.TrailerContext && rhs.children[2] instanceof Python3Parser.TrailerContext && !rhs.children[2].getText().startsWith("(") && !rhs.children[2].getText().endsWith(")") && rhs.children[3] instanceof Python3Parser.TrailerContext && rhs.children[3].getText().startsWith("(") && rhs.children[3].getText().endsWith(")")) { // w.x.y(z)...  [resource collections]
+                    let namespace = rhs.children[0];
+                    if (rhs.children[1].children.length == 2 && rhs.children[1].children[0].getText() == ".") {
+                        let subnamespace = rhs.children[1].children[1];
+                        if (rhs.children[2].children.length == 2 && rhs.children[2].children[0].getText() == ".") {
+                            let method = rhs.children[2].children[1];
+                            let argsRaw = rhs.children[3];
+
+                            for (let resourceObject of this.ResourceObjects) {
+                                if (namespace.getText() == resourceObject['variable']) {
+                                    this.ResourceCalls.push({
+                                        'resourceObject': resourceObject,
+                                        'subnamespace': subnamespace.getText(),
+                                        'method': method.getText(),
+                                        'argsRaw': argsRaw,
+                                        'args': this.resolveArgs(argsRaw, { resourceObject: resourceObject, method: method.getText(), subnamespace: subnamespace.getText() }),
+                                        'start': method.symbol.start,
+                                        'stop': method.symbol.stop
+                                    });
+                                    break;
+                                }
+                            }
+    
+                            for (let resourceDeclaration of this.ResourceDeclarations) {
+                                if (namespace.getText() == resourceDeclaration['variable']) {
+                                    if (method.getText()[0] == method.getText()[0].toLowerCase()) {
+                                        this.ResourceCalls.push({
+                                            'resource': resourceDeclaration,
+                                            'subnamespace': subnamespace.getText(),
+                                            'method': method.getText(),
+                                            'argsRaw': argsRaw,
+                                            'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, method: method.getText(), subnamespace: subnamespace.getText() }),
+                                            'start': method.symbol.start,
+                                            'stop': method.symbol.stop
+                                        });
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else if (rhs.children.length >= 3 && rhs.children[0] instanceof Python3Parser.AtomContext && rhs.children[1] instanceof Python3Parser.TrailerContext && rhs.children[2] instanceof Python3Parser.TrailerContext && rhs.children[2].getText().startsWith("(") && rhs.children[2].getText().endsWith(")")) { // x.y(z)...
                     let namespace = rhs.children[0];
                     if (rhs.children[1].children.length == 2 && rhs.children[1].children[0].getText() == ".") {
                         let method = rhs.children[1].children[1];

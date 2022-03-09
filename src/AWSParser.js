@@ -232,10 +232,16 @@ export default class AWSParser {
                 if (resource_call.resource && pyServiceMap[resource_call.resource.type]) {
                     let method = null;
 
-                    if (pyServiceMap[resource_call.resource.type].service.actions) {
+                    if (pyServiceMap[resource_call.resource.type].service.actions && !resource_call.subnamespace) { // x = boto3.resource(''); x.y()
                         for (let actionname of Object.keys(pyServiceMap[resource_call.resource.type].service.actions)) {
                             if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
                                 method = pyServiceMap[resource_call.resource.type].service.actions[actionname].request.operation;
+                            }
+                        }
+                    } else if (pyServiceMap[resource_call.resource.type].service.hasMany && resource_call.subnamespace) { // x = boto3.resource(''); x.y.z()
+                        for (let collectionname of Object.keys(pyServiceMap[resource_call.resource.type].service.hasMany)) {
+                            if (resource_call.subnamespace.replace(/_/g, "").toLowerCase() == collectionname.toLowerCase()) {
+                                method = pyServiceMap[resource_call.resource.type].service.hasMany[collectionname].request.operation
                             }
                         }
                     }
@@ -254,10 +260,16 @@ export default class AWSParser {
                 } else if (resource_call.resourceObject && pyServiceMap[resource_call.resourceObject.resource.type]) {
                     let method = null;
 
-                    if (pyServiceMap[resource_call.resourceObject.resource.type].resources && pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object] && pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].actions) {
+                    if (pyServiceMap[resource_call.resourceObject.resource.type].resources && pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object] && pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].actions && !resource_call.subnamespace) { // x = boto3.resource('').Thing(); x.y()
                         for (let actionname of Object.keys(pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].actions)) {
                             if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
                                 method = pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].actions[actionname].request.operation;
+                            }
+                        }
+                    } else if (pyServiceMap[resource_call.resourceObject.resource.type].resources && pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object] && pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].hasMany && resource_call.subnamespace) { // x = boto3.resource('').Thing(); x.y.z()
+                        for (let collectionname of Object.keys(pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].hasMany)) {
+                            if (resource_call.subnamespace.replace(/_/g, "").toLowerCase() == collectionname.toLowerCase()) {
+                                method = pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].hasMany[collectionname].request.operation;
                             }
                         }
                     }
