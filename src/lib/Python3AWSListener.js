@@ -1,6 +1,17 @@
 import Python3Parser from './Python3Parser.js';
 import Python3ParserListener from './Python3ParserListener.js';
 
+import PyCloudFormationService from './py-cloudformation-service.js';
+import PyCloudWatchService from './py-cloudwatch-service.js';
+import PyDynamoDBService from './py-dynamodb-service.js';
+import PyEC2Service from './py-ec2-service.js';
+import PyGlacierService from './py-glacier-service.js';
+import PyIAMService from './py-iam-service.js';
+import PyOpsWorksService from './py-opsworks-service.js';
+import PyS3Service from './py-s3-service.js';
+import PySNSService from './py-sns-service.js';
+import PySQSService from './py-sqs-service.js';
+
 export default class Python3AWSListener extends Python3ParserListener {
 
     constructor() {
@@ -14,8 +25,22 @@ export default class Python3AWSListener extends Python3ParserListener {
         this.VariableDeclarations = [];
     }
 
-    resolveArgs(argsRaw) {
+    resolveArgs(argsRaw, extra) {
         let args = {};
+
+        const pyServiceMap = {
+            "cloudformation": PyCloudFormationService,
+            "cloudwatch": PyCloudWatchService,
+            "dynamodb": PyDynamoDBService,
+            "ec2": PyEC2Service,
+            "glacier": PyGlacierService,
+            "iam": PyIAMService,
+            "opsworks": PyOpsWorksService,
+            "s3": PyS3Service,
+            "sns": PySNSService,
+            "sqs": PySQSService
+        };
+        let unnamedArgCount = 0;
 
         if (argsRaw.children.length == 3 && argsRaw.children[0].getText() == "(" && argsRaw.children[1] instanceof Python3Parser.ArglistContext && argsRaw.children[2].getText() == ")") {
             for (let arg of argsRaw.children[1].children) {
@@ -27,6 +52,26 @@ export default class Python3AWSListener extends Python3ParserListener {
                             for (let value of values) {
                                 args[variable.getText()] = value.getText().replace(/^['"](.*)['"]$/g, '$1');
                             }
+                        }
+
+                        unnamedArgCount = -1; // no more unnamed arguments after a named argument
+                    } else if (arg.children.length == 1 && unnamedArgCount != -1) {
+                        if (extra && extra.resource && extra.object) {
+                            args[pyServiceMap[extra.resource.type].resources[extra.object].identifiers[unnamedArgCount].name] = arg.getText().replace(/^['"](.*)['"]$/g, '$1');
+                        }
+
+                        unnamedArgCount += 1;
+                    }
+                }
+            }
+        }
+        
+        if (extra && extra.resourceObject && extra.method) {
+            for (let actionname of Object.keys(pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions)) {
+                if (extra.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                    for (let requestParam of pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions[actionname].request.params) {
+                        if (requestParam.source == "identifier" && extra.resourceObject.args[requestParam.name]) {
+                            args[requestParam.target] = extra.resourceObject.args[requestParam.name];
                         }
                     }
                 }
@@ -170,7 +215,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                                             'resource': resourceDeclaration,
                                             'method': method.getText(),
                                             'argsRaw': argsRaw,
-                                            'args': this.resolveArgs(argsRaw),
+                                            'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, method: method.getText() }),
                                             'variable': assignable.getText(),
                                             'start': method.symbol.start,
                                             'stop': method.symbol.stop
@@ -180,7 +225,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                                             'resource': resourceDeclaration,
                                             'object': method.getText(),
                                             'argsRaw': argsRaw,
-                                            'args': this.resolveArgs(argsRaw),
+                                            'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, object: method.getText() }),
                                             'variable': assignable.getText(),
                                             'start': method.symbol.start,
                                             'stop': method.symbol.stop
@@ -245,6 +290,20 @@ export default class Python3AWSListener extends Python3ParserListener {
                             }
                         }
 
+                        for (let resourceObject of this.ResourceObjects) {
+                            if (namespace.getText() == resourceObject['variable']) {
+                                this.ResourceCalls.push({
+                                    'resourceObject': resourceObject,
+                                    'method': method.getText(),
+                                    'argsRaw': argsRaw,
+                                    'args': this.resolveArgs(argsRaw, { resourceObject: resourceObject, method: method.getText() }),
+                                    'start': method.symbol.start,
+                                    'stop': method.symbol.stop
+                                });
+                                break;
+                            }
+                        }
+
                         for (let resourceDeclaration of this.ResourceDeclarations) {
                             if (namespace.getText() == resourceDeclaration['variable']) {
                                 if (method.getText()[0] == method.getText()[0].toLowerCase()) {
@@ -252,7 +311,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                                         'resource': resourceDeclaration,
                                         'method': method.getText(),
                                         'argsRaw': argsRaw,
-                                        'args': this.resolveArgs(argsRaw),
+                                        'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, method: method.getText() }),
                                         'start': method.symbol.start,
                                         'stop': method.symbol.stop
                                     });
@@ -261,7 +320,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                                         'resource': resourceDeclaration,
                                         'object': method.getText(),
                                         'argsRaw': argsRaw,
-                                        'args': this.resolveArgs(argsRaw),
+                                        'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, object: method.getText() }),
                                         'start': method.symbol.start,
                                         'stop': method.symbol.stop
                                     });

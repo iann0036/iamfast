@@ -9,8 +9,10 @@ s3 = session.resource('s3')
 s3.create_bucket(Bucket='mybucket')
 
 your_bucket = s3.Bucket('yourbucket')
-
 your_bucket.create()
+
+your_bucket_6 = s3.Bucket('yourbucket6')
+your_bucket_6.create(ACL='private')
 
 for s3_file in your_bucket.objects.all():
     print(s3_file.key)

@@ -215,19 +215,34 @@ export default class AWSParser {
                 }
             }
         } else if (language == "python") {
+            const pyServiceMap = {
+                "cloudformation": PyCloudFormationService,
+                "cloudwatch": PyCloudWatchService,
+                "dynamodb": PyDynamoDBService,
+                "ec2": PyEC2Service,
+                "glacier": PyGlacierService,
+                "iam": PyIAMService,
+                "opsworks": PyOpsWorksService,
+                "s3": PyS3Service,
+                "sns": PySNSService,
+                "sqs": PySQSService
+            };
+
             for (let resource_call of this.resource_calls) {
-                if (resource_call.resource && resource_call.resource.type == "cloudformation" && !resource_call.resourceObject) {
+                if (resource_call.resource && pyServiceMap[resource_call.resource.type]) {
                     let method = null;
 
-                    for (let actionname of Object.keys(PyCloudFormationService.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PyCloudFormationService.service.actions[actionname].request.operation;
+                    if (pyServiceMap[resource_call.resource.type].service.actions) {
+                        for (let actionname of Object.keys(pyServiceMap[resource_call.resource.type].service.actions)) {
+                            if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                                method = pyServiceMap[resource_call.resource.type].service.actions[actionname].request.operation;
+                            }
                         }
                     }
 
                     if (method) {
                         calls.push({
-                            'service': 'cloudformation',
+                            'service': resource_call.resource.type,
                             'method': method,
                             'params': resource_call.args,
                             'position': {
@@ -236,160 +251,20 @@ export default class AWSParser {
                             }
                         });
                     }
-                } else if (resource_call.resource && resource_call.resource.type == "cloudwatch" && !resource_call.resourceObject) {
-                    // N/A
-                } else if (resource_call.resource && resource_call.resource.type == "dynamodb" && !resource_call.resourceObject) {
+                } else if (resource_call.resourceObject && pyServiceMap[resource_call.resourceObject.resource.type]) {
                     let method = null;
 
-                    for (let actionname of Object.keys(PyDynamoDBService.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PyDynamoDBService.service.actions[actionname].request.operation;
-                        }
-                    }
-
-                    if (method) {
-                        calls.push({
-                            'service': 'dynamodb',
-                            'method': method,
-                            'params': resource_call.args,
-                            'position': {
-                                'start': resource_call.start,
-                                'stop': resource_call.stop
+                    if (pyServiceMap[resource_call.resourceObject.resource.type].resources && pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object] && pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].actions) {
+                        for (let actionname of Object.keys(pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].actions)) {
+                            if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                                method = pyServiceMap[resource_call.resourceObject.resource.type].resources[resource_call.resourceObject.object].actions[actionname].request.operation;
                             }
-                        });
-                    }
-                } else if (resource_call.resource && resource_call.resource.type == "ec2" && !resource_call.resourceObject) {
-                    let method = null;
-
-                    for (let actionname of Object.keys(PyEC2Service.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PyEC2Service.service.actions[actionname].request.operation;
                         }
                     }
 
                     if (method) {
                         calls.push({
-                            'service': 'ec2',
-                            'method': method,
-                            'params': resource_call.args,
-                            'position': {
-                                'start': resource_call.start,
-                                'stop': resource_call.stop
-                            }
-                        });
-                    }
-                } else if (resource_call.resource && resource_call.resource.type == "glacier" && !resource_call.resourceObject) {
-                    let method = null;
-
-                    for (let actionname of Object.keys(PyGlacierService.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PyGlacierService.service.actions[actionname].request.operation;
-                        }
-                    }
-
-                    if (method) {
-                        calls.push({
-                            'service': 'glacier',
-                            'method': method,
-                            'params': resource_call.args,
-                            'position': {
-                                'start': resource_call.start,
-                                'stop': resource_call.stop
-                            }
-                        });
-                    }
-                } else if (resource_call.resource && resource_call.resource.type == "iam" && !resource_call.resourceObject) {
-                    let method = null;
-
-                    for (let actionname of Object.keys(PyIAMService.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PyIAMService.service.actions[actionname].request.operation;
-                        }
-                    }
-
-                    if (method) {
-                        calls.push({
-                            'service': 'iam',
-                            'method': method,
-                            'params': resource_call.args,
-                            'position': {
-                                'start': resource_call.start,
-                                'stop': resource_call.stop
-                            }
-                        });
-                    }
-                } else if (resource_call.resource && resource_call.resource.type == "opsworks" && !resource_call.resourceObject) {
-                    let method = null;
-
-                    for (let actionname of Object.keys(PyOpsWorksService.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PyOpsWorksService.service.actions[actionname].request.operation;
-                        }
-                    }
-
-                    if (method) {
-                        calls.push({
-                            'service': 'opsworks',
-                            'method': method,
-                            'params': resource_call.args,
-                            'position': {
-                                'start': resource_call.start,
-                                'stop': resource_call.stop
-                            }
-                        });
-                    }
-                } else if (resource_call.resource && resource_call.resource.type == "s3" && !resource_call.resourceObject) {
-                    let method = null;
-                    
-                    for (let actionname of Object.keys(PyS3Service.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PyS3Service.service.actions[actionname].request.operation;
-                        }
-                    }
-
-                    if (method) {
-                        calls.push({
-                            'service': 's3',
-                            'method': method,
-                            'params': resource_call.args,
-                            'position': {
-                                'start': resource_call.start,
-                                'stop': resource_call.stop
-                            }
-                        });
-                    }
-                } else if (resource_call.resource && resource_call.resource.type == "sns" && !resource_call.resourceObject) {
-                    let method = null;
-
-                    for (let actionname of Object.keys(PySNSService.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PySNSService.service.actions[actionname].request.operation;
-                        }
-                    }
-
-                    if (method) {
-                        calls.push({
-                            'service': 'sns',
-                            'method': method,
-                            'params': resource_call.args,
-                            'position': {
-                                'start': resource_call.start,
-                                'stop': resource_call.stop
-                            }
-                        });
-                    }
-                } else if (resource_call.resource && resource_call.resource.type == "sqs" && !resource_call.resourceObject) {
-                    let method = null;
-
-                    for (let actionname of Object.keys(PySQSService.service.actions)) {
-                        if (resource_call.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                            method = PySQSService.service.actions[actionname].request.operation;
-                        }
-                    }
-
-                    if (method) {
-                        calls.push({
-                            'service': 'sqs',
+                            'service': resource_call.resourceObject.resource.type,
                             'method': method,
                             'params': resource_call.args,
                             'position': {
