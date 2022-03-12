@@ -7,14 +7,20 @@ import path from "path";
 import fs from "fs";
 
 const EXTS = ['.js', '.jsx', '.py', '.py3', '.java', '.go', '.c', '.cpp'];
+const FORMATS = ['json', 'yaml', 'sam'];
 
 program
     .arguments('<filename>')
-    .option('--output-sam', 'generate a SAM template instead of an IAM policy');
+    .option('--format <format>', 'specify the output format for the policy', 'json');
 program.parse(process.argv);
 const options = program.opts();
 const filename = program.args[0];
-const outputSam = options.outputSam;
+const format = options.format;
+
+if (!FORMATS.includes(format)) {
+    console.log("error: unknown format; available formats are: " + FORMATS.join(", "));
+    process.exit(1);
+}
 
 if (!fs.existsSync(filename)) {
     console.log("error: path does not exist");
@@ -42,7 +48,7 @@ var walk = function(dir) {
 }
 
 if (stat.isDirectory()) {
-    if (outputSam) {
+    if (format == "sam") {
         console.log("error: directory support for SAM output not yet supported");
         process.exit(1);
     }
@@ -76,9 +82,11 @@ for (let file of files) {
 
     let language = IAMFast.getLanguageByPath(file);
 
-    if (outputSam) {
+    if (format == "sam") {
         output = iamfast.GenerateSAMTemplate(code, language);
-    } else {
+    } else if (format == "yaml") {
+        output = iamfast.GenerateYAMLPolicy(code, language);
+    } else if (format == "json") {
         output = iamfast.GenerateIAMPolicy(code, language);
     }
 }

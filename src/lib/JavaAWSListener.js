@@ -55,6 +55,7 @@ export default class JavaAWSListener extends JavaParserListener {
                                         break;
                                     }
                                 }
+                                // request builder here
                             } else if (declerator.children[2].getText().match(/^(['"].*['"])|([0-9\.]+)$/)) {
                                 this.VariableDeclarations.push({
                                     'type': 'literal',

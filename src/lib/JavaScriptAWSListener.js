@@ -21,7 +21,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
             if (objectLiteralChild instanceof JavaScriptParser.PropertyExpressionAssignmentContext) {
                 let propertyName = objectLiteralChild.children[0].getText().replace(/^['"](.*)['"]$/g, '$1'); // blah = {###'abc'###: 'def'}
                 if (objectLiteralChild.children[2] instanceof JavaScriptParser.LiteralExpressionContext) { // blah = {'abc': ###'def'###}
-                    let propertyValue = objectLiteralChild.children[2].getText().replace(/^['"]?(.*)['"]?$/g, '$1');
+                    let propertyValue = objectLiteralChild.children[2].getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
                     propertyMap[propertyName] = {
                         'type': 'literal',
                         'value': propertyValue

@@ -361,6 +361,10 @@ export default class IAMFast {
         this.privs = [];
     }
 
+    GenerateYAMLPolicy(code, language) {
+        return YAML.stringify(JSON.parse(this.GenerateIAMPolicy(code, language)));
+    }
+
     GenerateIAMPolicy(code, language) {
         const GENERIC_SERVICE_METHODS = new Set([
             "endpoint",
