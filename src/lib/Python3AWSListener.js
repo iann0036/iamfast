@@ -50,14 +50,14 @@ export default class Python3AWSListener extends Python3ParserListener {
                         let values = this.drillToAtomExprs(arg.children[2]);
                         for (let variable of variables) {
                             for (let value of values) {
-                                args[variable.getText()] = value.getText().replace(/^['"](.*)['"]$/g, '$1');
+                                args[variable.getText()] = value.getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
                             }
                         }
 
                         unnamedArgCount = -1; // no more unnamed arguments after a named argument
                     } else if (arg.children.length == 1 && unnamedArgCount != -1) {
                         if (extra && extra.resource && extra.object) {
-                            args[pyServiceMap[extra.resource.type].resources[extra.object].identifiers[unnamedArgCount].name] = arg.getText().replace(/^['"](.*)['"]$/g, '$1');
+                            args[pyServiceMap[extra.resource.type].resources[extra.object].identifiers[unnamedArgCount].name] = arg.getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
                         }
 
                         unnamedArgCount += 1;

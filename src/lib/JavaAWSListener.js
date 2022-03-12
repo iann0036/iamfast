@@ -23,6 +23,16 @@ export default class JavaAWSListener extends JavaParserListener {
                 });
             }
         }
+
+        matchString = importString.match(/^software\.amazon\.awssdk\.services\.([a-zA-Z0-9]+)\.model\.((?:[a-zA-Z0-9]+)Request)$/);
+
+        if (matchString) {
+            this.VariableDeclarations.push({
+                'variable': matchString[2],
+                'service': matchString[1],
+                'type': 'requestmodel'
+            });
+        }
 	}
 
     exitLocalVariableDeclaration(ctx) {
@@ -45,6 +55,12 @@ export default class JavaAWSListener extends JavaParserListener {
                                         break;
                                     }
                                 }
+                            } else if (declerator.children[2].getText().match(/^(['"].*['"])|([0-9\.]+)$/)) {
+                                this.VariableDeclarations.push({
+                                    'type': 'literal',
+                                    'variable': assignable.getText(),
+                                    'value': declerator.children[2].getText().replace(/^['"]?(.*?)['"]?$/g, '$1')
+                                });
                             }
                         }
                     }

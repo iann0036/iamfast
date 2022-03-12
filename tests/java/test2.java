@@ -41,7 +41,7 @@ public class StartStopInstance {
             System.exit(1);
         }
 
-        String instanceId = args[0];
+        String instanceId = "i-1234567";
         boolean start;
 
         Region region = Region.US_WEST_2;
