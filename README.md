@@ -89,6 +89,7 @@ npm test
 
 ### General
 
+- [ ] Gather test cases
 - [ ] Environment variable referencing in SAM output
 - [ ] Online tool for quick evaluation
 - [ ] GitHub app
