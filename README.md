@@ -20,7 +20,7 @@ Execute `iamfast` with the first argument being the file or directory (currently
 iamfast yourfile.js
 ```
 
-iamfast supports the following programming languages:
+iamfast [supports](#development-progress) the following programming languages:
 
 * JavaScript (v2 SDK)
 * Python 3 (Boto3 SDK)
@@ -87,3 +87,96 @@ npm test
 
 ## Development Progress
 
+### JavaScript
+
+- [x] Lexing & parsing with ANTLR
+- [x] Custom tree walker
+- [x] Identify standard SDK definitions
+- [ ] Identify advanced SDK definitions ("as x" etc.)
+- [x] Identify client instantiations
+- [x] Identify client calls
+- [x] Identify resource instantiations (AWS.S3.ManagedUpload, AWS.DynamoDB.DocumentClient)
+- [x] Identify resource calls
+- [x] Interpret call arguments (top-level, static)
+- [x] Interpret call arguments (top-level, variable)
+- [ ] Interpret call arguments (deep, static)
+- [ ] Interpret call arguments (deep, variable)
+- [ ] Track literal variables
+- [x] Track object variables
+- [x] Track environmental variables
+- [ ] Understand scope (build the call stack)
+- [ ] Understand entrypoints and code accessibility
+
+### Python
+
+- [x] Lexing & parsing with ANTLR
+- [x] Custom tree walker
+- [x] Identify standard SDK definitions
+- [x] Identify advanced SDK definitions ("as x" etc.)
+- [x] Identify client instantiations
+- [x] Identify client calls
+- [x] Identify resource instantiations
+- [x] Identify resource calls
+- [x] Interpret call arguments (top-level, static)
+- [ ] Interpret call arguments (top-level, variable)
+- [ ] Interpret call arguments (deep, static)
+- [ ] Interpret call arguments (deep, variable)
+- [ ] Track literal variables
+- [ ] Track object variables
+- [ ] Track environmental variables
+- [ ] Understand scope (build the call stack)
+- [ ] Understand entrypoints and code accessibility
+
+### Go
+
+- [x] Lexing & parsing with ANTLR
+- [x] Custom tree walker
+- [x] Identify standard SDK definitions
+- [ ] Identify advanced SDK definitions ("as x" etc.)
+- [x] Identify client instantiations
+- [x] Identify client calls
+- [x] Interpret call arguments (top-level, static)
+- [ ] Interpret call arguments (top-level, variable)
+- [ ] Interpret call arguments (deep, static)
+- [ ] Interpret call arguments (deep, variable)
+- [x] Track literal variables
+- [ ] Track object variables
+- [ ] Track environmental variables
+- [ ] Understand scope (build the call stack)
+- [ ] Understand entrypoints and code accessibility
+
+### Java
+
+- [x] Lexing & parsing with ANTLR
+- [x] Custom tree walker
+- [ ] Identify standard SDK definitions
+- [ ] Identify advanced SDK definitions ("as x" etc.)
+- [ ] Identify client instantiations
+- [ ] Identify client calls
+- [ ] Interpret call arguments (top-level, static)
+- [ ] Interpret call arguments (top-level, variable)
+- [ ] Interpret call arguments (deep, static)
+- [ ] Interpret call arguments (deep, variable)
+- [ ] Track literal variables
+- [ ] Track object variables
+- [ ] Track environmental variables
+- [ ] Understand scope (build the call stack)
+- [ ] Understand entrypoints and code accessibility
+
+### C++
+
+- [x] Lexing & parsing with ANTLR
+- [x] Custom tree walker
+- [ ] Identify standard SDK definitions
+- [ ] Identify advanced SDK definitions ("as x" etc.)
+- [ ] Identify client instantiations
+- [ ] Identify client calls
+- [ ] Interpret call arguments (top-level, static)
+- [ ] Interpret call arguments (top-level, variable)
+- [ ] Interpret call arguments (deep, static)
+- [ ] Interpret call arguments (deep, variable)
+- [ ] Track literal variables
+- [ ] Track object variables
+- [ ] Track environmental variables
+- [ ] Understand scope (build the call stack)
+- [ ] Understand entrypoints and code accessibility
