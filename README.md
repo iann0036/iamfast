@@ -155,10 +155,10 @@ npm test
 
 - [x] Lexing & parsing with ANTLR
 - [x] Custom tree walker
-- [ ] Identify standard SDK definitions
+- [x] Identify standard SDK definitions
 - [ ] Identify advanced SDK definitions ("as x" etc.)
-- [ ] Identify client instantiations
-- [ ] Identify client calls
+- [x] Identify client instantiations
+- [x] Identify client calls
 - [ ] Interpret call arguments (top-level, static)
 - [ ] Interpret call arguments (top-level, variable)
 - [ ] Interpret call arguments (deep, static)
@@ -175,10 +175,10 @@ npm test
 
 - [x] Lexing & parsing with ANTLR
 - [x] Custom tree walker
-- [ ] Identify standard SDK definitions
+- [x] Identify standard SDK definitions
 - [ ] Identify advanced SDK definitions ("as x" etc.)
-- [ ] Identify client instantiations
-- [ ] Identify client calls
+- [x] Identify client instantiations
+- [x] Identify client calls
 - [ ] Interpret call arguments (top-level, static)
 - [ ] Interpret call arguments (top-level, variable)
 - [ ] Interpret call arguments (deep, static)
