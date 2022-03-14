@@ -1,5 +1,7 @@
 # iamfast
 
+<a href="https://marketplace.visualstudio.com/items?itemName=iann0036.iamfast"><img src="https://img.shields.io/badge/vscode-extension-blueviolet" /></a>
+
 :construction: EXPERIMENTAL :construction:
 
 > IAM policy generation from application code
