@@ -43,7 +43,7 @@ export default class IAMFast {
         let arns = [];
 
         if (start_index > -1 && end_index != start_index) {
-            let parts = arn.substr(start_index + 2, end_index - start_index + 2).split("%");
+            let parts = arn.substr(start_index + 2, end_index - start_index - 2).split("%");
 
             if (parts.length < 2) {
                 return [arn.substr(0, startIndex) + "*" + arn.substr(end_index + 2)];
@@ -59,7 +59,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = this.subSARARN(parts[1], call['params'], mapped_priv, '');
+                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '')];
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (parts[3] == "") {
@@ -81,7 +81,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = this.subSARARN(parts[1], call['params'], mapped_priv, '');
+                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '')];
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -96,7 +96,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = this.subSARARN(parts[1], call['params'], mapped_priv, '');
+                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '')];
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -118,7 +118,7 @@ export default class IAMFast {
                     let many_parts = [];
 
                     for (let part of parts.slice(1)) {
-                        arns = this.subSARARN(part, call['params'], mapped_priv, '');
+                        arns = [this.subSARARN(part, call['params'], mapped_priv, '')];
                         if (arns.length < 1 || arns[0] == "") {
                             if (mandatory) {
                                 return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
@@ -135,7 +135,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = this.subSARARN(parts[1], call['params'], mapped_priv, '');
+                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '')];
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -145,10 +145,10 @@ export default class IAMFast {
                     }
 
                     if (parts[2][0] == "/") {
-                        parts[2] = parts[2].substr(1, -2);
+                        parts[2] = parts[2].substr(1, parts[2].length - 3);
                     }
 
-                    let groups = parts[2].matchAll(arns[0].replace(/\$/g, "$$"));
+                    let groups = arns[0].match(new RegExp(parts[2]));
 
                     if (groups.length < 2 || groups[1] == "") {
                         if (mandatory) {
@@ -411,7 +411,7 @@ export default class IAMFast {
                                     && resource.resource != "") {
                                     let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv, resource.resource.toLowerCase());
                                     if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
-                                        resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, false, privilege.mappedpriv));
+                                        resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, true, privilege.mappedpriv));
                                     }
                                 }
                             }

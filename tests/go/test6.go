@@ -36,6 +36,18 @@ func thing() {
 		os.Exit(1)
 	}
 
+	result2, err := svc.Encrypt(&kms.EncryptInput{
+		KeyId:     aws.String("2234abcd-12ab-34cd-56ef-1234567890ab"),
+		Plaintext: aws.String("1234567890"), // not real, should be []byte("...")
+	})
+
+	if err != nil {
+		fmt.Println("Got error encrypting data: ", err)
+		os.Exit(1)
+	}
+
 	fmt.Println("Blob (base-64 byte array):")
 	fmt.Println(result.CiphertextBlob)
+	fmt.Println("Blob (base-64 byte array):")
+	fmt.Println(result2.CiphertextBlob)
 }
