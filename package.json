@@ -1,6 +1,6 @@
 {
   "name": "iamfast",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "AWS IAM policy generation from code",
   "main": "src/main.js",
   "type": "module",
