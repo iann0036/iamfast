@@ -11,6 +11,56 @@ export default class GoAWSListener extends GoParserListener {
         this.VariableDeclarations = [];
     }
 
+    resolveArgs(argsRaw) {
+        let args = {};
+
+        if (argsRaw.children.length == 3 && argsRaw.children[1] instanceof GoParser.ExpressionListContext) {
+            if (argsRaw.children[1].children.length == 1) {
+                if (argsRaw.children[1].children[0].children.length == 2 && argsRaw.children[1].children[0].children[0].getText() == "&") {
+                    if (argsRaw.children[1].children[0].children[1].children.length == 1 && argsRaw.children[1].children[0].children[1].children[0] instanceof GoParser.PrimaryExprContext) {
+                        if (argsRaw.children[1].children[0].children[1].children[0].children.length == 1 && argsRaw.children[1].children[0].children[1].children[0].children[0] instanceof GoParser.OperandContext) {
+                            if (argsRaw.children[1].children[0].children[1].children[0].children[0].children.length == 1 && argsRaw.children[1].children[0].children[1].children[0].children[0].children[0] instanceof GoParser.LiteralContext) {
+                                if (argsRaw.children[1].children[0].children[1].children[0].children[0].children[0].children.length == 1 && argsRaw.children[1].children[0].children[1].children[0].children[0].children[0].children[0] instanceof GoParser.CompositeLitContext) {
+                                    let inputtype = argsRaw.children[1].children[0].children[1].children[0].children[0].children[0].children[0].children[0];
+                                    let inputvalue = argsRaw.children[1].children[0].children[1].children[0].children[0].children[0].children[0].children[1];
+
+                                    if (inputvalue.children.length > 2 && inputvalue.children[1] instanceof GoParser.ElementListContext) {
+                                        for (let el of inputvalue.children[1].children) {
+                                            if (el instanceof GoParser.KeyedElementContext) {
+                                                if (el.children.length == 3) {
+                                                    let key = el.children[0].getText();
+                                                    let value = el.children[2].getText();
+
+                                                    if (value.match(/aws\.[a-zA-Z0-9]+\((.+?)\)/)) { // aws.String(...)
+                                                        value = value.replace(/aws\.[a-zA-Z0-9]+\((.+?)\)/, "$1");
+
+                                                        if (value.match(/^(['"].*['"])|([0-9.-]+)$/)) { // aws.String("...")
+                                                            args[key] = value.replace(/^['"]?(.*?)['"]?$/g, '$1');
+                                                        } else {
+                                                            for (let variable of this.VariableDeclarations) { // aws.String(knownvar)
+                                                                if (variable.variable == value) {
+                                                                    if (variable.type == "literal") {
+                                                                        args[key] = variable.value;
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return args;
+    }
+
     exitImportSpec(ctx) {
         let matchString = ctx.getText().match(/^['"]github\.com[\\\/]aws[\\\/]aws-sdk-go[\\\/]service[\\\/]([a-zA-Z0-9]+)['"]$/);
 
@@ -42,6 +92,12 @@ export default class GoAWSListener extends GoParserListener {
                             }
                         }
                     }
+                } else if (ctx.children[2].children[0].children[0].getText().match(/^(['"].*['"])|([0-9.-]+)$/)) {
+                    this.VariableDeclarations.push({
+                        'variable': assignable.getText(),
+                        'type': 'literal',
+                        'value': ctx.children[2].children[0].children[0].getText().replace(/^['"]?(.*?)['"]?$/g, '$1')
+                    });
                 }
             }
         }
@@ -61,7 +117,7 @@ export default class GoAWSListener extends GoParserListener {
                                 'client': clientDeclaration,
                                 'method': method.getText(),
                                 'argsRaw': argsRaw,
-                                'args': {},
+                                'args': this.resolveArgs(argsRaw),
                                 'start': method.symbol.start,
                                 'stop': method.symbol.stop
                             });
