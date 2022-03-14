@@ -20,6 +20,13 @@ Execute `iamfast` with the first argument being the file or directory (currently
 iamfast yourfile.js
 ```
 
+iamfast supports the following programming languages:
+
+* JavaScript (v2 SDK)
+* Python 3 (Boto3 SDK)
+* Go (v1 SDK)
+* Java (v2 SDK)
+
 #### Optional Flags
 
 `--output <outputtype>`: Sets the type of policy to output, currently supporting `json` (default), `yaml` and `sam` (experimental)
@@ -77,3 +84,6 @@ To run tests:
 ```node
 npm test
 ```
+
+## Development Progress
+
