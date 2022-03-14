@@ -150,7 +150,7 @@ export default class IAMFast {
 
                     let groups = arns[0].match(new RegExp(parts[2]));
 
-                    if (groups.length < 2 || groups[1] == "") {
+                    if (!groups || groups.length < 2 || groups[1] == "") {
                         if (mandatory) {
                             return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                         }
