@@ -102,6 +102,7 @@ npm test
 - [ ] Identify advanced SDK definitions ("as x" etc.)
 - [x] Identify client instantiations
 - [x] Identify client calls
+- [ ] Identify client calls with advanced method chaining
 - [x] Identify resource instantiations (AWS.S3.ManagedUpload, AWS.DynamoDB.DocumentClient)
 - [x] Identify resource calls
 - [x] Interpret call arguments (top-level, static)
@@ -124,6 +125,7 @@ npm test
 - [x] Identify advanced SDK definitions ("as x" etc.)
 - [x] Identify client instantiations
 - [x] Identify client calls
+- [ ] Identify client calls with advanced method chaining
 - [x] Identify resource instantiations
 - [x] Identify resource calls
 - [x] Interpret call arguments (top-level, static)
@@ -146,6 +148,7 @@ npm test
 - [ ] Identify advanced SDK definitions ("as x" etc.)
 - [x] Identify client instantiations
 - [x] Identify client calls
+- [ ] Identify client calls with advanced method chaining
 - [x] Interpret call arguments (top-level, static)
 - [ ] Interpret call arguments (top-level, variable)
 - [ ] Interpret call arguments (deep, static)
@@ -166,6 +169,7 @@ npm test
 - [ ] Identify advanced SDK definitions ("as x" etc.)
 - [x] Identify client instantiations
 - [x] Identify client calls
+- [ ] Identify client calls with advanced method chaining
 - [ ] Interpret call arguments (top-level, static)
 - [ ] Interpret call arguments (top-level, variable)
 - [ ] Interpret call arguments (deep, static)
@@ -186,6 +190,7 @@ npm test
 - [ ] Identify advanced SDK definitions ("as x" etc.)
 - [x] Identify client instantiations
 - [x] Identify client calls
+- [ ] Identify client calls with advanced method chaining
 - [ ] Interpret call arguments (top-level, static)
 - [ ] Interpret call arguments (top-level, variable)
 - [ ] Interpret call arguments (deep, static)
