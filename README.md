@@ -14,7 +14,7 @@ You can also install iamfast as a [Visual Studio Code extension](https://marketp
 
 ## Usage
 
-Execute `iamfast` with the first argument being the file or directory (currently slow!) to be scanned.
+Execute `iamfast` with the first argument being the file or directory (currently slow, not yet recommended) to be scanned.
 
 ```
 iamfast yourfile.js
