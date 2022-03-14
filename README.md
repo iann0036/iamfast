@@ -1,6 +1,6 @@
 # iamfast
 
-:construction: EXPERIMENTAL - WORK IN PROGRESS :construction:
+:construction: EXPERIMENTAL :construction:
 
 > IAM policy generation from application code
 
@@ -15,6 +15,12 @@ npm i -g iamfast
 ```
 iamfast yourfile.js
 ```
+
+Execute `iamfast` with the first argument being the file or directory (currently slow!) to be scanned.
+
+### Optional Flags
+
+`--output <outputtype>`: Sets the type of policy to output, currently supporting `json` (default), `yaml` and `sam` (experimental)
 
 ## Example
 
@@ -63,6 +69,8 @@ ddb.putItem(params, function(err, data) {
 ```
 
 ## Test
+
+> Tests are still a work in progress
 
 To run tests:
 
