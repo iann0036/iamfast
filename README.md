@@ -87,6 +87,12 @@ npm test
 
 ## Development Progress
 
+### General
+
+- [ ] Environment variable referencing in SAM output
+- [ ] Online tool for quick evaluation
+- [ ] GitHub app
+
 ### JavaScript
 
 - [x] Lexing & parsing with ANTLR
