@@ -105,7 +105,9 @@ npm test
 - [x] Track object variables
 - [x] Track environmental variables
 - [ ] Understand scope (build the call stack)
+- [ ] Cross-file relationships
 - [ ] Understand entrypoints and code accessibility
+- [ ] Performance tuning
 
 ### Python
 
@@ -125,7 +127,9 @@ npm test
 - [ ] Track object variables
 - [ ] Track environmental variables
 - [ ] Understand scope (build the call stack)
+- [ ] Cross-file relationships
 - [ ] Understand entrypoints and code accessibility
+- [ ] Performance tuning
 
 ### Go
 
@@ -143,7 +147,9 @@ npm test
 - [ ] Track object variables
 - [ ] Track environmental variables
 - [ ] Understand scope (build the call stack)
+- [ ] Cross-file relationships
 - [ ] Understand entrypoints and code accessibility
+- [ ] Performance tuning
 
 ### Java
 
@@ -161,7 +167,9 @@ npm test
 - [ ] Track object variables
 - [ ] Track environmental variables
 - [ ] Understand scope (build the call stack)
+- [ ] Cross-file relationships
 - [ ] Understand entrypoints and code accessibility
+- [ ] Performance tuning
 
 ### C++
 
@@ -179,4 +187,6 @@ npm test
 - [ ] Track object variables
 - [ ] Track environmental variables
 - [ ] Understand scope (build the call stack)
+- [ ] Cross-file relationships
 - [ ] Understand entrypoints and code accessibility
+- [ ] Performance tuning
