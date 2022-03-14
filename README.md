@@ -12,13 +12,13 @@ npm i -g iamfast
 
 ## Usage
 
+Execute `iamfast` with the first argument being the file or directory (currently slow!) to be scanned.
+
 ```
 iamfast yourfile.js
 ```
 
-Execute `iamfast` with the first argument being the file or directory (currently slow!) to be scanned.
-
-### Optional Flags
+#### Optional Flags
 
 `--output <outputtype>`: Sets the type of policy to output, currently supporting `json` (default), `yaml` and `sam` (experimental)
 
@@ -69,8 +69,6 @@ ddb.putItem(params, function(err, data) {
 ```
 
 ## Test
-
-> Tests are still a work in progress
 
 To run tests:
 
