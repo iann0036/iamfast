@@ -370,9 +370,9 @@ export default class IAMFast {
         let doc = `data "aws_iam_policy_document" "my_policy" {`;
 
         for (let stmt of policy['Statement']) {
-            doc += `\n  statement {\n    effect = "Allow"\n    actions = [\n      "${stmt['Action']}"\n    ]\n    resources = [\n      "`;
+            doc += `\n  statement {\n    effect = "Allow"\n    actions = [\n      "${stmt['Action']}",\n    ]\n    resources = [\n      "`;
             doc += stmt['Resource'].join(`",\n      "`);
-            doc += `"\n    ]\n  }\n`;
+            doc += `",\n    ]\n  }\n`;
         }
 
         doc += `}`;
