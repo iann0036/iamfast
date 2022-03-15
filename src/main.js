@@ -7,7 +7,7 @@ import path from "path";
 import fs from "fs";
 
 const EXTS = ['.js', '.jsx', '.py', '.py3', '.java', '.go', '.c', '.cpp'];
-const FORMATS = ['json', 'yaml', 'sam'];
+const FORMATS = ['json', 'yaml', 'hcl', 'sam'];
 
 program
     .arguments('<filename>')
@@ -88,6 +88,8 @@ for (let file of files) {
         output = iamfast.GenerateYAMLPolicy(code, language);
     } else if (format == "json") {
         output = iamfast.GenerateIAMPolicy(code, language);
+    } else if (format == "hcl") {
+        output = iamfast.GenerateHCLPolicy(code, language);
     }
 }
 

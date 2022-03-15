@@ -365,6 +365,21 @@ export default class IAMFast {
         return YAML.stringify(JSON.parse(this.GenerateIAMPolicy(code, language)));
     }
 
+    GenerateHCLPolicy(code, language) {
+        let policy = JSON.parse(this.GenerateIAMPolicy(code, language));
+        let doc = `data "aws_iam_policy_document" "my_policy" {`;
+
+        for (let stmt of policy['Statement']) {
+            doc += `\n  statement {\n    effect = "Allow"\n    actions = [\n      "${stmt['Action']}"\n    ]\n    resources = [\n      "`;
+            doc += stmt['Resource'].join(`",\n      "`);
+            doc += `"\n    ]\n  }\n`;
+        }
+
+        doc += `}`;
+
+        return doc;
+    }
+
     GenerateIAMPolicy(code, language) {
         const GENERIC_SERVICE_METHODS = new Set([
             "endpoint",

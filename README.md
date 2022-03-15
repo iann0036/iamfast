@@ -29,7 +29,7 @@ iamfast [supports](#development-progress) the following programming languages:
 
 #### Optional Flags
 
-`--format <type>`: Sets the format of the output, currently supporting `json` (default), `yaml` and `sam` (experimental)
+`--format <type>`: Sets the format of the output, currently supporting `json` (default), `yaml`, `hcl` and `sam` (experimental)
 
 ## Example
 
