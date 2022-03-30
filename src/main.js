@@ -89,7 +89,7 @@ for (let file of files) {
     } else if (format == "json") {
         output = iamfast.GenerateIAMPolicy(code, language);
     } else if (format == "hcl") {
-        output = iamfast.GenerateHCLPolicy(code, language);
+        output = iamfast.GenerateHCLTemplate(code, language);
     }
 }
 
