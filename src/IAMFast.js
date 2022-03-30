@@ -436,6 +436,12 @@ export default class IAMFast {
                             resource_arns = ["*"];
                         }
 
+                        for (let i = 0; i < resource_arns.length; i++) {
+                            if (resource_arns[i] == "") {
+                                resource_arns[i] = "*";
+                            }
+                        }
+
                         privs.push({
                             'action': this.mapServicePrefix(service.prefix) + ":" + privilege.sarpriv.privilege,
                             'explanation': privilege.sarpriv.description,
