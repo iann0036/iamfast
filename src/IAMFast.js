@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import YAML from 'yaml';
+import YAML, { YAMLMap } from 'yaml';
 import AWSParser from './AWSParser.js';
 import iam_def from './lib/iam_definition.js';
 import mappings from './lib/map.js';
@@ -314,15 +314,26 @@ export default class IAMFast {
                                 "%%$": ""
                         Policies:
                           - {}
-        `, custom_tags);
+        `);
 
-        this.aws_region = `\${AWS::Region}`;
-        this.aws_partition = `aws`;
-        this.aws_accountid = `\${AWS::AccountId}`;
+        this.aws_region = `#%#AWSREGIONREPLACEME#%#`;
+        this.aws_accountid = `#%#AWSACCOUNTIDREPLACEME#%#`;
 
         let iam_policy = JSON.parse(this.GenerateIAMPolicy(code, language));
 
-        sam_template.addIn(['Resources', 'LambdaFunction', 'Properties', 'Policies'], new YAML.Document(iam_policy));
+        sam_template.setIn(['Resources', 'LambdaFunction', 'Properties', 'Policies', 0], new YAML.Document(iam_policy));
+        sam_template = YAML.parseDocument(YAML.stringify(sam_template), custom_tags); // flatten
+
+        for (let i=0; i<iam_policy.Statement.length; i++) {
+            for (let j=0; j<iam_policy.Statement[i].Resource.length; j++) {
+                if (iam_policy.Statement[i].Resource[j].includes("#%#AWSREGIONREPLACEME#%#") || iam_policy.Statement[i].Resource[j].includes("#%#AWSACCOUNTIDREPLACEME#%#")) {
+                    sam_template.setIn(
+                        ['Resources', 'LambdaFunction', 'Properties', 'Policies', 0, 'Statement', i, 'Resource', j],
+                        sam_template.createNode(iam_policy.Statement[i].Resource[j].replaceAll("#%#AWSREGIONREPLACEME#%#", "${AWS::Region}").replaceAll("#%#AWSACCOUNTIDREPLACEME#%#", "${AWS::AccountId}"), { tag: "!Sub", flow: true })
+                    );
+                }
+            }
+        }
 
         this.tracked_environment_variables.forEach(env => {
             let envkey = env.name[0].toUpperCase() + env.name.substr(1) || env;
@@ -348,7 +359,6 @@ export default class IAMFast {
         
         sam_template.deleteIn(['Parameters', '%%$']);
         sam_template.deleteIn(['Resources', 'LambdaFunction', 'Properties', 'Environment', 'Variables', '%%$']);
-        sam_template.deleteIn(['Resources', 'LambdaFunction', 'Properties', 'Policies', 0]);
         if (sam_template.get('Parameters').items.length < 1) {
             sam_template.deleteIn(['Parameters']);
             sam_template.deleteIn(['Resources', 'LambdaFunction', 'Properties', 'Environment']);
