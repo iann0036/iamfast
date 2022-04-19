@@ -9,6 +9,7 @@ export default class JavaAWSListener extends JavaParserListener {
         this.ClientDeclarations = [];
         this.ClientCalls = [];
         this.VariableDeclarations = [];
+        this.EnvironmentVariables = [];
     }
 
     exitImportDeclaration(ctx) {

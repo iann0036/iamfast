@@ -34,6 +34,7 @@ export default class AWSParser {
     constructor() {
         this.client_calls = [];
         this.resource_calls = [];
+        this.environmental_variables = [];
         this.debug = false;
     }
 
@@ -70,6 +71,7 @@ export default class AWSParser {
 
                 this.client_calls = listener.ClientCalls;
                 this.resource_calls = listener.ResourceCalls;
+                this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
 
@@ -90,6 +92,7 @@ export default class AWSParser {
 
                 this.client_calls = listener.ClientCalls;
                 this.resource_calls = listener.ResourceCalls;
+                this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
 
@@ -109,6 +112,7 @@ export default class AWSParser {
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+                this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
 
@@ -128,6 +132,7 @@ export default class AWSParser {
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+                this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
 
@@ -147,6 +152,7 @@ export default class AWSParser {
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+                this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
 

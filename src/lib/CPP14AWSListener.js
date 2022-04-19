@@ -9,6 +9,7 @@ export default class CPP14AWSListener extends CPP14ParserListener {
         this.ClientDeclarations = [];
         this.ClientCalls = [];
         this.VariableDeclarations = [];
+        this.EnvironmentVariables = [];
 
         this.SDKDeclarations.push({
             'variable': 'Aws'

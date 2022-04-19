@@ -4,6 +4,7 @@ import YAML, { YAMLMap } from 'yaml';
 import AWSParser from './AWSParser.js';
 import iam_def from './lib/iam_definition.js';
 import mappings from './lib/map.js';
+import { EnvironmentVariable } from './types.js';
 
 export default class IAMFast {
 
@@ -59,7 +60,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '')];
+                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '', false)];
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (parts[3] == "") {
@@ -81,7 +82,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '')];
+                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '', false)];
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -96,7 +97,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '')];
+                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '', false)];
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -118,7 +119,7 @@ export default class IAMFast {
                     let many_parts = [];
 
                     for (let part of parts.slice(1)) {
-                        arns = [this.subSARARN(part, call['params'], mapped_priv, '')];
+                        arns = [this.subSARARN(part, call['params'], mapped_priv, '', false)];
                         if (arns.length < 1 || arns[0] == "") {
                             if (mandatory) {
                                 return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
@@ -135,7 +136,7 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                     }
 
-                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '')];
+                    arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '', false)];
 
                     if (arns.length < 1 || arns[0] == "") {
                         if (mandatory) {
@@ -166,7 +167,7 @@ export default class IAMFast {
         return [arn];
     }
 
-    subSARARN(arn, params, mapped_priv, arntype) {
+    subSARARN(arn, params, mapped_priv, arntype, variable_replacement) {
         if (arntype != '' && mapped_priv && mapped_priv.resourcearn_mappings) {
             if (mapped_priv.resourcearn_mappings[arntype]) {
                 arn = mapped_priv.resourcearn_mappings[arntype];
@@ -181,8 +182,21 @@ export default class IAMFast {
         }
 
         for (let param of Object.keys(params)) {
-            let r = new RegExp("\\$\\{" + param + "\\}", "gi");
-            arn = arn.replace(r, params[param]);
+            if (params[param] instanceof EnvironmentVariable && variable_replacement) {
+                let envkey = params[param].Name[0].toUpperCase() + params[param].Name.substr(1) || params[param].Name;
+                envkey = envkey.replaceAll(/[^a-zA-Z0-9]/g, '');
+
+                console.log(envkey);
+                console.log(arn);
+
+                let r = new RegExp("\\$\\{" + param + "\\}", "gi");
+                arn = arn.replace(r, "##@##" + envkey + "##@##");
+
+                console.log(arn);
+            } else {
+                let r = new RegExp("\\$\\{" + param + "\\}", "gi");
+                arn = arn.replace(r, params[param]);
+            }
         }
 
         return arn.replace(/\$\{Partition\}/g, this.aws_partition)
@@ -316,35 +330,35 @@ export default class IAMFast {
                           - {}
         `);
 
-        this.aws_region = `#%#AWSREGIONREPLACEME#%#`;
-        this.aws_accountid = `#%#AWSACCOUNTIDREPLACEME#%#`;
+        this.aws_region = `##@##AWS::Region##@##`;
+        this.aws_accountid = `##@##AWS::AccountId##@##`;
 
-        let iam_policy = JSON.parse(this.GenerateIAMPolicy(code, language));
+        let iam_policy = JSON.parse(this.generateJSONIAMPolicy(code, language, true));
 
         sam_template.setIn(['Resources', 'LambdaFunction', 'Properties', 'Policies', 0], new YAML.Document(iam_policy));
         sam_template = YAML.parseDocument(YAML.stringify(sam_template), custom_tags); // flatten
 
         for (let i=0; i<iam_policy.Statement.length; i++) {
             for (let j=0; j<iam_policy.Statement[i].Resource.length; j++) {
-                if (iam_policy.Statement[i].Resource[j].includes("#%#AWSREGIONREPLACEME#%#") || iam_policy.Statement[i].Resource[j].includes("#%#AWSACCOUNTIDREPLACEME#%#")) {
+                if (iam_policy.Statement[i].Resource[j].includes("##@##")) {
                     sam_template.setIn(
                         ['Resources', 'LambdaFunction', 'Properties', 'Policies', 0, 'Statement', i, 'Resource', j],
-                        sam_template.createNode(iam_policy.Statement[i].Resource[j].replaceAll("#%#AWSREGIONREPLACEME#%#", "${AWS::Region}").replaceAll("#%#AWSACCOUNTIDREPLACEME#%#", "${AWS::AccountId}"), { tag: "!Sub", flow: true })
+                        sam_template.createNode(iam_policy.Statement[i].Resource[j].replaceAll(/##@##(.+?)##@##/g, "$${$1}"), { tag: "!Sub", flow: true })
                     );
                 }
             }
         }
 
         this.tracked_environment_variables.forEach(env => {
-            let envkey = env.name[0].toUpperCase() + env.name.substr(1) || env;
+            let envkey = env[0].toUpperCase() + env.substr(1) || env;
             envkey = envkey.replaceAll(/[^a-zA-Z0-9]/g, '');
 
             if (!sam_template.hasIn(
-                ['Resources', 'LambdaFunction', 'Properties', 'Environment', 'Variables', env.name]
+                ['Resources', 'LambdaFunction', 'Properties', 'Environment', 'Variables', env]
             )) {
                 sam_template.addIn(
                     ['Resources', 'LambdaFunction', 'Properties', 'Environment', 'Variables'],
-                    sam_template.createPair(env.name, sam_template.createNode(envkey, null, { tag: "!Ref", flow: true }), {flow: true})
+                    sam_template.createPair(env, sam_template.createNode(envkey, null, { tag: "!Ref", flow: true }), {flow: true})
                 );
             }
             if (!sam_template.hasIn(
@@ -372,11 +386,11 @@ export default class IAMFast {
     }
 
     GenerateYAMLPolicy(code, language) {
-        return YAML.stringify(JSON.parse(this.GenerateIAMPolicy(code, language)));
+        return YAML.stringify(JSON.parse(this.generateJSONIAMPolicy(code, language, false)));
     }
 
     GenerateHCLTemplate(code, language) {
-        let policy = JSON.parse(this.GenerateIAMPolicy(code, language));
+        let policy = JSON.parse(this.generateJSONIAMPolicy(code, language, false));
         let doc = `data "aws_iam_policy_document" "my_policy" {`;
 
         for (let stmt of policy['Statement']) {
@@ -391,6 +405,10 @@ export default class IAMFast {
     }
 
     GenerateIAMPolicy(code, language) {
+        return generateJSONIAMPolicy(code, language, false)
+    }
+
+    generateJSONIAMPolicy(code, language, variable_replacement) {
         const GENERIC_SERVICE_METHODS = new Set([
             "endpoint",
             "defineservice",
@@ -413,6 +431,8 @@ export default class IAMFast {
 
         let tracked_calls = parser.GetNormalizedServiceCalls(language);
 
+        this.tracked_environment_variables = parser.environmental_variables;
+
         for (let tracked_call of tracked_calls) {
             let found_match = false;
 
@@ -422,6 +442,7 @@ export default class IAMFast {
                     this.debug && console.log("Mapped Service Prefix: ", service.prefix);
                     this.debug && console.log("Tracked Call: ", tracked_call);
                     this.debug && console.log("Privilege Array: ", privilege_array);
+                    this.debug && console.log("Env Vars: ", this.tracked_environment_variables);
 
                     for (let privilege of privilege_array) {
                         found_match = true;
@@ -434,7 +455,7 @@ export default class IAMFast {
                                 if (resource.resource.toLowerCase()
                                     == resource_type.resource_type.replace(/\*/g, "").toLowerCase()
                                     && resource.resource != "") {
-                                    let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv, resource.resource.toLowerCase());
+                                    let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv, resource.resource.toLowerCase(), variable_replacement);
                                     if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
                                         resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, true, privilege.mappedpriv));
                                     }

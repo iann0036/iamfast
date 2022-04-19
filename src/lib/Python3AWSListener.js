@@ -23,6 +23,7 @@ export default class Python3AWSListener extends Python3ParserListener {
         this.ResourceObjects = [];
         this.ResourceCalls = [];
         this.VariableDeclarations = [];
+        this.EnvironmentVariables = [];
     }
 
     resolveArgs(argsRaw, extra) {

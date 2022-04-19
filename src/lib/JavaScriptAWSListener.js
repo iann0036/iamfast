@@ -1,5 +1,6 @@
 import JavaScriptParser from './JavaScriptParser.js';
 import JavaScriptParserListener from './JavaScriptParserListener.js';
+import { EnvironmentVariable } from '../types.js';
 
 export default class JavaScriptAWSListener extends JavaScriptParserListener {
 
@@ -12,26 +13,44 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         this.ResourceObjects = [];
         this.ResourceCalls = [];
         this.VariableDeclarations = [];
+        this.EnvironmentVariables = [];
     }
 
     generateObjectLiteralMap(treeitem) {
         let propertyMap = {};
 
-        for (let objectLiteralChild of treeitem.children[0].children) {
-            if (objectLiteralChild instanceof JavaScriptParser.PropertyExpressionAssignmentContext) {
-                let propertyName = objectLiteralChild.children[0].getText().replace(/^['"](.*)['"]$/g, '$1'); // blah = {###'abc'###: 'def'}
-                if (objectLiteralChild.children[2] instanceof JavaScriptParser.LiteralExpressionContext) { // blah = {'abc': ###'def'###}
-                    let propertyValue = objectLiteralChild.children[2].getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
-                    propertyMap[propertyName] = {
-                        'type': 'literal',
-                        'value': propertyValue
-                    };
-                }
-                if (objectLiteralChild.children[2] instanceof JavaScriptParser.ObjectLiteralExpressionContext) { // blah = {'abc': ###{...}###}
-                    propertyMap[propertyName] = {
-                        'type': 'object',
-                        'value': this.generateObjectLiteralMap(objectLiteralChild.children[2])
-                    };
+        if (treeitem && treeitem.children && treeitem.children[0] && treeitem.children[0].children) {
+            for (let objectLiteralChild of treeitem.children[0].children) {
+                if (objectLiteralChild instanceof JavaScriptParser.PropertyExpressionAssignmentContext) {
+                    let propertyName = objectLiteralChild.children[0].getText().replace(/^['"](.*)['"]$/g, '$1'); // blah = {###'abc'###: 'def'}
+                    if (objectLiteralChild.children[2] instanceof JavaScriptParser.LiteralExpressionContext) { // blah = {'abc': ###'def'###}
+                        let propertyValue = objectLiteralChild.children[2].getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
+                        propertyMap[propertyName] = {
+                            'type': 'literal',
+                            'value': propertyValue
+                        };
+                    } else if (objectLiteralChild.children[2] instanceof JavaScriptParser.ObjectLiteralExpressionContext) { // blah = {'abc': ###{...}###}
+                        propertyMap[propertyName] = {
+                            'type': 'object',
+                            'value': this.generateObjectLiteralMap(objectLiteralChild.children[2])
+                        };
+                    } else if (objectLiteralChild.children[2] instanceof JavaScriptParser.IdentifierExpressionContext) { // blah = {'abc': varxyz}
+                        for (let variable of this.VariableDeclarations) {
+                            if (variable.variable == objectLiteralChild.children[2].getText()) {
+                                if (variable.type == "object") {
+                                    propertyMap[propertyName] = {
+                                        'type': 'object',
+                                        'value': this.generateObjectLiteralMap(variable.propertyMap)
+                                    };
+                                } else if (variable.type == "envvar") {
+                                    propertyMap[propertyName] = {
+                                        'type': 'envvar',
+                                        'value': variable.name
+                                    };
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -45,8 +64,10 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         for (let k of Object.keys(obj)) {
             if (obj[k].type == "object") {
                 ret[k] = this.resolvePropertyMap(obj[k].value);
-            } else {
+            } else if (obj[k].type == "literal") {
                 ret[k] = obj[k].value;
+            } else if (obj[k].type == "envvar") {
+                ret[k] = new EnvironmentVariable(obj[k].value)
             }
         }
 
@@ -149,10 +170,6 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                             const method = className.children[className.children.length - 1]; // blah.###.blah ??
                             let foundDeclaration = false;
 
-                            console.log("xx");
-                            console.log(namespace.getText());
-                            console.log(method.getText());
-
                             if (namespace.getText().match(/^[^\.]+\.[^\.]+$/)) {
                                 let parentNamespace = namespace.getText().split(".")[0];
                                 let childNamespace = namespace.getText().split(".")[1];
@@ -204,6 +221,17 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                         'type': 'object',
                         'propertyMap': this.generateObjectLiteralMap(expression)
                     });
+                } else if (expression instanceof JavaScriptParser.MemberDotExpressionContext) { // blah = ###.###...
+                    if (expression.children.length == 3) {
+                        if (expression.children[0].getText() == "process.env" && expression.children[1].getText() == "." && expression.children[2] instanceof JavaScriptParser.IdentifierNameContext) {
+                            this.VariableDeclarations.push({
+                                'variable': assignable.getText(),
+                                'type': 'envvar',
+                                'name': expression.children[2].getText()
+                            });
+                            this.EnvironmentVariables.push(expression.children[2].getText());
+                        }
+                    }
                 }
             }
         }

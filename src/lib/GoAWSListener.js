@@ -9,6 +9,7 @@ export default class GoAWSListener extends GoParserListener {
         this.ClientDeclarations = [];
         this.ClientCalls = [];
         this.VariableDeclarations = [];
+        this.EnvironmentVariables = [];
     }
 
     resolveArgs(argsRaw) {

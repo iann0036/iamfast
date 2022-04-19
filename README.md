@@ -99,7 +99,7 @@ npm test
 - [x] Lexing & parsing with ANTLR
 - [x] Custom tree walker
 - [x] Identify standard SDK definitions
-- [ ] Identify advanced SDK definitions ("as x" etc.)
+- [ ] Identify advanced SDK definitions
 - [x] Identify client instantiations
 - [x] Identify client calls
 - [ ] Identify client calls with advanced method chaining
@@ -145,7 +145,7 @@ npm test
 - [x] Lexing & parsing with ANTLR
 - [x] Custom tree walker
 - [x] Identify standard SDK definitions
-- [ ] Identify advanced SDK definitions ("as x" etc.)
+- [ ] Identify advanced SDK definitions
 - [x] Identify client instantiations
 - [x] Identify client calls
 - [ ] Identify client calls with advanced method chaining
@@ -166,7 +166,7 @@ npm test
 - [x] Lexing & parsing with ANTLR
 - [x] Custom tree walker
 - [x] Identify standard SDK definitions
-- [ ] Identify advanced SDK definitions ("as x" etc.)
+- [ ] Identify advanced SDK definitions
 - [x] Identify client instantiations
 - [x] Identify client calls
 - [ ] Identify client calls with advanced method chaining
@@ -187,7 +187,7 @@ npm test
 - [x] Lexing & parsing with ANTLR
 - [x] Custom tree walker
 - [x] Identify standard SDK definitions
-- [ ] Identify advanced SDK definitions ("as x" etc.)
+- [ ] Identify advanced SDK definitions
 - [x] Identify client instantiations
 - [x] Identify client calls
 - [ ] Identify client calls with advanced method chaining
