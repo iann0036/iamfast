@@ -4,7 +4,7 @@ import YAML, { YAMLMap } from 'yaml';
 import AWSParser from './AWSParser.js';
 import iam_def from './lib/iam_definition.js';
 import mappings from './lib/map.js';
-import { EnvironmentVariable } from './types.js';
+import EnvironmentVariable from './EnvironmentVariable.js';
 
 export default class IAMFast {
 

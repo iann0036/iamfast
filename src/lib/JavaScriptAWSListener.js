@@ -1,6 +1,6 @@
 import JavaScriptParser from './JavaScriptParser.js';
 import JavaScriptParserListener from './JavaScriptParserListener.js';
-import { EnvironmentVariable } from '../types.js';
+import EnvironmentVariable from '../EnvironmentVariable.js';
 
 export default class JavaScriptAWSListener extends JavaScriptParserListener {
 
