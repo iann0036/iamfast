@@ -418,7 +418,7 @@ export default class IAMFast {
     }
 
     GenerateIAMPolicy(code, language) {
-        return generateJSONIAMPolicy(code, language, false)
+        return this.generateJSONIAMPolicy(code, language, false)
     }
 
     generateJSONIAMPolicy(code, language, variable_replacement) {
