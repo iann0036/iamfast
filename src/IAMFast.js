@@ -182,13 +182,16 @@ export default class IAMFast {
         }
 
         for (let param of Object.keys(params)) {
-            if (params[param] instanceof EnvironmentVariable && variable_replacement) {
-                let envkey = this.transformSAMEnvKey(params[param].Name);
+            if (params[param] instanceof EnvironmentVariable) {
+                if (variable_replacement) {
+                    let envkey = this.transformSAMEnvKey(params[param].Name);
 
-                let r = new RegExp("\\$\\{" + param + "\\}", "gi");
-                arn = arn.replace(r, "##@##" + envkey + "##@##");
-
-                console.log(arn);
+                    let r = new RegExp("\\$\\{" + param + "\\}", "gi");
+                    arn = arn.replace(r, "##@##" + envkey + "##@##");
+                } else {
+                    let r = new RegExp("\\$\\{" + param + "\\}", "gi");
+                    arn = arn.replace(r, "*");
+                }
             } else {
                 let r = new RegExp("\\$\\{" + param + "\\}", "gi");
                 arn = arn.replace(r, params[param]);
