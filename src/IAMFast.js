@@ -183,11 +183,7 @@ export default class IAMFast {
 
         for (let param of Object.keys(params)) {
             if (params[param] instanceof EnvironmentVariable && variable_replacement) {
-                let envkey = params[param].Name[0].toUpperCase() + params[param].Name.substr(1) || params[param].Name;
-                envkey = envkey.replaceAll(/[^a-zA-Z0-9]/g, '');
-
-                console.log(envkey);
-                console.log(arn);
+                let envkey = this.transformSAMEnvKey(params[param].Name);
 
                 let r = new RegExp("\\$\\{" + param + "\\}", "gi");
                 arn = arn.replace(r, "##@##" + envkey + "##@##");
@@ -279,6 +275,24 @@ export default class IAMFast {
         return [];
     }
 
+    transformSAMEnvKey(input) {
+        if (!input || input.length < 3) {
+            return input;
+        }
+
+        var i, frags = input.split('_');
+        for (i=0; i<frags.length; i++) {
+            frags[i] = frags[i].charAt(0).toUpperCase() + frags[i].slice(1).toLowerCase();
+        }
+        var envkey = frags.join('');
+
+        if (envkey == "LambdaFunction") {
+            envkey = "LambdaFunctionVariable";
+        }
+
+        return envkey;
+    }
+
     GenerateSAMTemplate(code, language) {
         const custom_tags = {
             customTags: [{
@@ -350,8 +364,7 @@ export default class IAMFast {
         }
 
         this.tracked_environment_variables.forEach(env => {
-            let envkey = env[0].toUpperCase() + env.substr(1) || env;
-            envkey = envkey.replaceAll(/[^a-zA-Z0-9]/g, '');
+            let envkey = this.transformSAMEnvKey(env);
 
             if (!sam_template.hasIn(
                 ['Resources', 'LambdaFunction', 'Properties', 'Environment', 'Variables', env]
