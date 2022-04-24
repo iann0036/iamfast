@@ -5,6 +5,7 @@ import antlr4 from 'antlr4';
 import JavaScriptLexer from './lib/JavaScriptLexer.js';
 import JavaScriptParser from './lib/JavaScriptParser.js';
 import JavaScriptAWSListener from './lib/JavaScriptAWSListener.js';
+import JavaScriptScopeListener from './lib/JavaScriptScopeListener.js';
 import Python3Lexer from './lib/Python3Lexer.js'
 import Python3Parser from './lib/Python3Parser.js';
 import Python3AWSListener from './lib/Python3AWSListener.js';
@@ -48,7 +49,7 @@ export default class AWSParser {
     }
 
     ParseInput(input, language) {
-        let lexer, tokens, parser, tree, listener;
+        let lexer, tokens, parser, tree, listener, scopeListener;
 
         input += "\n";
 
@@ -66,12 +67,15 @@ export default class AWSParser {
                 tree = parser.program();
                 this.debug && this.treeWalker(tree, 0);
 
-                listener = new JavaScriptAWSListener();
+                scopeListener = new JavaScriptScopeListener();
+                antlr4.tree.ParseTreeWalker.DEFAULT.walk(scopeListener, tree);
+
+                listener = new JavaScriptAWSListener(scopeListener.VariableDeclarations);
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
                 this.resource_calls = listener.ResourceCalls;
-                this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
+                this.environmental_variables = [...new Set(scopeListener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
 
