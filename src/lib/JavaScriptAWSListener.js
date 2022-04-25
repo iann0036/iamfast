@@ -38,6 +38,49 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         return ret;
     }
 
+    generateObjectLiteralMap(treeitem) {
+        let propertyMap = {};
+
+        if (treeitem && treeitem.children && treeitem.children[0] && treeitem.children[0].children) {
+            for (let objectLiteralChild of treeitem.children[0].children) {
+                if (objectLiteralChild instanceof JavaScriptParser.PropertyExpressionAssignmentContext) {
+                    let propertyName = objectLiteralChild.children[0].getText().replace(/^['"](.*)['"]$/g, '$1'); // blah = {###'abc'###: 'def'}
+                    if (objectLiteralChild.children[2] instanceof JavaScriptParser.LiteralExpressionContext) { // blah = {'abc': ###'def'###}
+                        let propertyValue = objectLiteralChild.children[2].getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
+                        propertyMap[propertyName] = {
+                            'type': 'literal',
+                            'value': propertyValue
+                        };
+                    } else if (objectLiteralChild.children[2] instanceof JavaScriptParser.ObjectLiteralExpressionContext) { // blah = {'abc': ###{...}###}
+                        propertyMap[propertyName] = {
+                            'type': 'object',
+                            'value': this.generateObjectLiteralMap(objectLiteralChild.children[2])
+                        };
+                    } else if (objectLiteralChild.children[2] instanceof JavaScriptParser.IdentifierExpressionContext) { // blah = {'abc': varxyz}
+                        for (let variable of this.VariableDeclarations) {
+                            if (variable.variable == objectLiteralChild.children[2].getText()) {
+                                if (variable.type == "object") {
+                                    propertyMap[propertyName] = {
+                                        'type': 'object',
+                                        'value': this.generateObjectLiteralMap(variable.value)
+                                    };
+                                } else if (variable.type == "envvar") {
+                                    propertyMap[propertyName] = {
+                                        'type': 'envvar',
+                                        'value': variable.name
+                                    };
+                                }
+                                // TODO: Support more types (both listeners)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return propertyMap;
+    }
+
     resolveArgsVariants(argsRaw) { // AWS call args (variants)
         let argVariants = [];
 
@@ -67,6 +110,46 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         }
 
         return argVariants;
+    }
+
+    resolveNamedArgs(argsRaw) {
+        let args = [];
+        let index = 0;
+
+        for (let argument of argsRaw.children) {
+            if (argument instanceof JavaScriptParser.ArgumentContext) {
+                let arg = {};
+                let argType = null;
+                
+                if (argument.children.length == 1) { // blah(###abc###) 
+                    if (argument.children[0] instanceof JavaScriptParser.IdentifierExpressionContext) {
+                        let argumentsVariable = argument.children[0].getText();
+
+                        for (let variable of this.VariableDeclarations) {
+                            if (variable.variable == argumentsVariable) {
+                                arg = variable.value;
+                                argType = variable.type;
+                            }
+                        }
+                    } else if (argument.children[0] instanceof JavaScriptParser.ObjectLiteralExpressionContext) {
+                        arg = this.generateObjectLiteralMap(argument.children[0]);
+                        argType = 'object';
+                    }
+                } else {
+                    ; // TODO: blah(, ###...x###)
+                }
+
+                args.push({
+                    index: index,
+                    arg: arg,
+                    type: argType
+                });
+
+                index += 1;
+            }
+        }
+
+        return args;
     }
 
     enterAnonymousFunctionDecl(ctx) {
@@ -131,7 +214,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         /*
             Order of priority:
             1. Global vars
-            2. Global vars that are redeclared / set after (implicit)
+            2. Global vars that are redeclared / set after (implicitly by list order)
             3. Vars with increasingly matching scope (i.e. deepest to shallowest function depth), except current depth
             4. Arguments
             5. Vars with exactly matching scope (current depth)
@@ -158,8 +241,10 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                     for (let functionCall of this.FunctionCalls) {
                         if (functionCall.name == functionDeclaration.name) { // TODO: Scope check also
                             let argsVariant = Object.assign({}, args); // shallow copy
+
+                            let resolvedCallArgs = this.resolveNamedArgs(functionCall.argsRaw);
                             
-                            for (let arg of functionCall.args) {
+                            for (let arg of resolvedCallArgs) {
                                 if (arg.index === argName.index) {
                                     argsVariant[argName.argName] = {
                                         scope: [...this.currentScope],

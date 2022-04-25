@@ -45,6 +45,7 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                                         'value': variable.name
                                     };
                                 }
+                                // TODO: Support more types (both listeners)
                             }
                         }
                     }
@@ -86,9 +87,12 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
 
                         for (let variable of this.VariableDeclarations) {
                             if (variable.variable == argumentsVariable) {
-                                if (variable.type == "object") {
+                                if (variable.type == "object") { // TODO: Handle more types
                                     arg = this.resolvePropertyMap(variable.value);
                                     argType = 'object';
+                                } else {
+                                    arg = variable.value;
+                                    argType = variable.type;
                                 }
                             }
                         }
@@ -96,8 +100,9 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                         arg = this.generateObjectLiteralMap(argument.children[0]);
                         argType = 'object';
                     }
+                } else {
+                    ; // TODO: blah(, ###...x###)
                 }
-                // TODO else blah(...###x###, )
 
                 args.push({
                     index: index,
@@ -284,7 +289,7 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                 'name': name,
                 'scope': [...this.currentScope],
                 'raw': ctx,
-                'args': this.resolveNamedArgs(ctx.children[1]),
+                'args': this.resolveNamedArgs(ctx.children[1]), // TODO: deprecate (moved to AWSListener)
                 'argsRaw': ctx.children[1]
             });
         }
