@@ -112,6 +112,98 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
         return args;
     }
 
+    enterAnonymousFunctionDecl(ctx) { // function ( ... ) { ... }
+        this.currentScope.push("#ANONYMOUS-UNSUPPORTED#");
+    }
+
+    exitAnonymousFunctionDecl(ctx) {
+        this.currentScope.pop();
+    }
+
+    enterArrowFunction(ctx) {
+        for (let child of ctx.children) {
+            if (child instanceof JavaScriptParser.ArrowFunctionParametersContext) {
+                if (child.children[0] instanceof JavaScriptParser.IdentifierContext) { // abc => { ... }
+                    this.currentScope.push(child.children[0].getText());
+                    return;
+                } else { // ( ... ) => { ... }
+                    if (ctx.parentCtx && ctx.parentCtx.parentCtx && ctx.parentCtx.parentCtx instanceof JavaScriptParser.VariableDeclarationContext && ctx.parentCtx.parentCtx.children.length == 3) { // var x = ( ... ) => { ... }
+                        if (ctx.parentCtx.parentCtx.children[0].children[0] instanceof JavaScriptParser.IdentifierContext) {
+                            this.currentScope.push(ctx.parentCtx.parentCtx.children[0].children[0].getText());
+                            return;
+                        }
+                    }
+                }
+                break;
+            }
+        }
+
+        this.currentScope.push("#ARROW-FUNCTION-UNSUPPORTED#");
+    }
+
+    exitArrowFunction(ctx) {
+        this.currentScope.pop();
+
+        for (let child of ctx.children) {
+            if (child instanceof JavaScriptParser.ArrowFunctionParametersContext) {
+                if (child.children[0] instanceof JavaScriptParser.IdentifierContext) { // abc => { ... }
+                    this.FunctionDeclarations.push({
+                        'name': child.children[0].getText(),
+                        'scope': [...this.currentScope],
+                        'raw': ctx,
+                        'argNames': [],
+                        'argNamesRaw': null
+                    });
+                } else { // ( ... ) => { ... }
+                    if (ctx.parentCtx && ctx.parentCtx.parentCtx && ctx.parentCtx.parentCtx instanceof JavaScriptParser.VariableDeclarationContext && ctx.parentCtx.parentCtx.children.length == 3) { // var x = ( ... ) => { ... }
+                        if (ctx.parentCtx.parentCtx.children[0].children[0] instanceof JavaScriptParser.IdentifierContext) {
+                            let argNames = [];
+                            let argNamesRaw = null;
+
+                            if (child.children.length == 3) { // (###...###) => { ... }
+                                argNamesRaw = child.children[1];
+
+                                let index = 0;
+
+                                for (let argNameChild of child.children[1].children) {
+                                    if (argNameChild instanceof JavaScriptParser.FormalParameterArgContext) {
+                                        let argNameName = null;
+                                        
+                                        if (argNameChild.children[0].children[0] instanceof JavaScriptParser.IdentifierContext)  {
+                                            argNameName = argNameChild.children[0].children[0].getText();
+                                        }
+
+                                        if (argNameChild.children.length == 3) { // x.y(y=###'default value'###)
+                                            // TODO
+                                        }
+
+                                        argNames.push({
+                                            'index': index,
+                                            'argName': argNameName
+                                        });
+
+                                        index += 1;
+                                    }
+                                }
+                            } else { // () => { ... }
+                                ;
+                            }
+
+                            this.FunctionDeclarations.push({
+                                'name': ctx.parentCtx.parentCtx.children[0].children[0].getText(),
+                                'scope': [...this.currentScope],
+                                'raw': ctx,
+                                'argNames': argNames,
+                                'argNamesRaw': argNamesRaw
+                            });
+                        }
+                    }
+                }
+                break;
+            }
+        }
+    }
+
     enterFunctionDeclaration(ctx) {
         for (let child of ctx.children) {
             if (child instanceof JavaScriptParser.IdentifierContext) {
@@ -137,9 +229,8 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                 let index = 0;
 
                 for (let argNameChild of child.children) {
-                    let argNameName = null;
-
                     if (argNameChild instanceof JavaScriptParser.FormalParameterArgContext) {
+                        let argNameName = null;    
                         
                         if (argNameChild.children[0].children[0] instanceof JavaScriptParser.IdentifierContext)  {
                             argNameName = argNameChild.children[0].children[0].getText();
@@ -148,14 +239,14 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                         if (argNameChild.children.length == 3) { // x.y(y=###'default value'###)
                             // TODO
                         }
+
+                        argNames.push({
+                            'index': index,
+                            'argName': argNameName
+                        });
+
+                        index += 1;
                     }
-
-                    argNames.push({
-                        'index': index,
-                        'argName': argNameName
-                    });
-
-                    index += 1;
                 }
             }
         }

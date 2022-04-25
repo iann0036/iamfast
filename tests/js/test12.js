@@ -48,7 +48,7 @@ function doThing(arg) {
   var globalvarstr = 'hij';
 
   // Call DynamoDB to add the item to the table
-  ddb.getItem({
+  ddb.putItem({
     TableName: globalvarstr,
     Item: {
       'CUSTOMER_ID' : {N: '001'},
@@ -63,6 +63,8 @@ function doThing(arg) {
   });
 }
 
+doThing(params);
+
 doThing({
   TableName: 'OTHER_TABLE_NAME',
   Item: {
@@ -70,3 +72,29 @@ doThing({
     'CUSTOMER_NAME' : {S: 'Richard Roe'}
   }
 });
+
+doThing({
+  TableName: 'OTHER_TABLE_NAME_AGAIN',
+  Item: {
+    'CUSTOMER_ID' : {N: '001'},
+    'CUSTOMER_NAME' : {S: 'Richard Roe'}
+  }
+});
+
+const anonFunc = async (argNameForClientDecl) => {
+  argNameForClientDecl.putItem({
+    TableName: 'ANON_TABLE',
+    Item: {
+      'CUSTOMER_ID' : {N: '001'},
+      'CUSTOMER_NAME' : {S: 'Richard Roe'}
+    }
+  }, function(err, data) {
+    if (err) {
+      console.log("Error", err);
+    } else {
+      console.log("Success", data);
+    }
+  });
+};
+
+anonFunc(ddb);

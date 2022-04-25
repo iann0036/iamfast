@@ -7,10 +7,9 @@ const expect = chai.expect;
 import IAMFast from "../src/IAMFast.js";
 
 
-const sut = new IAMFast("aws", "us-east-1", "123456789012");
-
-
 const generatePolicyAsJson = (filePath) => {
+    const sut = new IAMFast("aws", "us-east-1", "123456789012");
+    
     let language = IAMFast.getLanguageByPath(filePath);
 
     let code = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' });

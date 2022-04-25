@@ -11,8 +11,8 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
     constructor(variableDeclarations, functionDeclarations, functionCalls) {
         super();
         this.SDKDeclarations = [];
-        this.ClientDeclarations = [];
-        this.ResourceDeclarations = [];
+        this.ClientDeclarations = []; // TODO: deprecate for VariableDeclarations
+        this.ResourceDeclarations = []; // TODO: deprecate for VariableDeclarations
         this.ClientCalls = [];
         this.ResourceObjects = [];
         this.ResourceCalls = [];
@@ -38,29 +38,68 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         return ret;
     }
 
-    resolveArgs(argsRaw) { // AWS call args
-        let args = {};
+    resolveArgsVariants(argsRaw) { // AWS call args (variants)
+        let argVariants = [];
 
-        for (let argument of argsRaw.children) {
-            if (argument instanceof JavaScriptParser.ArgumentContext) {
-                if (argument.children.length == 1) { // blah(###abc###) 
-                    if (argument.children[0] instanceof JavaScriptParser.IdentifierExpressionContext) {
-                        let argumentsVariable = argument.children[0].getText();
+        for (let variablesVariant of this.getVariableDeclarationVariants()) {
+            let args = {};
 
-                        for (let variable of this.getVariableDeclarations()) {
-                            if (variable.variable == argumentsVariable) {
-                                if (variable.type == "object") {
-                                    args = this.resolvePropertyMap(variable.value);
+            for (let argument of argsRaw.children) {
+                if (argument instanceof JavaScriptParser.ArgumentContext) {
+                    if (argument.children.length == 1) { // blah(###abc###) 
+                        if (argument.children[0] instanceof JavaScriptParser.IdentifierExpressionContext) {
+                            let argumentsVariable = argument.children[0].getText();
+
+                            for (let variable of Object.values(variablesVariant)) {
+                                if (variable.variable == argumentsVariable) {
+                                    if (variable.type == "object") {
+                                        args = this.resolvePropertyMap(variable.value);
+                                    }
                                 }
                             }
                         }
                     }
+                    // TODO: else blah(...###x###, )
                 }
-                // TODO: else blah(...###x###, )
+            }
+
+            argVariants.push(args);
+        }
+
+        return argVariants;
+    }
+
+    enterAnonymousFunctionDecl(ctx) {
+        this.currentScope.push("#ANONYMOUS-UNSUPPORTED#");
+    }
+
+    exitAnonymousFunctionDecl(ctx) {
+        this.currentScope.pop();
+    }
+
+    enterArrowFunction(ctx) {
+        for (let child of ctx.children) {
+            if (child instanceof JavaScriptParser.ArrowFunctionParametersContext) {
+                if (child.children[0] instanceof JavaScriptParser.IdentifierContext) { // abc => { ... }
+                    this.currentScope.push(child.children[0].getText());
+                    return;
+                } else { // ( ... ) => { ... }
+                    if (ctx.parentCtx && ctx.parentCtx.parentCtx && ctx.parentCtx.parentCtx instanceof JavaScriptParser.VariableDeclarationContext && ctx.parentCtx.parentCtx.children.length == 3) { // var x = ( ... ) => { ... }
+                        if (ctx.parentCtx.parentCtx.children[0].children[0] instanceof JavaScriptParser.IdentifierContext) {
+                            this.currentScope.push(ctx.parentCtx.parentCtx.children[0].children[0].getText());
+                        }
+                        return;
+                    }
+                }
+                break;
             }
         }
 
-        return args;
+        this.currentScope.push("#ARROW-FUNCTION-UNSUPPORTED#");
+    }
+
+    exitArrowFunction(ctx) {
+        this.currentScope.pop();
     }
 
     enterFunctionDeclaration(ctx) {
@@ -88,7 +127,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         return this.SDKDeclarations;
     }
 
-    getVariableDeclarations() {
+    getVariableDeclarationVariants() {
         /*
             Order of priority:
             1. Global vars
@@ -97,7 +136,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
             4. Arguments
             5. Vars with exactly matching scope (current depth)
 
-            At priority #4 and beyond, variants (different paths) are generated
+            At priority #4 and beyond, variants (different paths based on many function calls with different args) are generated
         */
 
        let args = {};
@@ -120,9 +159,9 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                         if (functionCall.name == functionDeclaration.name) { // TODO: Scope check also
                             let argsVariant = Object.assign({}, args); // shallow copy
                             
-                            for (let arg of this.FunctionCalls[0].args) {
+                            for (let arg of functionCall.args) {
                                 if (arg.index === argName.index) {
-                                    argsVariant[argName] = {
+                                    argsVariant[argName.argName] = {
                                         scope: [...this.currentScope],
                                         variable: argName.argName,
                                         type: arg.type,
@@ -138,6 +177,10 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
             }
         }
 
+        if (argsVariants.length == 0) {
+            argsVariants = [args];
+        }
+
         // priority #5 (within function)
         for (let variableDeclaration of this.VariableDeclarations) {
             if (scalarArraysAreEqual(variableDeclaration.scope, this.currentScope)) {
@@ -149,7 +192,9 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
             }
         }
 
-        return Object.values(args);
+        // TODO: dedup variants
+
+        return argsVariants;
     }
 
     aggregateVariableOrAssignmentDeclaration(ctx) {
@@ -218,14 +263,18 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                                 });
                             }
                             if (anonymousDeclaration && prevMethod.getText()) { // new AWS.Service().methodName(args)
-                                this.ClientCalls.push({
-                                    'client': this.ClientDeclarations[this.ClientDeclarations.length - 1],
-                                    'method': prevMethod.getText(),
-                                    'argsRaw': argsRawPrev,
-                                    'args': this.resolveArgs(argsRawPrev),
-                                    'start': prevMethod.start.start,
-                                    'stop': prevMethod.stop.stop
-                                });
+                                let argsVariants = this.resolveArgsVariants(argsRawPrev);
+
+                                for (let argsVariant of argsVariants) {
+                                    this.ClientCalls.push({
+                                        'client': this.ClientDeclarations[this.ClientDeclarations.length - 1],
+                                        'method': prevMethod.getText(),
+                                        'argsRaw': argsRawPrev,
+                                        'args': argsVariant,
+                                        'start': prevMethod.start.start,
+                                        'stop': prevMethod.stop.stop
+                                    });
+                                }
                             }
                             break;
                         } else if (className.children[0] instanceof JavaScriptParser.MemberDotExpressionContext) { // blah.blah.blah
@@ -257,14 +306,18 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                                     }
                                 }
                                 if (anonymousDeclaration && prevMethod.getText()) { // new AWS.Service().methodName(args)
-                                    this.ResourceCalls.push({
-                                        'resource': this.ResourceDeclarations[this.ResourceDeclarations.length - 1],
-                                        'method': prevMethod.getText(),
-                                        'argsRaw': argsRawPrev,
-                                        'args': this.resolveArgs(argsRawPrev),
-                                        'start': prevMethod.start.start,
-                                        'stop': prevMethod.stop.stop
-                                    });
+                                    let argsVariants = this.resolveArgsVariants(argsRawPrev);
+
+                                    for (let argsVariant of argsVariants) {
+                                        this.ResourceCalls.push({
+                                            'resource': this.ResourceDeclarations[this.ResourceDeclarations.length - 1],
+                                            'method': prevMethod.getText(),
+                                            'argsRaw': argsRawPrev,
+                                            'args': argsVariant,
+                                            'start': prevMethod.start.start,
+                                            'stop': prevMethod.stop.stop
+                                        });
+                                    }
                                 }
                             }
 
@@ -295,33 +348,90 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         if (callMethod instanceof JavaScriptParser.MemberDotExpressionContext) {
             const namespace = callMethod.children[0] // ###.blah
             const method = callMethod.children[callMethod.children.length - 1] // blah.###
+            const namespaceText = namespace.getText();
 
-            for (let clientDeclaration of this.ClientDeclarations) {
-                if (namespace.getText() == clientDeclaration['variable']) {
-                    this.ClientCalls.push({
-                        'client': clientDeclaration,
-                        'method': method.getText(),
-                        'argsRaw': argsRaw,
-                        'args': this.resolveArgs(argsRaw),
-                        'start': method.start.start,
-                        'stop': method.stop.stop
-                    });
-                    break;
-                }
+            if ([
+                'console',
+                'JSON',
+                'Array'
+            ].includes(namespaceText)) {
+                return;
             }
 
-            for (let resourceDeclaration of this.ResourceDeclarations) {
-                if (namespace.getText() == resourceDeclaration['variable']) {
-                    this.ResourceCalls.push({
-                        'resource': resourceDeclaration,
-                        'method': method.getText(),
-                        'argsRaw': argsRaw,
-                        'args': this.resolveArgs(argsRaw),
-                        'start': method.start.start,
-                        'stop': method.stop.stop
-                    });
-                    break;
+            if (namespace instanceof JavaScriptParser.IdentifierExpressionContext) {
+                for (let variablesVariant of this.getVariableDeclarationVariants()) {
+                    for (let variable of Object.values(variablesVariant)) {
+                        if (variable.variable == namespaceText) {
+                            if (variable.type == 'clientdeclaration') {
+                                let argsVariants = this.resolveArgsVariants(argsRaw);
+
+                                for (let argsVariant of argsVariants) {
+                                    this.ClientCalls.push({
+                                        'client': variable.value,
+                                        'method': method.getText(),
+                                        'argsRaw': argsRaw,
+                                        'args': argsVariant,
+                                        'start': method.start.start,
+                                        'stop': method.stop.stop
+                                    });
+                                }
+                                break;
+                            } else if (variable.type == 'resourcedeclaration') {
+                                let argsVariants = this.resolveArgsVariants(argsRaw);
+
+                                for (let argsVariant of argsVariants) {
+                                    this.ResourceCalls.push({
+                                        'resource': variable.value,
+                                        'method': method.getText(),
+                                        'argsRaw': argsRaw,
+                                        'args': argsVariant,
+                                        'start': method.start.start,
+                                        'stop': method.stop.stop
+                                    });
+                                }
+                                break;
+                            }
+                        }
+                    }
                 }
+
+                /*
+                for (let clientDeclaration of this.ClientDeclarations) {
+                    if (namespace.getText() == clientDeclaration['variable']) {
+                        let argsVariants = this.resolveArgsVariants(argsRaw);
+
+                        for (let argsVariant of argsVariants) {
+                            this.ClientCalls.push({
+                                'client': clientDeclaration,
+                                'method': method.getText(),
+                                'argsRaw': argsRaw,
+                                'args': argsVariant,
+                                'start': method.start.start,
+                                'stop': method.stop.stop
+                            });
+                        }
+                        break;
+                    }
+                }
+
+                for (let resourceDeclaration of this.ResourceDeclarations) {
+                    if (namespace.getText() == resourceDeclaration['variable']) {
+                        let argsVariants = this.resolveArgsVariants(argsRaw);
+
+                        for (let argsVariant of argsVariants) {
+                            this.ResourceCalls.push({
+                                'resource': resourceDeclaration,
+                                'method': method.getText(),
+                                'argsRaw': argsRaw,
+                                'args': argsVariant,
+                                'start': method.start.start,
+                                'stop': method.stop.stop
+                            });
+                        }
+                        break;
+                    }
+                }
+                */
             }
         }
 	}
