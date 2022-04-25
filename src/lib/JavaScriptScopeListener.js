@@ -8,6 +8,8 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
         super();
         this.VariableDeclarations = [];
         this.EnvironmentVariables = [];
+        this.FunctionDeclarations = [];
+        this.FunctionCalls = [];
         this.currentScope = [];
     }
 
@@ -35,7 +37,7 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                                 if (variable.type == "object") {
                                     propertyMap[propertyName] = {
                                         'type': 'object',
-                                        'value': this.generateObjectLiteralMap(variable.propertyMap)
+                                        'value': this.generateObjectLiteralMap(variable.value)
                                     };
                                 } else if (variable.type == "envvar") {
                                     propertyMap[propertyName] = {
@@ -53,6 +55,63 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
         return propertyMap;
     }
 
+    resolvePropertyMap(obj) {
+        let ret = {};
+
+        for (let k of Object.keys(obj)) {
+            if (obj[k].type == "object") {
+                ret[k] = this.resolvePropertyMap(obj[k].value);
+            } else if (obj[k].type == "literal") {
+                ret[k] = obj[k].value;
+            } else if (obj[k].type == "envvar") {
+                ret[k] = new EnvironmentVariable(obj[k].value)
+            }
+        }
+
+        return ret;
+    }
+
+    resolveNamedArgs(argsRaw) {
+        let args = [];
+        let index = 0;
+
+        for (let argument of argsRaw.children) {
+            if (argument instanceof JavaScriptParser.ArgumentContext) {
+                let arg = {};
+                let argType = null;
+                
+                if (argument.children.length == 1) { // blah(###abc###) 
+                    if (argument.children[0] instanceof JavaScriptParser.IdentifierExpressionContext) {
+                        let argumentsVariable = argument.children[0].getText();
+
+                        for (let variable of this.VariableDeclarations) {
+                            if (variable.variable == argumentsVariable) {
+                                if (variable.type == "object") {
+                                    arg = this.resolvePropertyMap(variable.value);
+                                    argType = 'object';
+                                }
+                            }
+                        }
+                    } else if (argument.children[0] instanceof JavaScriptParser.ObjectLiteralExpressionContext) {
+                        arg = this.generateObjectLiteralMap(argument.children[0]);
+                        argType = 'object';
+                    }
+                }
+                // TODO else blah(...###x###, )
+
+                args.push({
+                    index: index,
+                    arg: arg,
+                    type: argType
+                });
+
+                index += 1;
+            }
+        }
+
+        return args;
+    }
+
     enterFunctionDeclaration(ctx) {
         for (let child of ctx.children) {
             if (child instanceof JavaScriptParser.IdentifierContext) {
@@ -64,6 +123,80 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
 
     exitFunctionDeclaration(ctx) {
         this.currentScope.pop();
+
+        let name = null;
+        let argsNamesRaw = null;
+        let argNames = [];
+
+        for (let child of ctx.children) {
+            if (child instanceof JavaScriptParser.IdentifierContext) {
+                name = child.getText();
+            } else if (child instanceof JavaScriptParser.FormalParameterListContext) {
+                argsNamesRaw = child;
+
+                let index = 0;
+
+                for (let argNameChild of child.children) {
+                    let argNameName = null;
+
+                    if (argNameChild instanceof JavaScriptParser.FormalParameterArgContext) {
+                        
+                        if (argNameChild.children[0].children[0] instanceof JavaScriptParser.IdentifierContext)  {
+                            argNameName = argNameChild.children[0].children[0].getText();
+                        }
+
+                        if (argNameChild.children.length == 3) { // x.y(y=###'default value'###)
+                            // TODO
+                        }
+                    }
+
+                    argNames.push({
+                        'index': index,
+                        'argName': argNameName
+                    });
+
+                    index += 1;
+                }
+            }
+        }
+
+        this.FunctionDeclarations.push({
+            'name': name,
+            'scope': [...this.currentScope],
+            'raw': ctx,
+            'argNames': argNames,
+            'argNamesRaw': argsNamesRaw
+        });
+    }
+
+    exitArgumentsExpression(ctx) {
+        if (ctx.children[0] instanceof JavaScriptParser.IdentifierExpressionContext) {
+            let name = ctx.children[0].getText();
+
+            if (this.currentScope.length == 0 && [ // https://nodejs.org/api/globals.html
+                'require',
+                'atob',
+                'btoa',
+                'clearImmediate',
+                'clearInterval',
+                'clearTimeout',
+                'setImmediate',
+                'setInterval',
+                'setTimeout',
+                'structuredClone',
+                'queueMicrotask'
+            ].includes(name)) {
+                return;
+            }
+
+            this.FunctionCalls.push({
+                'name': name,
+                'scope': [...this.currentScope],
+                'raw': ctx,
+                'args': this.resolveNamedArgs(ctx.children[1]),
+                'argsRaw': ctx.children[1]
+            });
+        }
     }
 
     exitAssignmentExpression(ctx) {
@@ -85,7 +218,7 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                         'scope': [...this.currentScope],
                         'variable': assignable.getText(),
                         'type': 'object',
-                        'propertyMap': this.generateObjectLiteralMap(expression)
+                        'value': this.generateObjectLiteralMap(expression)
                     });
                 } else if (expression instanceof JavaScriptParser.MemberDotExpressionContext) { // blah = ###.###...
                     if (expression.children.length == 3) {

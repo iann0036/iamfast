@@ -70,7 +70,7 @@ export default class AWSParser {
                 scopeListener = new JavaScriptScopeListener();
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(scopeListener, tree);
 
-                listener = new JavaScriptAWSListener(scopeListener.VariableDeclarations);
+                listener = new JavaScriptAWSListener(scopeListener.VariableDeclarations, scopeListener.FunctionDeclarations, scopeListener.FunctionCalls);
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;

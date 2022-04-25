@@ -1,4 +1,4 @@
-// Generated from /Users/ian/iamfast-js/grammars/JavaScriptParser.g4 by ANTLR 4.8
+// Generated from /Users/ian/iamfast/grammars/JavaScriptParser.g4 by ANTLR 4.8
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
