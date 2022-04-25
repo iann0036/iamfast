@@ -232,8 +232,10 @@ export default class IAMFast {
     }
 
     mapServicePrefix(prefix) {
-        if (this.mappings['sdk_service_mappings'][prefix]) {
-            return this.mappings['sdk_service_mappings'][prefix];
+        for (let k of Object.keys(this.mappings['sdk_service_mappings'])) {
+            if (k.toLowerCase() == prefix.toLowerCase()) {
+                return this.mappings['sdk_service_mappings'][k];
+            }
         }
 
         return prefix;
@@ -249,7 +251,7 @@ export default class IAMFast {
             if (lower_priv == mappingkey.toLowerCase()) {
                 for (var mapped_priv of this.mappings.sdk_method_iam_mappings[mappingkey]) {
                     for (let privilege of service.privileges) {
-                        if (this.mapServicePrefix(service.prefix).toLowerCase() + ":" + privilege.privilege.toLowerCase() == mapped_priv.action.toLowerCase()) {
+                        if (service.prefix.toLowerCase() + ":" + privilege.privilege.toLowerCase() == mapped_priv.action.toLowerCase()) {
                             privileges.push({
                                 'sarpriv': privilege,
                                 'mappedpriv': mapped_priv
@@ -453,7 +455,7 @@ export default class IAMFast {
             let found_match = false;
 
             for (let service of this.iam_def) {
-                if (this.mapServicePrefix(service.prefix).toLowerCase() == tracked_call.service) {
+                if (service.prefix.toLowerCase() == this.mapServicePrefix(tracked_call.service).toLowerCase()) {
                     let privilege_array = this.mapCallToPrivilegeArray(service, tracked_call);
                     this.debug && console.log("Mapped Service Prefix: ", service.prefix);
                     this.debug && console.log("Tracked Call: ", tracked_call);
@@ -490,12 +492,13 @@ export default class IAMFast {
                         }
 
                         privs.push({
-                            'action': this.mapServicePrefix(service.prefix) + ":" + privilege.sarpriv.privilege,
+                            'action': service.prefix.toLowerCase() + ":" + privilege.sarpriv.privilege,
                             'explanation': privilege.sarpriv.description,
                             'resource': resource_arns,
                             'position': tracked_call.position
                         });
                     }
+                    break;
                 }
             }
 

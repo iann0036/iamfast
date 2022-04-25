@@ -106,6 +106,25 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                         'type': 'literal',
                         'value': expression.getText().replace(/^['"]?(.*?)['"]?$/g, '$1')
                     });
+                } else if (expression instanceof JavaScriptParser.ArrayLiteralExpressionContext) { // blah = ###['abc']###
+                    let values = [];
+
+                    if (expression.children[0].children[1].children) {
+                        for (var arrayitem of expression.children[0].children[1].children) {
+                            if (arrayitem instanceof JavaScriptParser.ArrayElementContext) {
+                                values.push({
+                                    'rawValue': arrayitem
+                                });
+                            }
+                        }
+                    }
+
+                    this.VariableDeclarations.push({
+                        'scope': [...this.currentScope],
+                        'variable': assignable.getText(),
+                        'type': 'array',
+                        'values': values
+                    });
                 }
             }
         }
