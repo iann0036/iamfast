@@ -107,8 +107,8 @@ npm test
 - [x] Identify resource calls
 - [x] Interpret call arguments (top-level, static)
 - [x] Interpret call arguments (top-level, variable)
-- [ ] Interpret call arguments (deep, static)
-- [ ] Interpret call arguments (deep, variable)
+- [x] Interpret call arguments (deep, static)
+- [x] Interpret call arguments (deep, variable)
 - [x] Track literal variables
 - [x] Track object variables
 - [x] Track environmental variables
