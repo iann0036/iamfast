@@ -44,8 +44,13 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                                         'type': 'envvar',
                                         'value': variable.name
                                     };
+                                } else if (variable.type == "literal") {
+                                    propertyMap[propertyName] = {
+                                        'type': 'literal',
+                                        'value': variable.value
+                                    };
                                 }
-                                // TODO: Support more types (both listeners)
+                                // TODO: Support array type (both listeners)
                             }
                         }
                     }

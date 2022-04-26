@@ -109,10 +109,10 @@ npm test
 - [x] Interpret call arguments (top-level, variable)
 - [ ] Interpret call arguments (deep, static)
 - [ ] Interpret call arguments (deep, variable)
-- [ ] Track literal variables
+- [x] Track literal variables
 - [x] Track object variables
 - [x] Track environmental variables
-- [ ] Understand scope (build the call stack)
+- [x] Understand scope (build the call stack)
 - [ ] Cross-file relationships
 - [ ] Understand entrypoints and code accessibility
 - [ ] Performance tuning
