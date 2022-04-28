@@ -77,7 +77,7 @@ export default class AWSParser {
                 this.resource_calls = listener.ResourceCalls;
                 this.environmental_variables = [...new Set(scopeListener.EnvironmentVariables)]; // no dupes
 
-                this.debug && console.log(listener);
+                this.debug && console.dir(listener, {depth: 3});
 
                 break;
             case 'python':

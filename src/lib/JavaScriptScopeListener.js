@@ -44,6 +44,7 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                                         'type': 'envvar',
                                         'value': variable.name
                                     };
+                                    this.EnvironmentVariables.push(variable.name);
                                 } else if (variable.type == "literal") {
                                     propertyMap[propertyName] = {
                                         'type': 'literal',
@@ -51,6 +52,16 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                                     };
                                 }
                                 // TODO: Support array type (both listeners)
+                            }
+                        }
+                    } else if (objectLiteralChild.children[2] instanceof JavaScriptParser.MemberDotExpressionContext) {
+                        if (objectLiteralChild.children[2].children.length == 3) {
+                            if (objectLiteralChild.children[2].children[0].getText() == "process.env" && objectLiteralChild.children[2].children[1].getText() == "." && objectLiteralChild.children[2].children[2] instanceof JavaScriptParser.IdentifierNameContext) {
+                                propertyMap[propertyName] = {
+                                    'type': 'envvar',
+                                    'value': objectLiteralChild.children[2].children[2].getText()
+                                };
+                                this.EnvironmentVariables.push(objectLiteralChild.children[2].children[2].getText());
                             }
                         }
                     }
