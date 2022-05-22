@@ -28,6 +28,14 @@ export default class Python3AWSListener extends Python3ParserListener {
         this.currentScope = [];
     }
 
+    enterFuncdef(ctx) {
+        this.currentScope.push(ctx.children[1].getText());
+    }
+
+    exitFuncdef(ctx) {
+        let name = this.currentScope.pop();
+    }
+
     resolveArgs(argsRaw, extra) {
         let args = {};
 

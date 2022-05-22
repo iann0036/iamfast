@@ -14,6 +14,22 @@ export default class JavaAWSListener extends JavaParserListener {
         this.currentScope = [];
     }
 
+    enterClassDeclaration(ctx) {
+        this.currentScope.push(ctx.children[1].getText());
+    }
+
+    exitClassDeclaration(ctx) {
+        this.currentScope.pop();
+    }
+
+    enterMethodDeclaration(ctx) {
+        this.currentScope.push(ctx.children[1].getText());
+    }
+
+    exitMethodDeclaration(ctx) {
+        let name = this.currentScope.pop();
+    }
+
     exitImportDeclaration(ctx) {
         let importString = ctx.children[1].getText();
         let matchString = importString.match(/^software\.amazon\.awssdk\.services\.([a-zA-Z0-9]+)\.(([a-zA-Z0-9]+)Client)$/);
@@ -31,6 +47,7 @@ export default class JavaAWSListener extends JavaParserListener {
 
         if (matchString) {
             this.VariableDeclarations.push({
+                'scope': [...this.currentScope],
                 'variable': matchString[2],
                 'service': matchString[1],
                 'type': 'requestmodel'
