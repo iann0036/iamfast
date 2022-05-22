@@ -14,7 +14,7 @@ import PySQSService from './py-sqs-service.js';
 
 export default class Python3AWSListener extends Python3ParserListener {
 
-    constructor() {
+    constructor(variableDeclarations, functionDeclarations, functionCalls) {
         super();
         this.SDKDeclarations = [];
         this.ClientDeclarations = [];
@@ -22,8 +22,10 @@ export default class Python3AWSListener extends Python3ParserListener {
         this.ClientCalls = [];
         this.ResourceObjects = [];
         this.ResourceCalls = [];
-        this.VariableDeclarations = [];
-        this.EnvironmentVariables = [];
+        this.VariableDeclarations = variableDeclarations;
+        this.FunctionDeclarations = functionDeclarations;
+        this.FunctionCalls = functionCalls;
+        this.currentScope = [];
     }
 
     resolveArgs(argsRaw, extra) {
