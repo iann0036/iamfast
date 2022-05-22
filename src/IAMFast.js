@@ -396,7 +396,7 @@ export default class IAMFast {
             sam_template.deleteIn(['Resources', 'LambdaFunction', 'Properties', 'Environment']);
         }
 
-        return YAML.stringify(sam_template, custom_tags);
+        return YAML.stringify(sam_template, custom_tags).replaceAll(/- Version: 2012-10-17/g, "- Version: '2012-10-17'");
     }
 
     Clear() {
