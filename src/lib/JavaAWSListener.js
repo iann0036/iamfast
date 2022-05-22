@@ -3,13 +3,15 @@ import JavaParserListener from './JavaParserListener.js';
 
 export default class JavaAWSListener extends JavaParserListener {
 
-    constructor() {
+    constructor(variableDeclarations, functionDeclarations, functionCalls) {
         super();
         this.SDKDeclarations = [];
         this.ClientDeclarations = [];
         this.ClientCalls = [];
-        this.VariableDeclarations = [];
-        this.EnvironmentVariables = [];
+        this.VariableDeclarations = variableDeclarations;
+        this.FunctionDeclarations = functionDeclarations;
+        this.FunctionCalls = functionCalls;
+        this.currentScope = [];
     }
 
     exitImportDeclaration(ctx) {
@@ -57,12 +59,6 @@ export default class JavaAWSListener extends JavaParserListener {
                                     }
                                 }
                                 // request builder here
-                            } else if (declerator.children[2].getText().match(/^(['"].*['"])|([0-9\.]+)$/)) {
-                                this.VariableDeclarations.push({
-                                    'type': 'literal',
-                                    'variable': assignable.getText(),
-                                    'value': declerator.children[2].getText().replace(/^['"]?(.*?)['"]?$/g, '$1')
-                                });
                             }
                         }
                     }

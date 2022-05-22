@@ -13,6 +13,7 @@ import Python3ScopeListener from './lib/Python3ScopeListener.js';
 import JavaLexer from './lib/JavaLexer.js'
 import JavaParser from './lib/JavaParser.js';
 import JavaAWSListener from './lib/JavaAWSListener.js';
+import JavaScopeListener from './lib/JavaScopeListener.js';
 import CPP14Lexer from './lib/CPP14Lexer.js'
 import CPP14Parser from './lib/CPP14Parser.js';
 import CPP14AWSListener from './lib/CPP14AWSListener.js';
@@ -116,7 +117,10 @@ export default class AWSParser {
                 tree = parser.compilationUnit();
                 this.debug && this.treeWalker(tree, 0);
     
-                listener = new JavaAWSListener();
+                scopeListener = new JavaScopeListener();
+                antlr4.tree.ParseTreeWalker.DEFAULT.walk(scopeListener, tree);
+
+                listener = new JavaAWSListener(scopeListener.VariableDeclarations, scopeListener.FunctionDeclarations, scopeListener.FunctionCalls);
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;

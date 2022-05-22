@@ -2,7 +2,7 @@ import Python3Parser from './Python3Parser.js';
 import Python3ParserListener from './Python3ParserListener.js';
 import EnvironmentVariable from '../EnvironmentVariable.js';
 
-export default class Python3AWSListener extends Python3ParserListener {
+export default class Python3ScopeListener extends Python3ParserListener {
 
     constructor() {
         super();
