@@ -2,18 +2,22 @@ export function ScalarArraysAreEqual(array1, array2) {
     return array1.length === array2.length && array1.every(function(value, index) { return value === array2[index]});
 }
 
+/**
+ * Returns an array of scope-resolved variables, with each item containing a map of variables at the time the function was called.
+ * Each item represents an entrypoint / code path to it, usually split by many function calls towards a single function declaration.
+ * 
+ * Order of priority for scoped override resolution:
+ * 1. Global vars
+ * 2. Global vars that are redeclared / set after (implicitly by list order)
+ * 3. Vars with increasingly matching scope (i.e. deepest to shallowest function depth), except current depth
+ * 4. Arguments
+ * 5. Vars with exactly matching scope (current depth)
+ * 
+ * At priority #4 and beyond, variants (different paths based on many function calls with different args) are generated
+ *
+ * @returns {Array}
+ */
 export function GetVariableDeclarationVariants(self) {
-    /*
-        Order of priority:
-        1. Global vars
-        2. Global vars that are redeclared / set after (implicitly by list order)
-        3. Vars with increasingly matching scope (i.e. deepest to shallowest function depth), except current depth
-        4. Arguments
-        5. Vars with exactly matching scope (current depth)
-
-        At priority #4 and beyond, variants (different paths based on many function calls with different args) are generated
-    */
-
    let args = {};
    let argsVariants = [];
 
