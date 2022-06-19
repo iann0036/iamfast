@@ -1,5 +1,7 @@
 import Python3Parser from './Python3Parser.js';
 import Python3ParserListener from './Python3ParserListener.js';
+import EnvironmentVariable from '../EnvironmentVariable.js';
+import { ScalarArraysAreEqual, GetVariableDeclarationVariants } from '../ParsingCommon.js';
 
 import PyCloudFormationService from './py-cloudformation-service.js';
 import PyCloudWatchService from './py-cloudwatch-service.js';
@@ -36,72 +38,94 @@ export default class Python3AWSListener extends Python3ParserListener {
         let name = this.currentScope.pop();
     }
 
-    resolveArgs(argsRaw, extra) {
-        let args = {};
+    resolveArgsVariants(argsRaw, extra) {
+        // extra is used to map resource clients or objects to their respective clients and their calls
 
-        const pyServiceMap = {
-            "cloudformation": PyCloudFormationService,
-            "cloudwatch": PyCloudWatchService,
-            "dynamodb": PyDynamoDBService,
-            "ec2": PyEC2Service,
-            "glacier": PyGlacierService,
-            "iam": PyIAMService,
-            "opsworks": PyOpsWorksService,
-            "s3": PyS3Service,
-            "sns": PySNSService,
-            "sqs": PySQSService
-        };
-        let unnamedArgCount = 0;
+        let argVariants = [];
 
-        if (argsRaw.children.length == 3 && argsRaw.children[0].getText() == "(" && argsRaw.children[1] instanceof Python3Parser.ArglistContext && argsRaw.children[2].getText() == ")") {
-            for (let arg of argsRaw.children[1].children) {
-                if (arg instanceof Python3Parser.ArgumentContext) {
-                    if (arg.children.length == 3 && arg.children[1].getText() == "=") {
-                        let variables = this.drillToAtomExprs(arg.children[0]);
-                        let values = this.drillToAtomExprs(arg.children[2]);
-                        for (let variable of variables) {
-                            for (let value of values) {
-                                args[variable.getText()] = value.getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
+        for (let variablesVariant of GetVariableDeclarationVariants(this)) {
+            let args = {};
+
+            const pyServiceMap = { // resource client mapping services
+                "cloudformation": PyCloudFormationService,
+                "cloudwatch": PyCloudWatchService,
+                "dynamodb": PyDynamoDBService,
+                "ec2": PyEC2Service,
+                "glacier": PyGlacierService,
+                "iam": PyIAMService,
+                "opsworks": PyOpsWorksService,
+                "s3": PyS3Service,
+                "sns": PySNSService,
+                "sqs": PySQSService
+            };
+            let unnamedArgCount = 0;
+
+            if (argsRaw.children.length == 3 && argsRaw.children[0].getText() == "(" && argsRaw.children[1] instanceof Python3Parser.ArglistContext && argsRaw.children[2].getText() == ")") {
+                for (let arg of argsRaw.children[1].children) {
+                    if (arg instanceof Python3Parser.ArgumentContext) {
+                        if (arg.children.length == 3 && arg.children[1].getText() == "=") { // named argument: x(..., y='1', ...)
+                            let lhsVariables = this.drillToAtomExprs(arg.children[0]);
+                            let values = this.drillToAtomExprs(arg.children[2]);
+                            for (let lhsVariable of lhsVariables) { // should only be one?
+                                let lhsVariableText = lhsVariable.getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
+                                for (let value of values) { // should only be one?
+                                    if (value.getText().match(/^['"](.*?)['"]$/g)) { // TODO: Other literal types, like int, neg float, boolean
+                                        args[lhsVariableText] = value.getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
+                                    } else {
+                                        // override default value with passed in argument value
+                                        for (let variable of Object.values(variablesVariant)) {
+                                            if (variable.variable == value.getText()) {
+                                                if (variable.type == "literal") {
+                                                    args[lhsVariableText] = variable.value; // TODO: does this need to strip ", ' ?
+                                                }
+                                                // TODO: more variable types
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                        }
 
-                        unnamedArgCount = -1; // no more unnamed arguments after a named argument
-                    } else if (arg.children.length == 1 && unnamedArgCount != -1) {
-                        if (extra && extra.resource && extra.object) {
-                            args[pyServiceMap[extra.resource.type].resources[extra.object].identifiers[unnamedArgCount].name] = arg.getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
-                        }
+                            unnamedArgCount = -1; // no more unnamed arguments after a named argument
+                        } else if (arg.children.length == 1 && unnamedArgCount != -1) { // unnamed argument: x(..., y, ...) - in boto3, somewhat rare
+                            if (extra && extra.resource && extra.object) { // if this is a resource object, map the argument to the true underlying call argument
+                                args[pyServiceMap[extra.resource.type].resources[extra.object].identifiers[unnamedArgCount].name] = arg.getText().replace(/^['"]?(.*?)['"]?$/g, '$1');
+                                // TODO: can this use variablesVariant?
+                            }
 
-                        unnamedArgCount += 1;
-                    }
-                }
-            }
-        }
-        
-        if (extra && extra.resourceObject && extra.method) {
-            if (extra.subnamespace) {
-                for (let collectionname of Object.keys(pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].hasMany)) {
-                    if (extra.subnamespace.replace(/_/g, "").toLowerCase() == collectionname.toLowerCase()) {
-                        for (let requestParam of pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].hasMany[collectionname].request.params) {
-                            if (requestParam.source == "identifier" && extra.resourceObject.args[requestParam.name]) {
-                                args[requestParam.target] = extra.resourceObject.args[requestParam.name];
-                            }
-                        }
-                    }
-                }
-            } else {
-                for (let actionname of Object.keys(pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions)) {
-                    if (extra.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
-                        for (let requestParam of pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions[actionname].request.params) {
-                            if (requestParam.source == "identifier" && extra.resourceObject.args[requestParam.name]) {
-                                args[requestParam.target] = extra.resourceObject.args[requestParam.name];
-                            }
+                            unnamedArgCount += 1;
                         }
                     }
                 }
             }
+            
+            if (extra && extra.resourceObject && extra.method) {
+                if (extra.subnamespace) {
+                    for (let collectionname of Object.keys(pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].hasMany)) {
+                        if (extra.subnamespace.replace(/_/g, "").toLowerCase() == collectionname.toLowerCase()) {
+                            for (let requestParam of pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].hasMany[collectionname].request.params) {
+                                if (requestParam.source == "identifier" && extra.resourceObject.args[requestParam.name]) {
+                                    args[requestParam.target] = extra.resourceObject.args[requestParam.name];
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    for (let actionname of Object.keys(pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions)) {
+                        if (extra.method.replace(/_/g, "").toLowerCase() == actionname.toLowerCase()) {
+                            for (let requestParam of pyServiceMap[extra.resourceObject.resource.type].resources[extra.resourceObject.object].actions[actionname].request.params) {
+                                if (requestParam.source == "identifier" && extra.resourceObject.args[requestParam.name]) {
+                                    args[requestParam.target] = extra.resourceObject.args[requestParam.name];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            argVariants.push(args);
         }
 
-        return args;
+        return argVariants;
     }
 
     drillToAtomExprs(treeitem) {
@@ -118,6 +142,65 @@ export default class Python3AWSListener extends Python3ParserListener {
         }
 
         return items;
+    }
+
+    resolveNamedArgs(argsRaw) {
+        let args = [];
+        let index = 0;
+
+        for (let argument of argsRaw.children) {
+            if (argument instanceof Python3Parser.ArgumentContext) {
+                let arg = {};
+                let argType = null;
+
+                let atomExprArgs = this.drillToAtomExprs(argument);
+                if (atomExprArgs.length == 1) {
+                    let argumentsVariable = atomExprArgs[0].getText();
+
+                    if (argumentsVariable == "None") {
+                        arg = null;
+                        argType = 'literal';
+                    } else if (argumentsVariable == "True") {
+                        arg = true;
+                        argType = 'literal';
+                    } else if (argumentsVariable == "False") {
+                        arg = false;
+                        argType = 'literal';
+                    } else if (argumentsVariable.startsWith("...")) {
+                        // unknown
+                    } else if (argumentsVariable.startsWith("{") && argumentsVariable.endsWith("{")) {
+                        // TODO: object
+                    } else if (argumentsVariable.startsWith("[") && argumentsVariable.endsWith("]")) {
+                        // TODO: array
+                    } else if (argumentsVariable.startsWith("(") && argumentsVariable.endsWith(")")) {
+                        // expr
+                    } else if (!isNaN(argumentsVariable)) {
+                        arg = Number(argumentsVariable);
+                        argType = 'literal';
+                    } else if ((argumentsVariable.startsWith("\"") || argumentsVariable.startsWith("'")) && (argumentsVariable.endsWith("\"") || argumentsVariable.endsWith("'"))) {
+                        arg = argumentsVariable.replace(/^['"]?(.*?)['"]?$/g, '$1');
+                        argType = 'literal';
+                    } else {
+                        for (let variable of this.VariableDeclarations) {
+                            if (variable.variable == argumentsVariable) {
+                                arg = variable.value;
+                                argType = variable.type;
+                            }
+                        }
+                    }
+                }
+
+                args.push({
+                    index: index,
+                    arg: arg,
+                    type: argType
+                });
+
+                index += 1;
+            }
+        }
+
+        return args;
     }
 
     exitImport_name(ctx) {
@@ -187,11 +270,18 @@ export default class Python3AWSListener extends Python3ParserListener {
                                         let arg1 = this.drillToAtomExprs(argsRaw.children[1].children[0])[0];
                                         let arg1filtered = arg1.getText().replace(/^['"](.*)['"]$/g, '$1');
 
-                                        this.ClientDeclarations.push({
+                                        let clientDeclaration = {
                                             'type': arg1filtered,
                                             'variable': assignable.getText(),
                                             'argsRaw': argsRaw,
                                             'sdk': sdkDeclaration
+                                        };
+                                        this.ClientDeclarations.push(clientDeclaration);
+                                        this.VariableDeclarations.push({
+                                            'scope': [...this.currentScope],
+                                            'variable': assignable.getText(),
+                                            'type': 'clientdeclaration',
+                                            'value': clientDeclaration
                                         });
                                         break;
                                     }
@@ -200,11 +290,18 @@ export default class Python3AWSListener extends Python3ParserListener {
                                         let arg1 = this.drillToAtomExprs(argsRaw.children[1].children[0])[0];
                                         let arg1filtered = arg1.getText().replace(/^['"](.*)['"]$/g, '$1');
 
-                                        this.ResourceDeclarations.push({
+                                        let resourceDeclaration = {
                                             'type': arg1filtered,
                                             'variable': assignable.getText(),
                                             'argsRaw': argsRaw,
                                             'sdk': sdkDeclaration
+                                        };
+                                        this.ResourceDeclarations.push(resourceDeclaration);
+                                        this.VariableDeclarations.push({
+                                            'scope': [...this.currentScope],
+                                            'variable': assignable.getText(),
+                                            'type': 'resourcedeclaration',
+                                            'value': resourceDeclaration
                                         });
                                         break;
                                     }
@@ -213,20 +310,29 @@ export default class Python3AWSListener extends Python3ParserListener {
                                         'type': 'sessioninst',
                                         'variable': assignable.getText()
                                     });
+                                    this.VariableDeclarations.push({
+                                        'scope': [...this.currentScope],
+                                        'variable': assignable.getText(),
+                                        'type': 'sessioninst'
+                                    });
                                 }
                             }
 
                             for (let clientDeclaration of this.ClientDeclarations) {
                                 if (namespace.getText() == clientDeclaration['variable']) {
-                                    this.ClientCalls.push({
-                                        'client': clientDeclaration,
-                                        'method': method.getText(),
-                                        'argsRaw': argsRaw,
-                                        'args': this.resolveArgs(argsRaw),
-                                        'variable': assignable.getText(),
-                                        'start': method.symbol.start,
-                                        'stop': method.symbol.stop
-                                    });
+                                    let argsVariants = this.resolveArgsVariants(argsRaw);
+
+                                    for (let argsVariant of argsVariants) {
+                                        this.ClientCalls.push({
+                                            'client': clientDeclaration,
+                                            'method': method.getText(),
+                                            'argsRaw': argsRaw,
+                                            'args': argsVariant,
+                                            'variable': assignable.getText(),
+                                            'start': method.symbol.start,
+                                            'stop': method.symbol.stop
+                                        });
+                                    }
                                     break;
                                 }
                             }
@@ -234,25 +340,33 @@ export default class Python3AWSListener extends Python3ParserListener {
                             for (let resourceDeclaration of this.ResourceDeclarations) {
                                 if (namespace.getText() == resourceDeclaration['variable']) {
                                     if (method.getText()[0] == method.getText()[0].toLowerCase()) {
-                                        this.ResourceCalls.push({
-                                            'resource': resourceDeclaration,
-                                            'method': method.getText(),
-                                            'argsRaw': argsRaw,
-                                            'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, method: method.getText() }),
-                                            'variable': assignable.getText(),
-                                            'start': method.symbol.start,
-                                            'stop': method.symbol.stop
-                                        });
+                                        let argsVariants = this.resolveArgsVariants(argsRaw, { resource: resourceDeclaration, method: method.getText() });
+
+                                        for (let argsVariant of argsVariants) {
+                                            this.ResourceCalls.push({
+                                                'resource': resourceDeclaration,
+                                                'method': method.getText(),
+                                                'argsRaw': argsRaw,
+                                                'args': argsVariant,
+                                                'variable': assignable.getText(),
+                                                'start': method.symbol.start,
+                                                'stop': method.symbol.stop
+                                            });
+                                        }
                                     } else {
-                                        this.ResourceObjects.push({
-                                            'resource': resourceDeclaration,
-                                            'object': method.getText(),
-                                            'argsRaw': argsRaw,
-                                            'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, object: method.getText() }),
-                                            'variable': assignable.getText(),
-                                            'start': method.symbol.start,
-                                            'stop': method.symbol.stop
-                                        });
+                                        let argsVariants = this.resolveArgsVariants(argsRaw, { resource: resourceDeclaration, object: method.getText() });
+
+                                        for (let argsVariant of argsVariants) {
+                                            this.ResourceObjects.push({
+                                                'resource': resourceDeclaration,
+                                                'object': method.getText(),
+                                                'argsRaw': argsRaw,
+                                                'args': argsVariant,
+                                                'variable': assignable.getText(),
+                                                'start': method.symbol.start,
+                                                'stop': method.symbol.stop
+                                            });
+                                        }
                                     }
                                     break;
                                 }
@@ -286,15 +400,19 @@ export default class Python3AWSListener extends Python3ParserListener {
 
                             for (let resourceObject of this.ResourceObjects) {
                                 if (namespace.getText() == resourceObject['variable']) {
-                                    this.ResourceCalls.push({
-                                        'resourceObject': resourceObject,
-                                        'subnamespace': subnamespace.getText(),
-                                        'method': method.getText(),
-                                        'argsRaw': argsRaw,
-                                        'args': this.resolveArgs(argsRaw, { resourceObject: resourceObject, method: method.getText(), subnamespace: subnamespace.getText() }),
-                                        'start': method.symbol.start,
-                                        'stop': method.symbol.stop
-                                    });
+                                    let argsVariants = this.resolveArgsVariants(argsRaw, { resourceObject: resourceObject, method: method.getText(), subnamespace: subnamespace.getText() });
+
+                                    for (let argsVariant of argsVariants) {
+                                        this.ResourceCalls.push({
+                                            'resourceObject': resourceObject,
+                                            'subnamespace': subnamespace.getText(),
+                                            'method': method.getText(),
+                                            'argsRaw': argsRaw,
+                                            'args': argsVariant,
+                                            'start': method.symbol.start,
+                                            'stop': method.symbol.stop
+                                        });
+                                    }
                                     break;
                                 }
                             }
@@ -302,15 +420,19 @@ export default class Python3AWSListener extends Python3ParserListener {
                             for (let resourceDeclaration of this.ResourceDeclarations) {
                                 if (namespace.getText() == resourceDeclaration['variable']) {
                                     if (method.getText()[0] == method.getText()[0].toLowerCase()) {
-                                        this.ResourceCalls.push({
-                                            'resource': resourceDeclaration,
-                                            'subnamespace': subnamespace.getText(),
-                                            'method': method.getText(),
-                                            'argsRaw': argsRaw,
-                                            'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, method: method.getText(), subnamespace: subnamespace.getText() }),
-                                            'start': method.symbol.start,
-                                            'stop': method.symbol.stop
-                                        });
+                                        let argsVariants = this.resolveArgsVariants(argsRaw, { resource: resourceDeclaration, method: method.getText(), subnamespace: subnamespace.getText() });
+
+                                        for (let argsVariant of argsVariants) {
+                                            this.ResourceCalls.push({
+                                                'resource': resourceDeclaration,
+                                                'subnamespace': subnamespace.getText(),
+                                                'method': method.getText(),
+                                                'argsRaw': argsRaw,
+                                                'args': argsVariant,
+                                                'start': method.symbol.start,
+                                                'stop': method.symbol.stop
+                                            });
+                                        }
                                     }
                                     break;
                                 }
@@ -342,28 +464,36 @@ export default class Python3AWSListener extends Python3ParserListener {
 
                         for (let clientDeclaration of this.ClientDeclarations) {
                             if (namespace.getText() == clientDeclaration['variable']) {
-                                this.ClientCalls.push({
-                                    'client': clientDeclaration,
-                                    'method': method.getText(),
-                                    'argsRaw': argsRaw,
-                                    'args': this.resolveArgs(argsRaw),
-                                    'start': method.symbol.start,
-                                    'stop': method.symbol.stop
-                                });
+                                let argsVariants = this.resolveArgsVariants(argsRaw);
+
+                                for (let argsVariant of argsVariants) {
+                                    this.ClientCalls.push({
+                                        'client': clientDeclaration,
+                                        'method': method.getText(),
+                                        'argsRaw': argsRaw,
+                                        'args': argsVariant,
+                                        'start': method.symbol.start,
+                                        'stop': method.symbol.stop
+                                    });
+                                }
                                 break;
                             }
                         }
 
                         for (let resourceObject of this.ResourceObjects) {
                             if (namespace.getText() == resourceObject['variable']) {
-                                this.ResourceCalls.push({
-                                    'resourceObject': resourceObject,
-                                    'method': method.getText(),
-                                    'argsRaw': argsRaw,
-                                    'args': this.resolveArgs(argsRaw, { resourceObject: resourceObject, method: method.getText() }),
-                                    'start': method.symbol.start,
-                                    'stop': method.symbol.stop
-                                });
+                                let argsVariants = this.resolveArgsVariants(argsRaw, { resourceObject: resourceObject, method: method.getText() });
+
+                                for (let argsVariant of argsVariants) {
+                                    this.ResourceCalls.push({
+                                        'resourceObject': resourceObject,
+                                        'method': method.getText(),
+                                        'argsRaw': argsRaw,
+                                        'args': argsVariant,
+                                        'start': method.symbol.start,
+                                        'stop': method.symbol.stop
+                                    });
+                                }
                                 break;
                             }
                         }
@@ -371,23 +501,31 @@ export default class Python3AWSListener extends Python3ParserListener {
                         for (let resourceDeclaration of this.ResourceDeclarations) {
                             if (namespace.getText() == resourceDeclaration['variable']) {
                                 if (method.getText()[0] == method.getText()[0].toLowerCase()) {
-                                    this.ResourceCalls.push({
-                                        'resource': resourceDeclaration,
-                                        'method': method.getText(),
-                                        'argsRaw': argsRaw,
-                                        'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, method: method.getText() }),
-                                        'start': method.symbol.start,
-                                        'stop': method.symbol.stop
-                                    });
+                                    let argsVariants = this.resolveArgsVariants(argsRaw, { resource: resourceDeclaration, method: method.getText() });
+
+                                    for (let argsVariant of argsVariants) {
+                                        this.ResourceCalls.push({
+                                            'resource': resourceDeclaration,
+                                            'method': method.getText(),
+                                            'argsRaw': argsRaw,
+                                            'args': argsVariant,
+                                            'start': method.symbol.start,
+                                            'stop': method.symbol.stop
+                                        });
+                                    }
                                 } else {
-                                    this.ResourceObjects.push({
-                                        'resource': resourceDeclaration,
-                                        'object': method.getText(),
-                                        'argsRaw': argsRaw,
-                                        'args': this.resolveArgs(argsRaw, { resource: resourceDeclaration, object: method.getText() }),
-                                        'start': method.symbol.start,
-                                        'stop': method.symbol.stop
-                                    });
+                                    let argsVariants = this.resolveArgsVariants(argsRaw, { resource: resourceDeclaration, object: method.getText() });
+
+                                    for (let argsVariant of argsVariants) {
+                                        this.ResourceObjects.push({
+                                            'resource': resourceDeclaration,
+                                            'object': method.getText(),
+                                            'argsRaw': argsRaw,
+                                            'args': argsVariant,
+                                            'start': method.symbol.start,
+                                            'stop': method.symbol.stop
+                                        });
+                                    }
                                 }
                                 break;
                             }

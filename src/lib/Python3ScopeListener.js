@@ -29,6 +29,33 @@ export default class Python3ScopeListener extends Python3ParserListener {
         return items;
     }
 
+    exitAtom_expr(ctx) {
+        let funcName = '';
+        let offset = 0;
+
+        if (ctx.children[offset].getText() == "await") {
+            offset += 1;
+        }
+
+        if (!ctx.children[offset] instanceof Python3Parser.AtomContext || ctx.children[offset].children.length != 1) { // skip if not terminal atom
+            return;
+        }
+        funcName = ctx.children[offset].getText();
+        offset += 1;
+
+        if (ctx.children.length > offset && ctx.children[offset].children.length == 3) { // at least one trailer exists
+            if (ctx.children[offset].children[1] instanceof Python3Parser.ArglistContext) {
+                this.FunctionCalls.push({
+                    'name': funcName,
+                    'scope': [...this.currentScope],
+                    'raw': ctx.children[offset],
+                    'args': null, // TODO: deprecate
+                    'argsRaw': ctx.children[offset].children[1]
+                });
+            }
+        }
+    }
+
     enterFuncdef(ctx) {
         this.currentScope.push(ctx.children[1].getText());
     }

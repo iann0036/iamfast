@@ -1,10 +1,7 @@
 import JavaScriptParser from './JavaScriptParser.js';
 import JavaScriptParserListener from './JavaScriptParserListener.js';
 import EnvironmentVariable from '../EnvironmentVariable.js';
-
-function scalarArraysAreEqual(array1, array2) {
-    return array1.length === array2.length && array1.every(function(value, index) { return value === array2[index]});
-}
+import { ScalarArraysAreEqual, GetVariableDeclarationVariants } from '../ParsingCommon.js';
 
 export default class JavaScriptAWSListener extends JavaScriptParserListener {
 
@@ -87,23 +84,24 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
     resolveArgsVariants(argsRaw) { // AWS call args (variants)
         let argVariants = [];
 
-        for (let variablesVariant of this.getVariableDeclarationVariants()) {
+        for (let variablesVariant of GetVariableDeclarationVariants(this)) {
             let args = {};
 
             for (let argument of argsRaw.children) {
                 if (argument instanceof JavaScriptParser.ArgumentContext) {
                     if (argument.children.length == 1) { // blah(###abc###) 
-                        if (argument.children[0] instanceof JavaScriptParser.IdentifierExpressionContext) {
+                        if (argument.children[0] instanceof JavaScriptParser.IdentifierExpressionContext) { // blah(argname)
                             let argumentsVariable = argument.children[0].getText();
 
                             for (let variable of Object.values(variablesVariant)) {
                                 if (variable.variable == argumentsVariable) {
                                     if (variable.type == "object") {
-                                        args = this.resolvePropertyMap(variable.value);
+                                        args = this.resolvePropertyMap(variable.value); // TODO: is this overriding previously set args?
                                     }
+                                    // TODO: More variable types
                                 }
                             }
-                        } else if (argument.children[0] instanceof JavaScriptParser.ObjectLiteralExpressionContext) {
+                        } else if (argument.children[0] instanceof JavaScriptParser.ObjectLiteralExpressionContext) { // blah({ ... })
                             args = this.resolvePropertyMap(this.generateObjectLiteralMap(argument.children[0]));
                         }
                     } else {
@@ -214,78 +212,6 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
 
     getSDKDeclarations() {
         return this.SDKDeclarations;
-    }
-
-    getVariableDeclarationVariants() {
-        /*
-            Order of priority:
-            1. Global vars
-            2. Global vars that are redeclared / set after (implicitly by list order)
-            3. Vars with increasingly matching scope (i.e. deepest to shallowest function depth), except current depth
-            4. Arguments
-            5. Vars with exactly matching scope (current depth)
-
-            At priority #4 and beyond, variants (different paths based on many function calls with different args) are generated
-        */
-
-       let args = {};
-       let argsVariants = [];
-
-        // priority #1 to #3 (parent-defined)
-        for (let i=0; i<this.currentScope.length; i++) {
-            for (let variableDeclaration of this.VariableDeclarations) {
-                if (scalarArraysAreEqual(variableDeclaration.scope, this.currentScope.slice(0, i))) {
-                    args[variableDeclaration.variable] = variableDeclaration;
-                }
-            }
-        }
-
-        // priority #4 (args)
-        for (let functionDeclaration of this.FunctionDeclarations) {
-            if (scalarArraysAreEqual(functionDeclaration.scope.concat([functionDeclaration.name]), this.currentScope)) { // scope check
-                for (let argName of functionDeclaration.argNames) {
-                    for (let functionCall of this.FunctionCalls) {
-                        if (functionCall.name == functionDeclaration.name) { // TODO: Scope check also
-                            let argsVariant = Object.assign({}, args); // shallow copy
-
-                            let resolvedCallArgs = this.resolveNamedArgs(functionCall.argsRaw);
-                            
-                            for (let arg of resolvedCallArgs) {
-                                if (arg.index === argName.index) {
-                                    argsVariant[argName.argName] = {
-                                        scope: [...this.currentScope],
-                                        variable: argName.argName,
-                                        type: arg.type,
-                                        value: arg.arg
-                                    };
-                                }
-                            }
-
-                            argsVariants.push(argsVariant);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (argsVariants.length == 0) {
-            argsVariants = [args];
-        }
-
-        // priority #5 (within function)
-        for (let variableDeclaration of this.VariableDeclarations) {
-            if (scalarArraysAreEqual(variableDeclaration.scope, this.currentScope)) {
-                args[variableDeclaration.variable] = variableDeclaration;
-
-                for (let i=0; i<argsVariants.length; i++) {
-                    argsVariants[i][variableDeclaration.variable] = variableDeclaration;
-                }
-            }
-        }
-
-        // TODO: dedup variants
-
-        return argsVariants;
     }
 
     aggregateVariableOrAssignmentDeclaration(ctx) {
@@ -452,7 +378,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
             }
 
             if (namespace instanceof JavaScriptParser.IdentifierExpressionContext) {
-                for (let variablesVariant of this.getVariableDeclarationVariants()) {
+                for (let variablesVariant of GetVariableDeclarationVariants(this)) {
                     for (let variable of Object.values(variablesVariant)) {
                         if (variable.variable == namespaceText) {
                             if (variable.type == 'clientdeclaration') {
