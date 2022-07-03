@@ -142,13 +142,13 @@ npm test
 - [x] Identify resource instantiations
 - [x] Identify resource calls
 - [x] Interpret call arguments (top-level, static)
-- [ ] Interpret call arguments (top-level, variable)
+- [x] Interpret call arguments (top-level, variable)
 - [ ] Interpret call arguments (deep, static)
 - [ ] Interpret call arguments (deep, variable)
-- [ ] Track literal variables
+- [x] Track literal variables
 - [ ] Track object variables
 - [ ] Track environmental variables
-- [ ] Understand scope (build the call stack)
+- [x] Understand scope (build the call stack)
 - [ ] Cross-file relationships
 - [ ] Understand entrypoints and code accessibility
 - [ ] Performance tuning
