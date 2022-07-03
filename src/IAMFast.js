@@ -12,6 +12,9 @@ export default class IAMFast {
         this.aws_partition = aws_partition || 'aws';
         this.aws_region = aws_region || 'us-east-1';
         this.aws_accountid = aws_accountid || '123456789012';
+        this.initial_aws_partition = this.aws_partition;
+        this.initial_aws_region = this.aws_region;
+        this.initial_aws_accountid = this.aws_accountid;
         this.tracked_environment_variables = [];
         this.iam_def = iam_def;
         this.mappings = mappings;
@@ -400,7 +403,12 @@ export default class IAMFast {
     }
 
     Clear() {
+        this.aws_partition = this.initial_aws_partition;
+        this.aws_region = this.initial_aws_region;
+        this.aws_accountid = this.initial_aws_accountid;
+        this.tracked_environment_variables = [];
         this.privs = [];
+        this.last_privs = [];
     }
 
     GenerateYAMLPolicy(code, language) {
