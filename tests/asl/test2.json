@@ -15,7 +15,7 @@
       "Type": "Task",
       "Resource": "arn:aws:states:::states:startExecution.sync",
       "Parameters": {
-        "StateMachineArn": "arn:aws:states:us-east-1:642712255693:stateMachine:TypescriptStateMachineChildStateMachineF20FCB80-p8mpcm39RmTG",
+        "StateMachineArn": "arn:aws:states:us-east-1:123456789012:stateMachine:TypescriptStateMachineChildStateMachineF20FCB80-p8mpcm39RmTG",
         "Input": {
           "firstName": "Santa",
           "lastName": "Claus",

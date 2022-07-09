@@ -38,7 +38,58 @@ describe('main.js', function () {
             }
             )
         })
-
+        it.only('should produce a valid iam definition for synch stepfunction call', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test2.json");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "states:StartExecution",
+                        "Resource": [
+                            "arn:aws:states:us-east-1:123456789012:stateMachine:TypescriptStateMachineChildStateMachineF20FCB80-p8mpcm39RmTG"
+                        ]
+                    }, {
+                        "Action": "events:PutRule",
+                        "Effect": "Allow",
+                        "Resource": [
+                        "arn:aws:events:us-east-1:123456789012:rule/[*/]StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        ],
+                    },
+                    {
+                        "Action": "events:PutTargets",
+                        "Effect": "Allow",
+                        "Resource": [
+                        "arn:aws:events:us-east-1:123456789012:rule/[*/]StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        ]
+                    },
+                    {
+                        "Action": "events:DescribeRule",
+                        "Effect": "Allow",
+                        "Resource": [
+                        "arn:aws:events:us-east-1:123456789012:rule/[*/]StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        ]
+                    }
+                ]
+            }
+            )
+        })
+        it.only('should produce a valid iam definition for direct lambda call', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test3.json");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "lambda:InvokeFunction",
+                        "Resource": [
+                            "arn:aws:lambda:us-east-1:123456789012:function:HelloFunction"
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
 
         it('should produce a valid iam definition for DynamoDB (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test1.js");
