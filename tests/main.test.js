@@ -20,7 +20,26 @@ const generatePolicyAsJson = (filePath) => {
 
 describe('main.js', function () {
     this.timeout(10000);
+    
     describe('generateIAMPolicy', () => {
+        it.only('should produce a valid iam definition for DynamoDB (ASL)', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test1.json");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "dynamodb:GetItem",
+                        "Resource": [
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/Boo"
+                        ]
+                    }
+                ]
+            }
+            )
+        })
+
+
         it('should produce a valid iam definition for DynamoDB (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test1.js");
             expect(policy).to.deep.equal({

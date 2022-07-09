@@ -1,0 +1,46 @@
+{
+  "Comment": "A Hello World example of the Amazon States Language using Pass states",
+  "StartAt": "Hello",
+  "States": {
+    "Hello": {
+      "Type": "Pass",
+      "Result": "Hello",
+      "Next": "assignment(input)"
+    },
+    "assignment(input)": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:dynamodb:getItem",
+      "Parameters": {
+        "TableName": "Boo",
+        "Key": {
+          "PK": {
+            "S": "ff"
+          },
+          "SK": {
+            "S": "ff"
+          }
+        }
+      },
+      "Comment": "source: assignment(input)",
+      "ResultPath": "$.tmp.result",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "World"
+    },
+    "World": {
+      "Type": "Pass",
+      "Result": "World",
+      "End": true
+    }
+  }
+}

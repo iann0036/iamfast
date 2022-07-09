@@ -36,6 +36,8 @@ export default class IAMFast {
             language = 'go';
         } else if (path.endsWith(".cpp") || path.endsWith(".c")) {
             language = 'cplusplus';
+        } else if (path.endsWith(".json")) {
+            language = 'asl';
         }
 
         return language;

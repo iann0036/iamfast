@@ -31,6 +31,7 @@ import PyOpsWorksService from './lib/py-opsworks-service.js';
 import PyS3Service from './lib/py-s3-service.js';
 import PySNSService from './lib/py-sns-service.js';
 import PySQSService from './lib/py-sqs-service.js';
+import AslParser from './lib/AslParser.js';
 
 export default class AWSParser {
 
@@ -58,6 +59,12 @@ export default class AWSParser {
         let chars = new antlr4.InputStream(input);
 
         switch (language) {
+            case 'asl':
+                parser =  new AslParser(chars);
+                this.client_calls = parser.listClientCalls();
+                this.environmental_variables = [];
+
+                break;
             case 'js':
                 lexer = new JavaScriptLexer(chars);
                 lexer.strictMode = false;
