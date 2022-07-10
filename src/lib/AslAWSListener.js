@@ -77,7 +77,7 @@ class JSONObjectAccessor {
         return this.#internalStructure.start.start;
     }
 
-    getEndPosition() {
+    getStopPosition() {
         return this.#internalStructure.stop.stop;
     }
 }
@@ -136,8 +136,8 @@ export default class AslAWSListener extends JSONListener {
                                 variable: name
                             },
                             method,
-                            start: 0,
-                            stop: 0,
+                            start: state.getStartPosition(),
+                            stop: state.getStopPosition(),
                             args,
                         })
 
@@ -155,8 +155,8 @@ export default class AslAWSListener extends JSONListener {
                                 variable: name
                             },
                             method,
-                            start: 0,
-                            stop: 0,
+                            start: state.getStartPosition(),
+                            stop: state.getStopPosition(),
                             args,
                         })
 
@@ -189,8 +189,8 @@ export default class AslAWSListener extends JSONListener {
                                 variable: name
                             },
                             method: "Invoke",
-                            start: 0,
-                            stop: 0,
+                            start: state.getStartPosition(),
+                            stop: state.getStopPosition(),
                             args: { FunctionName: functionName },
                         });
                         continue;
