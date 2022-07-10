@@ -20,6 +20,9 @@ import CPP14AWSListener from './lib/CPP14AWSListener.js';
 import GoLexer from './lib/GoLexer.js'
 import GoParser from './lib/GoParser.js';
 import GoAWSListener from './lib/GoAWSListener.js';
+import JSONLexer from './lib/JSONLexer.js'
+import JSONParser from './lib/JSONParser.js';
+import AslAWSListener from './lib/AslAWSListener.js';
 
 import PyCloudFormationService from './lib/py-cloudformation-service.js';
 import PyCloudWatchService from './lib/py-cloudwatch-service.js';
@@ -31,7 +34,6 @@ import PyOpsWorksService from './lib/py-opsworks-service.js';
 import PyS3Service from './lib/py-s3-service.js';
 import PySNSService from './lib/py-sns-service.js';
 import PySQSService from './lib/py-sqs-service.js';
-import AslParser from './lib/AslParser.js';
 
 export default class AWSParser {
 
@@ -59,12 +61,6 @@ export default class AWSParser {
         let chars = new antlr4.InputStream(input);
 
         switch (language) {
-            case 'asl':
-                parser =  new AslParser(chars);
-                this.client_calls = parser.listClientCalls();
-                this.environmental_variables = [];
-
-                break;
             case 'js':
                 lexer = new JavaScriptLexer(chars);
                 lexer.strictMode = false;
@@ -172,6 +168,26 @@ export default class AWSParser {
 
                 this.client_calls = listener.ClientCalls;
                 this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
+
+                this.debug && console.log(listener);
+
+                break;
+            case 'asl':
+                lexer = new JSONLexer(chars);
+                lexer.strictMode = false;
+    
+                tokens = new antlr4.CommonTokenStream(lexer);
+                parser = new JSONParser(tokens);
+                parser.buildParseTrees = true;
+    
+                tree = parser.json();
+                this.debug && this.treeWalker(tree, 0);
+    
+                listener = new AslAWSListener();
+                antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
+
+                this.client_calls = listener.ClientCalls;
+                this.environmental_variables = [];
 
                 this.debug && console.log(listener);
 

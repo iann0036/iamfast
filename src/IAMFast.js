@@ -37,6 +37,7 @@ export default class IAMFast {
         } else if (path.endsWith(".cpp") || path.endsWith(".c")) {
             language = 'cplusplus';
         } else if (path.endsWith(".json")) {
+            // TODO: Very basic content validation (probably with default JSON parse)
             language = 'asl';
         }
 
