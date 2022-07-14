@@ -207,7 +207,8 @@ export default class IAMFast {
         return arn.replace(/\$\{Partition\}/g, this.aws_partition)
             .replace(/\$\{Region\}/g, this.aws_region)
             .replace(/\$\{Account\}/g, this.aws_accountid)
-            .replace(/rule\/\[\$\{EventBusName\}\/]/g, "rule/"); //default bus
+            .replace(/rule\/\[\$\{EventBusName\}\/]/g, "rule/") //default bus
+            .replace(/\$\{(?!Token\[AWS\.(AccountId|Region)\.\d+]).*?\}/g, "*"); //ensure CDK tokens dont get replaced
     }
 
     toIAMPolicy(privs) {

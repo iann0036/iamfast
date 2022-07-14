@@ -1,0 +1,59 @@
+
+{
+  "StartAt": "Initialize",
+  "States": {
+    "Initialize": {
+      "Type": "Pass",
+      "ResultPath": "$",
+      "Parameters": {
+        "vars.$": "$$.Execution.Input",
+        "_undefined": null,
+        "_null": null
+      },
+      "Next": "Call Api GW"
+    },
+    "Call Api GW": {
+      "Type": "Task",
+      "ResultPath": "$.vars.legacyData",
+      "Resource": "arn:aws:states:::apigateway:invoke",
+      "Parameters": {
+        "ApiEndpoint": "aaabbbddde.execute-api.us-east-1.amazonaws.com",
+        "Method": "GET",
+        "Stage": "prod",
+        "Path.$": "States.Format('/accounts/{}/xxxx', $.vars.customerId)",
+        "AuthType": "IAM_ROLE"
+      },
+      "Next": "Evaluate StringToJson($.t ..."
+    },
+    "Evaluate StringToJson($.t ...": {
+      "Type": "Pass",
+      "ResultPath": "$.tmp.eval",
+      "Parameters": {
+        "value.$": "States.StringToJson($.tmp.result.Output)"
+      },
+      "Next": "Convert Result"
+    },
+    "Convert Result": {
+      "Type": "Pass",
+      "InputPath": "$.tmp.eval.value",
+      "ResultPath": "$.tmp.result",
+      "Next": "Assign name"
+    },
+    "Assign name": {
+      "Type": "Pass",
+      "InputPath": "$.tmp.result",
+      "ResultPath": "$.vars.name",
+      "Comment": "source: name = await childStateMachine({firstName: \"Sa ...",
+      "Next": "Return name"
+    },
+    "Return name": {
+      "Type": "Pass",
+      "InputPath": "$.vars.name",
+      "End": true
+    }
+  },
+  "Comment": "ASL Generated using ts2asl version 0.1.57."
+}
+
+
+

@@ -7,8 +7,8 @@ const expect = chai.expect;
 import IAMFast from "../src/IAMFast.js";
 
 
-const generatePolicyAsJson = (filePath) => {
-    const sut = new IAMFast("aws", "us-east-1", "123456789012");
+const generatePolicyAsJson = (filePath, awsAccountId = "123456789012") => {
+    const sut = new IAMFast("aws", "us-east-1", awsAccountId);
     
     let language = IAMFast.getLanguageByPath(filePath);
 
@@ -90,7 +90,38 @@ describe('main.js', function () {
             }
             )
         })
-
+        it.only('should produce a valid iam definition for API GW Invoke', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test4.json");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "execute-api:Invoke",
+                        "Resource": [
+                            "arn:aws:execute-api:us-east-1:123456789012:*/prod/GET/*"
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
+        it.only('should allow CDK Token to be passed as account Id', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test4.json", "${Token[AWS.AccountId.0]}");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "execute-api:Invoke",
+                        "Resource": [
+                            "arn:aws:execute-api:us-east-1:${Token[AWS.AccountId.0]}:*/prod/GET/*"
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
         it('should produce a valid iam definition for DynamoDB (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test1.js");
             expect(policy).to.deep.equal({
