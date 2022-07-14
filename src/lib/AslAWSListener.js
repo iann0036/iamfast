@@ -1,7 +1,7 @@
 import JSONParser from './JSONParser.js';
 import JSONListener from './JSONListener.js';
 
-const optimizedIntegrationServiceToServiceName = { "states": "stepfunctions" };
+const optimizedIntegrationServiceToServiceName = { "states": "stepfunctions", "apigateway": "execute-api" };
 const optimizedIntegrationOperationToOperationName = {};
 
 class JSONObjectAccessor {
@@ -194,9 +194,22 @@ export default class AslAWSListener extends JSONListener {
                             args: { FunctionName: functionName },
                         });
                         continue;
+                    } else if (resourceParts.length === 1 && resourceParts[0].startsWith("${Token")) {
+                        const functionName = resourceParts[0];
 
+                        arr.push({
+                            client: {
+                                type: "Lambda",
+                                variable: name
+                            },
+                            method: "Invoke",
+                            start: state.getStartPosition(),
+                            stop: state.getStopPosition(),
+                            args: { FunctionName: functionName },
+                        });
+                        continue;
                     }
-                    //console.warn(`unknown task resource ${resource}`)
+                    console.warn(`unknown task resource ${resource}`)
                     break;
             }
         }

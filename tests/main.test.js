@@ -53,21 +53,21 @@ describe('main.js', function () {
                         "Action": "events:PutRule",
                         "Effect": "Allow",
                         "Resource": [
-                        "arn:aws:events:us-east-1:123456789012:rule/[*/]StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        "arn:aws:events:us-east-1:123456789012:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
                         ],
                     },
                     {
                         "Action": "events:PutTargets",
                         "Effect": "Allow",
                         "Resource": [
-                        "arn:aws:events:us-east-1:123456789012:rule/[*/]StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        "arn:aws:events:us-east-1:123456789012:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
                         ]
                     },
                     {
                         "Action": "events:DescribeRule",
                         "Effect": "Allow",
                         "Resource": [
-                        "arn:aws:events:us-east-1:123456789012:rule/[*/]StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        "arn:aws:events:us-east-1:123456789012:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
                         ]
                     }
                 ]

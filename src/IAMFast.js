@@ -207,7 +207,7 @@ export default class IAMFast {
         return arn.replace(/\$\{Partition\}/g, this.aws_partition)
             .replace(/\$\{Region\}/g, this.aws_region)
             .replace(/\$\{Account\}/g, this.aws_accountid)
-            .replace(/\$\{.*\}/g, "*");
+            .replace(/rule\/\[\$\{EventBusName\}\/]/g, "rule/"); //default bus
     }
 
     toIAMPolicy(privs) {
