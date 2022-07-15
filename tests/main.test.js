@@ -138,6 +138,23 @@ describe('main.js', function () {
             }
             )
         })
+        it.only('should translate a ts2asl replacement in resource to function *', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test6.json", "123123123123");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "lambda:InvokeFunction",
+                        "Resource": [
+                            //todo: might be better to a) replace [!lambda[xxxxx]arn] with [!lambda[xxxx]name] and pass it down the FunctionName (or!) replace region & accountId with * 
+                            "arn:aws:lambda:us-east-1:123123123123:function:*" 
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
         it('should produce a valid iam definition for DynamoDB (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test1.js");
             expect(policy).to.deep.equal({

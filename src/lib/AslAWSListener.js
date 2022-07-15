@@ -123,11 +123,10 @@ export default class AslAWSListener extends JSONListener {
 
                 case "Task":
                     const resource = state.Resource;
-                    const args = state.Parameters;
+                    const args = state.Parameters || {};
                     if (!resource) continue;
                     const resourceParts = resource.split(":");
-                    if (resourceParts[0] !== "arn" || resourceParts[1] !== "aws") continue; //doest seem like something we are looking for
-                    if (resourceParts[2] === "states" && resourceParts[5] === "aws-sdk") { //sdk integration, example: arn:aws:states:::aws-sdk:dynamodb:getItem
+                    if (resourceParts[0] === "arn" && resourceParts[1] === "aws" && resourceParts[2] === "states" && resourceParts[5] === "aws-sdk") { //sdk integration, example: arn:aws:states:::aws-sdk:dynamodb:getItem
                         const serviceName = resourceParts[6];
                         const method = resourceParts[7];
                         arr.push({
@@ -142,7 +141,7 @@ export default class AslAWSListener extends JSONListener {
                         })
 
                         continue;
-                    } else if (resourceParts[2] === "states") { //optimized integration, example: arn:aws:states:::states:startExecution.sync
+                    } else if (resourceParts[0] === "arn" && resourceParts[1] === "aws" && resourceParts[2] === "states") { //optimized integration, example: arn:aws:states:::states:startExecution.sync
                         const integrationService = resourceParts[5];
                         const integrationOperation = resourceParts[6];
                         if (!integrationService || !integrationOperation) continue;
@@ -179,7 +178,7 @@ export default class AslAWSListener extends JSONListener {
                                 break;
                         }
                         continue;
-                    } else if (resourceParts[2] === "lambda" && resourceParts[5] === "function") { //lambda arn, arn:aws:lambda:us-east-1:123456789012:function:HelloFunction
+                    } else if (resourceParts[0] === "arn" && resourceParts[1] === "aws" && resourceParts[2] === "lambda" && resourceParts[5] === "function") { //lambda arn, arn:aws:lambda:us-east-1:123456789012:function:HelloFunction
                         const functionName = resourceParts[6];
                         if (!functionName) continue;
 
@@ -194,9 +193,7 @@ export default class AslAWSListener extends JSONListener {
                             args: { FunctionName: functionName },
                         });
                         continue;
-                    } else if (resourceParts.length === 1 && resourceParts[0].startsWith("${Token")) {
-                        const functionName = resourceParts[0];
-
+                    } else if (resourceParts.length === 1 && resourceParts[0].startsWith("[!lambda")) {
                         arr.push({
                             client: {
                                 type: "Lambda",
@@ -205,7 +202,7 @@ export default class AslAWSListener extends JSONListener {
                             method: "Invoke",
                             start: state.getStartPosition(),
                             stop: state.getStopPosition(),
-                            args: { FunctionName: functionName },
+                            args: {}
                         });
                         continue;
                     }
