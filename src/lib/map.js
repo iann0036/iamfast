@@ -175,6 +175,7 @@ export default {
         "DynamoDB.BatchExecuteStatement": [
             {
                 "action": "dynamodb:PartiQLSelect",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Statements[].Statement",
                     "op": "IContains",
@@ -183,6 +184,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLInsert",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Statements[].Statement",
                     "op": "IContains",
@@ -191,6 +193,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLUpdate",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Statements[].Statement",
                     "op": "IContains",
@@ -199,6 +202,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLDelete",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Statements[].Statement",
                     "op": "IContains",
@@ -209,6 +213,7 @@ export default {
         "DynamoDB.ExecuteStatement": [
             {
                 "action": "dynamodb:PartiQLSelect",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Statement",
                     "op": "IContains",
@@ -217,6 +222,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLInsert",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Statement",
                     "op": "IContains",
@@ -225,6 +231,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLUpdate",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Statement",
                     "op": "IContains",
@@ -233,6 +240,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLDelete",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Statement",
                     "op": "IContains",
@@ -243,6 +251,7 @@ export default {
         "DynamoDB.ExecuteTransaction": [
             {
                 "action": "dynamodb:PartiQLSelect",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "TransactStatements[].Statement",
                     "op": "IContains",
@@ -251,6 +260,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLInsert",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "TransactStatements[].Statement",
                     "op": "IContains",
@@ -259,6 +269,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLUpdate",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "TransactStatements[].Statement",
                     "op": "IContains",
@@ -267,6 +278,7 @@ export default {
             },
             {
                 "action": "dynamodb:PartiQLDelete",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "TransactStatements[].Statement",
                     "op": "IContains",
@@ -514,6 +526,7 @@ export default {
         "S3.DeleteObjects": [
             {
                 "action": "s3:DeleteObject",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Delete.Objects[].VersionId",
                     "op": "NotExists"
@@ -521,6 +534,7 @@ export default {
             },
             {
                 "action": "s3:DeleteObjectVersion",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "Delete.Objects[].VersionId",
                     "op": "Exists"
@@ -1264,6 +1278,7 @@ export default {
         "TimestreamQuery.Query": [
             {
                 "action": "timestream:Select",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "QueryString",
                     "op": "IContains",
@@ -1277,6 +1292,7 @@ export default {
             },
             {
                 "action": "timestream:SelectValues",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "QueryString",
                     "op": "IContains",
@@ -1290,6 +1306,7 @@ export default {
             },
             {
                 "action": "timestream:ListDatabases",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "QueryString",
                     "op": "IContains",
@@ -1298,6 +1315,7 @@ export default {
             },
             {
                 "action": "timestream:ListTables",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "QueryString",
                     "op": "IContains",
@@ -1306,6 +1324,7 @@ export default {
             },
             {
                 "action": "timestream:ListMeasures",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "QueryString",
                     "op": "IContains",
@@ -1314,6 +1333,7 @@ export default {
             },
             {
                 "action": "timestream:DescribeTable",
+                "resource_mappings": {},
                 "conditions": {
                     "lhs": "QueryString",
                     "op": "IContains",
