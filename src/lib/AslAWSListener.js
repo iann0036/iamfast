@@ -110,14 +110,14 @@ export default class AslAWSListener extends JSONListener {
             if (!state.Type) continue;
             switch (state.Type) {
                 case "Map":
-                    this.appendClientCalls(state.Iterator);
+                    this.appendClientCalls(state.Iterator, arr);
                     break;
 
                 case "Parallel":
                     const branches = state.Branches;
                     if (!branches || !Array.isArray(branches)) continue;
                     for (const branch of branches) {
-                        this.appendClientCalls(branch);
+                        this.appendClientCalls(branch, arr);
                     }
                     break;
 

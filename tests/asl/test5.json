@@ -1,0 +1,41 @@
+{
+  "StartAt": "Parallel",
+  "States": {
+    "Parallel": {  
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "Assign",
+          "States": {
+            "Assign": {
+              "Type": "Task",
+              "ResultPath": "$.vars.return_var",
+              "Resource": "arn:aws:lambda:us-east-1:642712255693:function:function-name",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Return",
+              "End": true
+            }
+          }
+        }
+      ],
+      "ResultPath": "$.result",
+      "Next": "Return_2"
+    },
+    "Return_2": {
+      "Type": "Pass",
+      "InputPath": "$.result",
+      "End": true
+    }
+  }
+}

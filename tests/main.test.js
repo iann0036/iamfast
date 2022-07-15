@@ -47,7 +47,7 @@ describe('main.js', function () {
                         "Effect": "Allow",
                         "Action": "states:StartExecution",
                         "Resource": [
-                            "arn:aws:states:us-east-1:123456789012:stateMachine:TypescriptStateMachineChildStateMachineF20FCB80-p8mpcm39RmTG"
+                            "arn:aws:states:us-east-1:123456789012:stateMachine:statemachine-name"
                         ]
                     }, {
                         "Action": "events:PutRule",
@@ -116,6 +116,22 @@ describe('main.js', function () {
                         "Action": "execute-api:Invoke",
                         "Resource": [
                             "arn:aws:execute-api:us-east-1:${Token[AWS.AccountId.0]}:*/prod/GET/*"
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
+        it.only('should collect permissions from within Asl Parallel', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test5.json", "123123123123");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "lambda:InvokeFunction",
+                        "Resource": [
+                            "arn:aws:lambda:us-east-1:123123123123:function:function-name"
                         ]
                     }, 
                 ]

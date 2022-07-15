@@ -1,28 +1,17 @@
 {
-  "StartAt": "Initialize",
+  "StartAt": "Sync Invoke",
   "States": {
-    "Initialize": {
-      "Type": "Pass",
-      "ResultPath": "$",
-      "Parameters": {
-        "vars.$": "$$.Execution.Input",
-        "_undefined": null,
-        "_null": null
-      },
-      "Next": "childStateMachine({firstN ..."
-    },
-    "childStateMachine({firstN ...": {
+    "Sync Invoke": {
       "Type": "Task",
       "Resource": "arn:aws:states:::states:startExecution.sync",
       "Parameters": {
-        "StateMachineArn": "arn:aws:states:us-east-1:123456789012:stateMachine:TypescriptStateMachineChildStateMachineF20FCB80-p8mpcm39RmTG",
+        "StateMachineArn": "arn:aws:states:us-east-1:123456789012:stateMachine:statemachine-name",
         "Input": {
           "firstName": "Santa",
           "lastName": "Claus",
           "AWS_STEP_FUNCTIONS_STARTED_BY_EXECUTION_ID.$": "$$.Execution.Id"
         }
       },
-      "Comment": "source: childStateMachine({firstName: \"Santa\", lastNam ...",
       "ResultPath": "$.tmp.result",
       "Retry": [
         {
@@ -36,34 +25,7 @@
           "BackoffRate": 2
         }
       ],
-      "Next": "Evaluate StringToJson($.t ..."
-    },
-    "Evaluate StringToJson($.t ...": {
-      "Type": "Pass",
-      "ResultPath": "$.tmp.eval",
-      "Parameters": {
-        "value.$": "States.StringToJson($.tmp.result.Output)"
-      },
-      "Next": "Convert Result"
-    },
-    "Convert Result": {
-      "Type": "Pass",
-      "InputPath": "$.tmp.eval.value",
-      "ResultPath": "$.tmp.result",
-      "Next": "Assign name"
-    },
-    "Assign name": {
-      "Type": "Pass",
-      "InputPath": "$.tmp.result",
-      "ResultPath": "$.vars.name",
-      "Comment": "source: name = await childStateMachine({firstName: \"Sa ...",
-      "Next": "Return name"
-    },
-    "Return name": {
-      "Type": "Pass",
-      "InputPath": "$.vars.name",
       "End": true
     }
-  },
-  "Comment": "ASL Generated using ts2asl version 0.1.57."
+  }
 }

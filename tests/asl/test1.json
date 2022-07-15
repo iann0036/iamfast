@@ -5,9 +5,9 @@
     "Hello": {
       "Type": "Pass",
       "Result": "Hello",
-      "Next": "assignment(input)"
+      "Next": "GetItem"
     },
-    "assignment(input)": {
+    "GetItem": {
       "Type": "Task",
       "Resource": "arn:aws:states:::aws-sdk:dynamodb:getItem",
       "Parameters": {
@@ -21,25 +21,6 @@
           }
         }
       },
-      "Comment": "source: assignment(input)",
-      "ResultPath": "$.tmp.result",
-      "Retry": [
-        {
-          "ErrorEquals": [
-            "Lambda.ServiceException",
-            "Lambda.AWSLambdaException",
-            "Lambda.SdkClientException"
-          ],
-          "IntervalSeconds": 2,
-          "MaxAttempts": 6,
-          "BackoffRate": 2
-        }
-      ],
-      "Next": "World"
-    },
-    "World": {
-      "Type": "Pass",
-      "Result": "World",
       "End": true
     }
   }
