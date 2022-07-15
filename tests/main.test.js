@@ -7,8 +7,8 @@ const expect = chai.expect;
 import IAMFast from "../src/IAMFast.js";
 
 
-const generatePolicyAsJson = (filePath) => {
-    const sut = new IAMFast("aws", "us-east-1", "123456789012");
+const generatePolicyAsJson = (filePath, awsAccountId = "123456789012") => {
+    const sut = new IAMFast("aws", "us-east-1", awsAccountId);
     
     let language = IAMFast.getLanguageByPath(filePath);
 
@@ -20,7 +20,141 @@ const generatePolicyAsJson = (filePath) => {
 
 describe('main.js', function () {
     this.timeout(10000);
+    
     describe('generateIAMPolicy', () => {
+        it.only('should produce a valid iam definition for DynamoDB (ASL)', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test1.json");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "dynamodb:GetItem",
+                        "Resource": [
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/Boo"
+                        ]
+                    }
+                ]
+            }
+            )
+        })
+        it.only('should produce a valid iam definition for synch stepfunction call', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test2.json");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "states:StartExecution",
+                        "Resource": [
+                            "arn:aws:states:us-east-1:123456789012:stateMachine:statemachine-name"
+                        ]
+                    }, {
+                        "Action": "events:PutRule",
+                        "Effect": "Allow",
+                        "Resource": [
+                        "arn:aws:events:us-east-1:123456789012:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        ],
+                    },
+                    {
+                        "Action": "events:PutTargets",
+                        "Effect": "Allow",
+                        "Resource": [
+                        "arn:aws:events:us-east-1:123456789012:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        ]
+                    },
+                    {
+                        "Action": "events:DescribeRule",
+                        "Effect": "Allow",
+                        "Resource": [
+                        "arn:aws:events:us-east-1:123456789012:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                        ]
+                    }
+                ]
+            }
+            )
+        })
+        it.only('should produce a valid iam definition for direct lambda call', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test3.json");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "lambda:InvokeFunction",
+                        "Resource": [
+                            "arn:aws:lambda:us-east-1:123456789012:function:HelloFunction"
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
+        it.only('should produce a valid iam definition for API GW Invoke', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test4.json");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "execute-api:Invoke",
+                        "Resource": [
+                            "arn:aws:execute-api:us-east-1:123456789012:*/prod/GET/*"
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
+        it.only('should allow CDK Token to be passed as account Id', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test4.json", "${Token[AWS.AccountId.0]}");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "execute-api:Invoke",
+                        "Resource": [
+                            "arn:aws:execute-api:us-east-1:${Token[AWS.AccountId.0]}:*/prod/GET/*"
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
+        it.only('should collect permissions from within Asl Parallel', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test5.json", "123123123123");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "lambda:InvokeFunction",
+                        "Resource": [
+                            "arn:aws:lambda:us-east-1:123123123123:function:function-name"
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
+        it.only('should translate a ts2asl replacement in resource to function *', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test6.json", "123123123123");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "lambda:InvokeFunction",
+                        "Resource": [
+                            //todo: might be better to a) replace [!lambda[xxxxx]arn] with [!lambda[xxxx]name] and pass it down the FunctionName (or!) replace region & accountId with * 
+                            "arn:aws:lambda:us-east-1:123123123123:function:*" 
+                        ]
+                    }, 
+                ]
+            }
+            )
+        })
         it('should produce a valid iam definition for DynamoDB (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test1.js");
             expect(policy).to.deep.equal({

@@ -6,7 +6,7 @@ import IAMFast from "./IAMFast.js";
 import path from "path";
 import fs from "fs";
 
-const EXTS = ['.js', '.jsx', '.py', '.py3', '.java', '.go', '.c', '.cpp'];
+const EXTS = ['.js', '.jsx', '.py', '.py3', '.java', '.go', '.c', '.cpp', '.json'];
 const FORMATS = ['json', 'yaml', 'hcl', 'sam'];
 
 program

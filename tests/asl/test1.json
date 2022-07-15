@@ -1,0 +1,27 @@
+{
+  "Comment": "A Hello World example of the Amazon States Language using Pass states",
+  "StartAt": "Hello",
+  "States": {
+    "Hello": {
+      "Type": "Pass",
+      "Result": "Hello",
+      "Next": "GetItem"
+    },
+    "GetItem": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:dynamodb:getItem",
+      "Parameters": {
+        "TableName": "Boo",
+        "Key": {
+          "PK": {
+            "S": "ff"
+          },
+          "SK": {
+            "S": "ff"
+          }
+        }
+      },
+      "End": true
+    }
+  }
+}

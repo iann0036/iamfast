@@ -36,6 +36,9 @@ export default class IAMFast {
             language = 'go';
         } else if (path.endsWith(".cpp") || path.endsWith(".c")) {
             language = 'cplusplus';
+        } else if (path.endsWith(".json")) {
+            // TODO: Very basic content validation (probably with default JSON parse)
+            language = 'asl';
         }
 
         return language;
@@ -204,7 +207,8 @@ export default class IAMFast {
         return arn.replace(/\$\{Partition\}/g, this.aws_partition)
             .replace(/\$\{Region\}/g, this.aws_region)
             .replace(/\$\{Account\}/g, this.aws_accountid)
-            .replace(/\$\{.*?\}/g, "*");
+            .replace(/\$\{(?!Token\[AWS\.(AccountId|Region)\.\d+]).*?\}/g, "*"); //ensure CDK tokens dont get replaced
+
     }
 
     toIAMPolicy(privs) {

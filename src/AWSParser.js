@@ -20,6 +20,9 @@ import CPP14AWSListener from './lib/CPP14AWSListener.js';
 import GoLexer from './lib/GoLexer.js'
 import GoParser from './lib/GoParser.js';
 import GoAWSListener from './lib/GoAWSListener.js';
+import JSONLexer from './lib/JSONLexer.js'
+import JSONParser from './lib/JSONParser.js';
+import AslAWSListener from './lib/AslAWSListener.js';
 
 import PyCloudFormationService from './lib/py-cloudformation-service.js';
 import PyCloudWatchService from './lib/py-cloudwatch-service.js';
@@ -165,6 +168,26 @@ export default class AWSParser {
 
                 this.client_calls = listener.ClientCalls;
                 this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
+
+                this.debug && console.log(listener);
+
+                break;
+            case 'asl':
+                lexer = new JSONLexer(chars);
+                lexer.strictMode = false;
+    
+                tokens = new antlr4.CommonTokenStream(lexer);
+                parser = new JSONParser(tokens);
+                parser.buildParseTrees = true;
+    
+                tree = parser.json();
+                this.debug && this.treeWalker(tree, 0);
+    
+                listener = new AslAWSListener();
+                antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
+
+                this.client_calls = listener.ClientCalls;
+                this.environmental_variables = [];
 
                 this.debug && console.log(listener);
 

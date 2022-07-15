@@ -1,0 +1,22 @@
+
+{
+  "StartAt": "Call Api GW",
+  "States": {
+    "Call Api GW": {
+      "Type": "Task",
+      "ResultPath": "$.vars.legacyData",
+      "Resource": "arn:aws:states:::apigateway:invoke",
+      "Parameters": {
+        "ApiEndpoint": "aaabbbddde.execute-api.us-east-1.amazonaws.com",
+        "Method": "GET",
+        "Stage": "prod",
+        "Path.$": "States.Format('/accounts/{}/xxxx', $.vars.customerId)",
+        "AuthType": "IAM_ROLE"
+      },
+      "End": true
+    }
+  }
+}
+
+
+
