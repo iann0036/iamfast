@@ -208,6 +208,7 @@ export default class IAMFast {
             .replace(/\$\{Region\}/g, this.aws_region)
             .replace(/\$\{Account\}/g, this.aws_accountid)
             .replace(/\$\{(?!Token\[AWS\.(AccountId|Region)\.\d+]).*?\}/g, "*"); //ensure CDK tokens dont get replaced
+
     }
 
     toIAMPolicy(privs) {
