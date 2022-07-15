@@ -22,7 +22,7 @@ describe('main.js', function () {
     this.timeout(10000);
     
     describe('generateIAMPolicy', () => {
-        it.only('should produce a valid iam definition for DynamoDB (ASL)', () => {
+        it('should produce a valid iam definition for DynamoDB (ASL)', () => {
             let policy = generatePolicyAsJson("./tests/asl/test1.json");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -38,7 +38,7 @@ describe('main.js', function () {
             }
             )
         })
-        it.only('should produce a valid iam definition for synch stepfunction call', () => {
+        it('should produce a valid iam definition for synch stepfunction call', () => {
             let policy = generatePolicyAsJson("./tests/asl/test2.json");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -49,12 +49,13 @@ describe('main.js', function () {
                         "Resource": [
                             "arn:aws:states:us-east-1:123456789012:stateMachine:statemachine-name"
                         ]
-                    }, {
+                    },
+                    {
                         "Action": "events:PutRule",
                         "Effect": "Allow",
                         "Resource": [
                         "arn:aws:events:us-east-1:123456789012:rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
-                        ],
+                        ]
                     },
                     {
                         "Action": "events:PutTargets",
@@ -74,7 +75,7 @@ describe('main.js', function () {
             }
             )
         })
-        it.only('should produce a valid iam definition for direct lambda call', () => {
+        it('should produce a valid iam definition for direct lambda call', () => {
             let policy = generatePolicyAsJson("./tests/asl/test3.json");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -90,7 +91,7 @@ describe('main.js', function () {
             }
             )
         })
-        it.only('should produce a valid iam definition for API GW Invoke', () => {
+        it('should produce a valid iam definition for API GW Invoke', () => {
             let policy = generatePolicyAsJson("./tests/asl/test4.json");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -106,7 +107,7 @@ describe('main.js', function () {
             }
             )
         })
-        it.only('should allow CDK Token to be passed as account Id', () => {
+        it('should allow CDK Token to be passed as account Id', () => {
             let policy = generatePolicyAsJson("./tests/asl/test4.json", "${Token[AWS.AccountId.0]}");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -122,7 +123,7 @@ describe('main.js', function () {
             }
             )
         })
-        it.only('should collect permissions from within Asl Parallel', () => {
+        it('should collect permissions from within Asl Parallel', () => {
             let policy = generatePolicyAsJson("./tests/asl/test5.json", "123123123123");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -138,7 +139,7 @@ describe('main.js', function () {
             }
             )
         })
-        it.only('should translate a ts2asl replacement in resource to function *', () => {
+        it('should translate a ts2asl replacement in resource to function *', () => {
             let policy = generatePolicyAsJson("./tests/asl/test6.json", "123123123123");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",

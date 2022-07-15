@@ -68,7 +68,7 @@ export default class IAMFast {
 
                     arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '', false)];
 
-                    if (arns.length < 1 || arns[0] == "") {
+                    if (arns.length < 1 || arns[0] == "" || arns[0] == "*") {
                         if (parts[3] == "") {
                             if (mandatory) {
                                 return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
@@ -90,7 +90,7 @@ export default class IAMFast {
 
                     arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '', false)];
 
-                    if (arns.length < 1 || arns[0] == "") {
+                    if (arns.length < 1 || arns[0] == "" || arns[0] == "*") {
                         if (mandatory) {
                             return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                         }
@@ -105,7 +105,7 @@ export default class IAMFast {
 
                     arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '', false)];
 
-                    if (arns.length < 1 || arns[0] == "") {
+                    if (arns.length < 1 || arns[0] == "" || arns[0] == "*") {
                         if (mandatory) {
                             return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                         }
@@ -126,7 +126,7 @@ export default class IAMFast {
 
                     for (let part of parts.slice(1)) {
                         arns = [this.subSARARN(part, call['params'], mapped_priv, '', false)];
-                        if (arns.length < 1 || arns[0] == "") {
+                        if (arns.length < 1 || arns[0] == "" || arns[0] == "*") {
                             if (mandatory) {
                                 return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                             }
@@ -144,7 +144,7 @@ export default class IAMFast {
 
                     arns = [this.subSARARN(parts[1], call['params'], mapped_priv, '', false)];
 
-                    if (arns.length < 1 || arns[0] == "") {
+                    if (arns.length < 1 || arns[0] == "" || arns[0] == "*") {
                         if (mandatory) {
                             return [arn.substr(0, start_index) + "*" + arn.substr(end_index + 2)];
                         }
@@ -480,14 +480,31 @@ export default class IAMFast {
                         let resource_arns = [];
                         //  initialize with resource_arns = ["*"];, so we don't need to have the check
 
-                        for (let resource_type of privilege.sarpriv.resource_types) {
-                            for (let resource of service.resources) {
-                                if (resource.resource.toLowerCase()
-                                    == resource_type.resource_type.replace(/\*/g, "").toLowerCase()
-                                    && resource.resource != "") {
-                                    let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv, resource.resource.toLowerCase(), variable_replacement);
-                                    if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
-                                        resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, true, privilege.mappedpriv));
+                        if (privilege.mappedpriv && privilege.mappedpriv.arn_override && privilege.mappedpriv.arn_override.template) {
+                            let arn_overrides = this.resolveSpecials(privilege.mappedpriv.arn_override.template, tracked_call, false, null);
+
+                            if (arn_overrides.length == 0 || arn_overrides.length > 1 || arn_overrides[0] != "") {
+                                for (let arn_override of arn_overrides) {
+                                    let subbed_arn = this.subSARARN(arn_override, tracked_call.params, privilege.mappedpriv, '', variable_replacement);
+                                    resource_arns.push(subbed_arn);
+                                }
+                            }
+
+                            if (resource_arns.length == 0 && (!privilege.mappedpriv.resource_mappings || privilege.mappedpriv.resource_mappings.length == 0)) {
+                                continue;
+                            }
+                        }
+
+                        if (resource_arns.length == 0) {
+                            for (let resource_type of privilege.sarpriv.resource_types) {
+                                for (let resource of service.resources) {
+                                    if (resource.resource.toLowerCase()
+                                        == resource_type.resource_type.replace(/\*/g, "").toLowerCase()
+                                        && resource.resource != "") {
+                                        let subbed_arn = this.subSARARN(resource.arn, tracked_call.params, privilege.mappedpriv, resource.resource.toLowerCase(), variable_replacement);
+                                        if (resource_type.resource_type.endsWith("*") || !subbed_arn.endsWith("*")) {
+                                            resource_arns = resource_arns.concat(this.resolveSpecials(subbed_arn, tracked_call, true, privilege.mappedpriv));
+                                        }
                                     }
                                 }
                             }
