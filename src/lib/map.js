@@ -287,6 +287,11 @@ export default {
         "DynamoDB.TransactWriteItems": [
             {
                 "action": "dynamodb:ConditionCheckItem",
+                "resource_mappings": {
+                    "TableName": {
+                        "template": "${TransactItems[].ConditionCheck.TableName}"
+                    }
+                },
                 "conditions": {
                     "lhs": "TransactItems[].ConditionCheck",
                     "op": "Exists"
@@ -294,6 +299,11 @@ export default {
             },
             {
                 "action": "dynamodb:PutItem",
+                "resource_mappings": {
+                    "TableName": {
+                        "template": "${TransactItems[].Put.TableName}"
+                    }
+                },
                 "conditions": {
                     "lhs": "TransactItems[].Put",
                     "op": "Exists"
@@ -301,6 +311,11 @@ export default {
             },
             {
                 "action": "dynamodb:UpdateItem",
+                "resource_mappings": {
+                    "TableName": {
+                        "template": "${TransactItems[].Update.TableName}"
+                    }
+                },
                 "conditions": {
                     "lhs": "TransactItems[].Update",
                     "op": "Exists"
@@ -308,6 +323,11 @@ export default {
             },
             {
                 "action": "dynamodb:DeleteItem",
+                "resource_mappings": {
+                    "TableName": {
+                        "template": "${TransactItems[].Delete.TableName}"
+                    }
+                },
                 "conditions": {
                     "lhs": "TransactItems[].Delete",
                     "op": "Exists"
@@ -1513,7 +1533,7 @@ export default {
                 "action": "s3:PutObject",
                 "resource_mappings": {
                     "BucketName": {
-                        "template": "${Body}"
+                        "template": "${Bucket}"
                     },
                     "ObjectName": {
                         "template": "${Key}"
@@ -6149,13 +6169,8 @@ export default {
         "CloudWatchEvents.DeleteRule": [
             {
                 "action": "events:DeleteRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
@@ -6212,39 +6227,24 @@ export default {
         "CloudWatchEvents.DescribeRule": [
             {
                 "action": "events:DescribeRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
         "CloudWatchEvents.DisableRule": [
             {
                 "action": "events:DisableRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
         "CloudWatchEvents.EnableRule": [
             {
                 "action": "events:EnableRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
@@ -6348,26 +6348,16 @@ export default {
         "CloudWatchEvents.PutRule": [
             {
                 "action": "events:PutRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
         "CloudWatchEvents.PutTargets": [
             {
                 "action": "events:PutTargets",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Rule}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Rule}%arn:${Partition}:events:${Region}:${Account}:rule/${Rule}%%"
                 }
             }
         ],
@@ -6380,13 +6370,8 @@ export default {
         "CloudWatchEvents.RemoveTargets": [
             {
                 "action": "events:RemoveTargets",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Rule}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Rule}%arn:${Partition}:events:${Region}:${Account}:rule/${Rule}%%"
                 }
             }
         ],
@@ -69645,13 +69630,8 @@ export default {
         "EventBridge.DeleteRule": [
             {
                 "action": "events:DeleteRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
@@ -69708,39 +69688,24 @@ export default {
         "EventBridge.DescribeRule": [
             {
                 "action": "events:DescribeRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
         "EventBridge.DisableRule": [
             {
                 "action": "events:DisableRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
         "EventBridge.EnableRule": [
             {
                 "action": "events:EnableRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             }
         ],
@@ -69809,13 +69774,8 @@ export default {
         "EventBridge.ListTargetsByRule": [
             {
                 "action": "events:ListTargetsByRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Rule}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Rule}%arn:${Partition}:events:${Region}:${Account}:rule/${Rule}%%"
                 }
             }
         ],
@@ -69844,13 +69804,8 @@ export default {
         "EventBridge.PutRule": [
             {
                 "action": "events:PutRule",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Name}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Name}%arn:${Partition}:events:${Region}:${Account}:rule/${Name}%%"
                 }
             },
             {
@@ -69863,13 +69818,8 @@ export default {
         "EventBridge.PutTargets": [
             {
                 "action": "events:PutTargets",
-                "resource_mappings": {
-                    "EventBusName": {
-                        "template": "${EventBusName}"
-                    },
-                    "RuleName": {
-                        "template": "${Rule}"
-                    }
+                "arn_override": {
+                    "template": "%%iftruthy%${EventBusName}%arn:${Partition}:events:${Region}:${Account}:rule/${EventBusName}/${Rule}%arn:${Partition}:events:${Region}:${Account}:rule/${Rule}%%"
                 }
             }
         ],
@@ -77564,13 +77514,23 @@ export default {
         "RedshiftData.DescribeTable": [
             {
                 "action": "redshift-data:DescribeTable",
-                "resource_mappings": {}
+                "resource_mappings": {
+                    "ClusterName": {
+                        "template": "${ClusterIdentifier}"
+                    }
+                }
+
             }
         ],
         "RedshiftData.ExecuteStatement": [
             {
                 "action": "redshift-data:ExecuteStatement",
-                "resource_mappings": {}
+                "resource_mappings": {
+                    "ClusterName": {
+                        "template": "${ClusterIdentifier}"
+                    }
+                }
+
             }
         ],
         "RedshiftData.GetStatementResult": [
@@ -77582,13 +77542,22 @@ export default {
         "RedshiftData.ListDatabases": [
             {
                 "action": "redshift-data:ListDatabases",
-                "resource_mappings": {}
+                "resource_mappings": {
+                    "ClusterName": {
+                        "template": "${ClusterIdentifier}"
+                    }
+                }
             }
         ],
         "RedshiftData.ListSchemas": [
             {
                 "action": "redshift-data:ListSchemas",
-                "resource_mappings": {}
+                "resource_mappings": {
+                    "ClusterName": {
+                        "template": "${ClusterIdentifier}"
+                    }
+                }
+
             }
         ],
         "RedshiftData.ListStatements": [
@@ -77600,7 +77569,11 @@ export default {
         "RedshiftData.ListTables": [
             {
                 "action": "redshift-data:ListTables",
-                "resource_mappings": {}
+                "resource_mappings": {
+                    "ClusterName": {
+                        "template": "${ClusterIdentifier}"
+                    }
+                }
             }
         ],
         "SSOAdmin.AttachManagedPolicyToPermissionSet": [
@@ -97573,18 +97546,65 @@ export default {
         "MemoryDB.BatchUpdateCluster": [
             {
                 "action": "memorydb:BatchUpdateCluster",
-                "undocumented": true,
-                "arn_override": {
-                    "template": "arn:${Partition}:memorydb:${Region}:${Account}:cluster/*"
+                "resource_mappings": {
+                    "ClusterName": {
+                        "template": "${ClusterNames[]}"
+                    }
+                }
+            },
+            {
+                "action": "ec2:CreateNetworkInterface",
+                "resource_mappings": {
+                    "NetworkInterfaceId": {
+                        "template": "*"
+                    },
+                    "SubnetId": {
+                        "template": "*"
+                    },
+                    "SecurityGroupId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "ec2:DeleteNetworkInterface",
+                "resource_mappings": {
+                    "NetworkInterfaceId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "ec2:DescribeNetworkInterfaces",
+                "resource_mappings": {}
+            },
+            {
+                "action": "ec2:DescribeSubnets",
+                "resource_mappings": {}
+            },
+            {
+                "action": "ec2:DescribeVpcs",
+                "resource_mappings": {}
+            },
+            {
+                "action": "s3:GetObject",
+                "resource_mappings": {
+                    "BucketName": {
+                        "template": "*"
+                    },
+                    "ObjectName": {
+                        "template": "*"
+                    }
                 }
             }
         ],
         "MemoryDB.ListAllowedNodeTypeUpdates": [
             {
                 "action": "memorydb:ListAllowedNodeTypeUpdates",
-                "undocumented": true,
-                "arn_override": {
-                    "template": "arn:${Partition}:memorydb:${Region}:${Account}:cluster/${clustername}"
+                "resource_mappings": {
+                    "ClusterName": {
+                        "template": "${ClusterName}"
+                    }
                 }
             }
         ],
@@ -114466,10 +114486,7 @@ export default {
         "Lightsail.GetLoadBalancerTlsPolicies": [
             {
                 "action": "lightsail:GetLoadBalancerTlsPolicies",
-                "undocumented": true,
-                "arn_override": {
-                    "template": "arn:${Partition}:lightsail:${Region}:${Account}:*"
-                }
+                "resource_mappings": {}
             }
         ],
         "Rekognition.UpdateStreamProcessor": [
@@ -114481,13 +114498,13 @@ export default {
         "IoTWireless.GetEventConfigurationByResourceTypes": [
             {
                 "action": "iotwireless:GetEventConfigurationByResourceTypes",
-                "undocumented": true
+                "resource_mappings": {}
             }
         ],
         "IoTWireless.UpdateEventConfigurationByResourceTypes": [
             {
                 "action": "iotwireless:UpdateEventConfigurationByResourceTypes",
-                "undocumented": true
+                "resource_mappings": {}
             }
         ],
         "Finspacedata.CreatePermissionGroup": [
@@ -114586,6 +114603,1136 @@ export default {
                 "undocumented": true,
                 "arn_override": {
                     "template": "arn:${Partition}:finspace-api:${Region}:${Account}:/user/${userId}"
+                }
+            }
+        ],
+        "EC2.GetInstanceUefiData": [
+            {
+                "action": "ec2:GetInstanceUefiData",
+                "resource_mappings": {
+                    "InstanceId": {
+                        "template": "${InstanceId}"
+                    }
+                }
+            }
+        ],
+        "Route53.ChangeCidrCollection": [
+            {
+                "action": "route53:ChangeCidrCollection",
+                "resource_mappings": {
+                    "Id": {
+                        "template": "${Id}"
+                    }
+                }
+            }
+        ],
+        "Route53.CreateCidrCollection": [
+            {
+                "action": "route53:CreateCidrCollection",
+                "resource_mappings": {}
+            }
+        ],
+        "Route53.DeleteCidrCollection": [
+            {
+                "action": "route53:DeleteCidrCollection",
+                "resource_mappings": {
+                    "Id": {
+                        "template": "${Id}"
+                    }
+                }
+            }
+        ],
+        "Route53.ListCidrBlocks": [
+            {
+                "action": "route53:ListCidrBlocks",
+                "resource_mappings": {
+                    "Id": {
+                        "template": "${CollectionId}"
+                    }
+                }
+            }
+        ],
+        "Route53.ListCidrCollections": [
+            {
+                "action": "route53:ListCidrCollections",
+                "resource_mappings": {}
+            }
+        ],
+        "Route53.ListCidrLocations": [
+            {
+                "action": "route53:ListCidrLocations",
+                "resource_mappings": {
+                    "Id": {
+                        "template": "${CollectionId}"
+                    }
+                }
+            }
+        ],
+        "CostExplorer.ListCostAllocationTags": [
+            {
+                "action": "ce:ListCostAllocationTags",
+                "resource_mappings": {}
+            }
+        ],
+        "CostExplorer.UpdateCostAllocationTagsStatus": [
+            {
+                "action": "ce:UpdateCostAllocationTagsStatus",
+                "resource_mappings": {}
+            }
+        ],
+        "Connect.CreateTaskTemplate": [
+            {
+                "action": "connect:CreateTaskTemplate",
+                "resource_mappings": {
+                    "InstanceId": {
+                        "template": "${InstanceId}"
+                    },
+                    "TaskTemplateId": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "Connect.DeleteTaskTemplate": [
+            {
+                "action": "connect:DeleteTaskTemplate",
+                "resource_mappings": {
+                    "InstanceId": {
+                        "template": "${InstanceId}"
+                    },
+                    "TaskTemplateId": {
+                        "template": "${TaskTemplateId}"
+                    }
+                }
+            }
+        ],
+        "Connect.GetCurrentUserData": [
+            {
+                "action": "connect:GetCurrentUserData",
+                "resource_mappings": {
+                    "InstanceId": {
+                        "template": "${InstanceId}"
+                    },
+                    "QueueId": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "Connect.GetTaskTemplate": [
+            {
+                "action": "connect:GetTaskTemplate",
+                "resource_mappings": {
+                    "InstanceId": {
+                        "template": "${InstanceId}"
+                    },
+                    "TaskTemplateId": {
+                        "template": "${TaskTemplateId}"
+                    }
+                }
+            }
+        ],
+        "Connect.ListTaskTemplates": [
+            {
+                "action": "connect:ListTaskTemplates",
+                "resource_mappings": {
+                    "InstanceId": {
+                        "template": "${InstanceId}"
+                    }
+                }
+            }
+        ],
+        "Connect.TransferContact": [
+            {
+                "action": "connect:TransferContact",
+                "resource_mappings": {
+                    "InstanceId": {
+                        "template": "${InstanceId}"
+                    },
+                    "ContactId": {
+                        "template": "${ContactId}"
+                    },
+                    "ContactFlowId": {
+                        "template": "${ContactFlowId}"
+                    }
+                }
+            }
+        ],
+        "Connect.UpdateTaskTemplate": [
+            {
+                "action": "connect:UpdateTaskTemplate",
+                "resource_mappings": {
+                    "InstanceId": {
+                        "template": "${InstanceId}"
+                    },
+                    "TaskTemplateId": {
+                        "template": "${TaskTemplateId}"
+                    }
+                }
+            }
+        ],
+        "Neptune.CreateGlobalCluster": [
+            {
+                "action": "rds:CreateGlobalCluster",
+                "resource_mappings": {
+                    "DbClusterInstanceName": {
+                        "template": "${SourceDBClusterIdentifier}"
+                    },
+                    "GlobalCluster": {
+                        "template": "${GlobalClusterIdentifier}"
+                    }
+                }
+            }
+        ],
+        "Neptune.DeleteGlobalCluster": [
+            {
+                "action": "rds:DeleteGlobalCluster",
+                "resource_mappings": {
+                    "GlobalCluster": {
+                        "template": "${GlobalClusterIdentifier}"
+                    }
+                }
+            }
+        ],
+        "Neptune.DescribeGlobalClusters": [
+            {
+                "action": "rds:DescribeGlobalClusters",
+                "resource_mappings": {
+                    "GlobalCluster": {
+                        "template": "${GlobalClusterIdentifier}"
+                    }
+                }
+            }
+        ],
+        "Neptune.FailoverGlobalCluster": [
+            {
+                "action": "rds:FailoverGlobalCluster",
+                "resource_mappings": {
+                    "DbClusterInstanceName": {
+                        "template": "${TargetDbClusterIdentifier}"
+                    },
+                    "GlobalCluster": {
+                        "template": "${GlobalClusterIdentifier}"
+                    }
+                }
+            }
+        ],
+        "Neptune.ModifyGlobalCluster": [
+            {
+                "action": "rds:ModifyGlobalCluster",
+                "resource_mappings": {
+                    "GlobalCluster": {
+                        "template": "%%many%${GlobalClusterIdentifier}%${NewGlobalClusterIdentifier}%%"
+                    }
+                }
+            }
+        ],
+        "Neptune.RemoveFromGlobalCluster": [
+            {
+                "action": "rds:RemoveFromGlobalCluster",
+                "resource_mappings": {
+                    "DbClusterInstanceName": {
+                        "template": "${DbClusterIdentifier}"
+                    },
+                    "GlobalCluster": {
+                        "template": "${GlobalClusterIdentifier}"
+                    }
+                }
+            }
+        ],
+        "QuickSight.UpdatePublicSharingSettings": [
+            {
+                "action": "quicksight:UpdatePublicSharingSettings",
+                "resource_mappings": {}
+            }
+        ],
+        "IoTEventsData.BatchDeleteDetector": [
+            {
+                "action": "iotevents:BatchDeleteDetector",
+                "resource_mappings": {
+                    "DetectorModelName": {
+                        "template": "${detectors[].detectorModelName}"
+                    }
+                }
+            }
+        ],
+        "NetworkManager.ListOrganizationServiceAccessStatus": [
+            {
+                "action": "networkmanager:ListOrganizationServiceAccessStatus",
+                "resource_mappings": {}
+            }
+        ],
+        "NetworkManager.StartOrganizationServiceAccessUpdate": [
+            {
+                "action": "networkmanager:StartOrganizationServiceAccessUpdate",
+                "resource_mappings": {}
+            }
+        ],
+        "Outposts.GetConnection": [
+            {
+                "action": "outposts:GetConnection",
+                "resource_mappings": {}
+            }
+        ],
+        "Outposts.StartConnection": [
+            {
+                "action": "outposts:StartConnection",
+                "resource_mappings": {}
+            }
+        ],
+        "ServiceCatalogAppRegistry.ListAttributeGroupsForApplication": [
+            {
+                "action": "servicecatalog:ListAttributeGroupsForApplication",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "LookoutMetrics.UpdateAlert": [
+            {
+                "action": "lookoutmetrics:UpdateAlert",
+                "resource_mappings": {},
+                "resourcearn_mappings": {
+                    "Alert": "${AlertArn}"
+                }
+            }
+        ],
+        "Mgn.CreateLaunchConfigurationTemplate": [
+            {
+                "action": "mgn:CreateLaunchConfigurationTemplate",
+                "resource_mappings": {}
+            }
+        ],
+        "Mgn.DeleteLaunchConfigurationTemplate": [
+            {
+                "action": "mgn:DeleteLaunchConfigurationTemplate",
+                "resource_mappings": {
+                    "LaunchConfigurationTemplateID": {
+                        "template": "${launchConfigurationTemplateID}"
+                    }
+                }
+            }
+        ],
+        "Mgn.DescribeLaunchConfigurationTemplates": [
+            {
+                "action": "mgn:DescribeLaunchConfigurationTemplates",
+                "resource_mappings": {}
+            }
+        ],
+        "Mgn.UpdateLaunchConfigurationTemplate": [
+            {
+                "action": "mgn:UpdateLaunchConfigurationTemplate",
+                "resource_mappings": {
+                    "LaunchConfigurationTemplateID": {
+                        "template": "${launchConfigurationTemplateID}"
+                    }
+                }
+            }
+        ],
+        "Grafana.CreateWorkspaceApiKey": [
+            {
+                "action": "grafana:CreateWorkspaceApiKey",
+                "resource_mappings": {
+                    "ResourceId": {
+                        "template": "${workspaceId}"
+                    }
+                }
+            }
+        ],
+        "Grafana.DeleteWorkspaceApiKey": [
+            {
+                "action": "grafana:DeleteWorkspaceApiKey",
+                "resource_mappings": {
+                    "ResourceId": {
+                        "template": "${workspaceId}"
+                    }
+                }
+            }
+        ],
+        "Drs.CreateExtendedSourceServer": [
+            {
+                "action": "drs:CreateExtendedSourceServer",
+                "resource_mappings": {}
+            }
+        ],
+        "Drs.ListExtensibleSourceServers": [
+            {
+                "action": "drs:ListExtensibleSourceServers",
+                "resource_mappings": {}
+            }
+        ],
+        "Drs.ListStagingAccounts": [
+            {
+                "action": "drs:ListStagingAccounts",
+                "resource_mappings": {}
+            }
+        ],
+        "MigrationHubRefactorSpaces.UpdateRoute": [
+            {
+                "action": "refactor-spaces:UpdateRoute",
+                "resource_mappings": {
+                    "EnvironmentId": {
+                        "template": "${EnvironmentIdentifier}"
+                    },
+                    "ApplicationId": {
+                        "template": "${ApplicationIdentifier}"
+                    },
+                    "RouteId": {
+                        "template": "${RouteIdentifier}"
+                    }
+                }
+            }
+        ],
+        "BackupGateway.GetGateway": [
+            {
+                "action": "backup-gateway:GetGateway",
+                "resource_mappings": {},
+                "resourcearn_mappings": {
+                    "gateway": "${GatewayArn}"
+                }
+            }
+        ],
+        "BackupGateway.UpdateGatewaySoftwareNow": [
+            {
+                "action": "backup-gateway:UpdateGatewaySoftwareNow",
+                "resource_mappings": {},
+                "resourcearn_mappings": {
+                    "gateway": "${GatewayArn}"
+                }
+            }
+        ],
+        "M2.CancelBatchJobExecution": [
+            {
+                "action": "m2:CancelBatchJobExecution",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.CreateApplication": [
+            {
+                "action": "m2:CreateApplication",
+                "resource_mappings": {}
+            },
+            {
+                "action": "s3:GetObject",
+                "resource_mappings": {
+                    "BucketName": {
+                        "template": "*"
+                    },
+                    "ObjectName": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "s3:ListBucket",
+                "resource_mappings": {
+                    "BucketName": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "M2.CreateDataSetImportTask": [
+            {
+                "action": "m2:CreateDataSetImportTask",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            },
+            {
+                "action": "s3:GetObject",
+                "resource_mappings": {
+                    "BucketName": {
+                        "template": "*"
+                    },
+                    "ObjectName": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "M2.CreateDeployment": [
+            {
+                "action": "m2:CreateDeployment",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    },
+                    "EnvironmentId": {
+                        "template": "${environmentId}"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:CreateListener",
+                "resource_mappings": {
+                    "LoadBalancerName": {
+                        "template": "*"
+                    },
+                    "LoadBalancerId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:CreateTargetGroup",
+                "resource_mappings": {
+                    "TargetGroupName": {
+                        "template": "*"
+                    },
+                    "TargetGroupId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:RegisterTargets",
+                "resource_mappings": {
+                    "TargetGroupName": {
+                        "template": "*"
+                    },
+                    "TargetGroupId": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "M2.CreateEnvironment": [
+            {
+                "action": "m2:CreateEnvironment",
+                "resource_mappings": {}
+            },
+            {
+                "action": "ec2:CreateNetworkInterface",
+                "resource_mappings": {
+                    "NetworkInterfaceId": {
+                        "template": "*"
+                    },
+                    "SubnetId": {
+                        "template": "${subnetIds[]}"
+                    },
+                    "SecurityGroupId": {
+                        "template": "${securityGroupIds[]}"
+                    }
+                }
+            },
+            {
+                "action": "ec2:CreateNetworkInterfacePermission",
+                "resource_mappings": {
+                    "NetworkInterfaceId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "ec2:DescribeNetworkInterfaces",
+                "resource_mappings": {}
+            },
+            {
+                "action": "ec2:DescribeSecurityGroups",
+                "resource_mappings": {}
+            },
+            {
+                "action": "ec2:DescribeSubnets",
+                "resource_mappings": {}
+            },
+            {
+                "action": "ec2:DescribeVpcAttribute",
+                "resource_mappings": {
+                    "VpcId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "ec2:DescribeVpcs",
+                "resource_mappings": {}
+            },
+            {
+                "action": "ec2:ModifyNetworkInterfaceAttribute",
+                "resource_mappings": {
+                    "NetworkInterfaceId": {
+                        "template": "*"
+                    },
+                    "InstanceId": {
+                        "template": "*"
+                    },
+                    "SecurityGroupId": {
+                        "template": "${securityGroupIds[]}"
+                    }
+                }
+            },
+            {
+                "action": "elasticfilesystem:DescribeMountTargets",
+                "resource_mappings": {
+                    "FileSystemId": {
+                        "template": "${storageConfigurations[].efs.fileSystemId}"
+                    },
+                    "AccessPointId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:CreateLoadBalancer",
+                "resource_mappings": {
+                    "LoadBalancerName": {
+                        "template": "*"
+                    },
+                    "LoadBalancerId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "fsx:DescribeFileSystems",
+                "resource_mappings": {}
+            },
+            {
+                "action": "iam:CreateServiceLinkedRole",
+                "resource_mappings": {
+                    "RoleNameWithPath": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "M2.DeleteApplication": [
+            {
+                "action": "m2:DeleteApplication",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:DeleteListener",
+                "resource_mappings": {
+                    "LoadBalancerName": {
+                        "template": "*"
+                    },
+                    "LoadBalancerId": {
+                        "template": "*"
+                    },
+                    "ListenerId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:DeleteTargetGroup",
+                "resource_mappings": {
+                    "TargetGroupName": {
+                        "template": "*"
+                    },
+                    "TargetGroupId": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "M2.DeleteApplicationFromEnvironment": [
+            {
+                "action": "m2:DeleteApplicationFromEnvironment",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:DeleteListener",
+                "resource_mappings": {
+                    "LoadBalancerName": {
+                        "template": "*"
+                    },
+                    "LoadBalancerId": {
+                        "template": "*"
+                    },
+                    "ListenerId": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:DeleteTargetGroup",
+                "resource_mappings": {
+                    "TargetGroupName": {
+                        "template": "*"
+                    },
+                    "TargetGroupId": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "M2.DeleteEnvironment": [
+            {
+                "action": "m2:DeleteEnvironment",
+                "resource_mappings": {
+                    "EnvironmentId": {
+                        "template": "${environmentId}"
+                    }
+                }
+            },
+            {
+                "action": "elasticloadbalancing:DeleteLoadBalancer",
+                "resource_mappings": {
+                    "LoadBalancerName": {
+                        "template": "*"
+                    },
+                    "LoadBalancerId": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "M2.GetApplication": [
+            {
+                "action": "m2:GetApplication",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.GetApplicationVersion": [
+            {
+                "action": "m2:GetApplicationVersion",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.GetBatchJobExecution": [
+            {
+                "action": "m2:GetBatchJobExecution",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.GetDataSetDetails": [
+            {
+                "action": "m2:GetDataSetDetails",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.GetDataSetImportTask": [
+            {
+                "action": "m2:GetDataSetImportTask",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.GetDeployment": [
+            {
+                "action": "m2:GetDeployment",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.GetEnvironment": [
+            {
+                "action": "m2:GetEnvironment",
+                "resource_mappings": {
+                    "EnvironmentId": {
+                        "template": "${environmentId}"
+                    }
+                }
+            }
+        ],
+        "M2.ListApplicationVersions": [
+            {
+                "action": "m2:ListApplicationVersions",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.ListApplications": [
+            {
+                "action": "m2:ListApplications",
+                "resource_mappings": {
+                    "EnvironmentId": {
+                        "template": "${environmentId}"
+                    }
+                }
+            }
+        ],
+        "M2.ListBatchJobDefinitions": [
+            {
+                "action": "m2:ListBatchJobDefinitions",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.ListBatchJobExecutions": [
+            {
+                "action": "m2:ListBatchJobExecutions",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.ListDataSetImportHistory": [
+            {
+                "action": "m2:ListDataSetImportHistory",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.ListDataSets": [
+            {
+                "action": "m2:ListDataSets",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.ListDeployments": [
+            {
+                "action": "m2:ListDeployments",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.ListEngineVersions": [
+            {
+                "action": "m2:ListEngineVersions",
+                "resource_mappings": {}
+            }
+        ],
+        "M2.ListEnvironments": [
+            {
+                "action": "m2:ListEnvironments",
+                "resource_mappings": {}
+            }
+        ],
+        "M2.ListTagsForResource": [
+            {
+                "action": "m2:ListTagsForResource",
+                "resource_mappings": {}
+            }
+        ],
+        "M2.StartApplication": [
+            {
+                "action": "m2:StartApplication",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.StartBatchJob": [
+            {
+                "action": "m2:StartBatchJob",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.StopApplication": [
+            {
+                "action": "m2:StopApplication",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            }
+        ],
+        "M2.TagResource": [
+            {
+                "action": "m2:TagResource",
+                "resource_mappings": {},
+                "resourcearn_mappings": {
+                    "Application": "%%iftemplatematch%${resourceArn}%%",
+                    "Environment": "%%iftemplatematch%${resourceArn}%%"
+                }
+            }
+        ],
+        "M2.UntagResource": [
+            {
+                "action": "m2:UntagResource",
+                "resource_mappings": {},
+                "resourcearn_mappings": {
+                    "Application": "%%iftemplatematch%${resourceArn}%%",
+                    "Environment": "%%iftemplatematch%${resourceArn}%%"
+                }
+            }
+        ],
+        "M2.UpdateApplication": [
+            {
+                "action": "m2:UpdateApplication",
+                "resource_mappings": {
+                    "ApplicationId": {
+                        "template": "${applicationId}"
+                    }
+                }
+            },
+            {
+                "action": "s3:GetObject",
+                "resource_mappings": {
+                    "BucketName": {
+                        "template": "*"
+                    },
+                    "ObjectName": {
+                        "template": "*"
+                    }
+                }
+            },
+            {
+                "action": "s3:ListBucket",
+                "resource_mappings": {
+                    "BucketName": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "M2.UpdateEnvironment": [
+            {
+                "action": "m2:UpdateEnvironment",
+                "resource_mappings": {
+                    "EnvironmentId": {
+                        "template": "${environmentId}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.CreateCampaign": [
+            {
+                "action": "connect-campaigns:CreateCampaign",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "*"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.DeleteCampaign": [
+            {
+                "action": "connect-campaigns:DeleteCampaign",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.DeleteConnectInstanceConfig": [
+            {
+                "action": "connect-campaigns:DeleteConnectInstanceConfig",
+                "resource_mappings": {}
+            }
+        ],
+        "ConnectCampaigns.DeleteInstanceOnboardingJob": [
+            {
+                "action": "connect-campaigns:DeleteInstanceOnboardingJob",
+                "resource_mappings": {}
+            }
+        ],
+        "ConnectCampaigns.DescribeCampaign": [
+            {
+                "action": "connect-campaigns:DescribeCampaign",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.GetCampaignState": [
+            {
+                "action": "connect-campaigns:GetCampaignState",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.GetCampaignStateBatch": [
+            {
+                "action": "connect-campaigns:GetCampaignStateBatch",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${campaignIds[]}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.GetConnectInstanceConfig": [
+            {
+                "action": "connect-campaigns:GetConnectInstanceConfig",
+                "resource_mappings": {}
+            }
+        ],
+        "ConnectCampaigns.GetInstanceOnboardingJobStatus": [
+            {
+                "action": "connect-campaigns:GetInstanceOnboardingJobStatus",
+                "resource_mappings": {}
+            }
+        ],
+        "ConnectCampaigns.ListCampaigns": [
+            {
+                "action": "connect-campaigns:ListCampaigns",
+                "resource_mappings": {}
+            }
+        ],
+        "ConnectCampaigns.ListTagsForResource": [
+            {
+                "action": "connect-campaigns:ListTagsForResource",
+                "resource_mappings": {},
+                "resourcearn_mappings": {
+                    "campaign": "%%iftemplatematch%${arn}%%"
+                }
+            }
+        ],
+        "ConnectCampaigns.PauseCampaign": [
+            {
+                "action": "connect-campaigns:PauseCampaign",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.PutDialRequestBatch": [
+            {
+                "action": "connect-campaigns:PutDialRequestBatch",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.ResumeCampaign": [
+            {
+                "action": "connect-campaigns:ResumeCampaign",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.StartCampaign": [
+            {
+                "action": "connect-campaigns:StartCampaign",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.StartInstanceOnboardingJob": [
+            {
+                "action": "connect-campaigns:StartInstanceOnboardingJob",
+                "resource_mappings": {}
+            }
+        ],
+        "ConnectCampaigns.StopCampaign": [
+            {
+                "action": "connect-campaigns:StopCampaign",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.TagResource": [
+            {
+                "action": "connect-campaigns:TagResource",
+                "resource_mappings": {},
+                "resourcearn_mappings": {
+                    "campaign": "%%iftemplatematch%${arn}%%"
+                }
+            }
+        ],
+        "ConnectCampaigns.UntagResource": [
+            {
+                "action": "connect-campaigns:UntagResource",
+                "resource_mappings": {},
+                "resourcearn_mappings": {
+                    "campaign": "%%iftemplatematch%${arn}%%"
+                }
+            }
+        ],
+        "ConnectCampaigns.UpdateCampaignDialerConfig": [
+            {
+                "action": "connect-campaigns:UpdateCampaignDialerConfig",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.UpdateCampaignName": [
+            {
+                "action": "connect-campaigns:UpdateCampaignName",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
+                }
+            }
+        ],
+        "ConnectCampaigns.UpdateCampaignOutboundCallConfig": [
+            {
+                "action": "connect-campaigns:UpdateCampaignOutboundCallConfig",
+                "resource_mappings": {
+                    "CampaignId": {
+                        "template": "${id}"
+                    }
                 }
             }
         ]
