@@ -369,7 +369,7 @@ export default class IAMFast {
                 if (iam_policy.Statement[i].Resource[j].includes("##@##")) {
                     sam_template.setIn(
                         ['Resources', 'LambdaFunction', 'Properties', 'Policies', 0, 'Statement', i, 'Resource', j],
-                        sam_template.createNode(iam_policy.Statement[i].Resource[j].toString().replaceAll(/##@##(.+?)##@##/g, "$${$1}"), { tag: "!Sub", flow: true })
+                        sam_template.createNode(iam_policy.Statement[i].Resource[j].toString().replace(/##@##(.+?)##@##/g, "$${$1}"), { tag: "!Sub", flow: true })
                     );
                 }
             }
@@ -403,7 +403,7 @@ export default class IAMFast {
             sam_template.deleteIn(['Resources', 'LambdaFunction', 'Properties', 'Environment']);
         }
 
-        return YAML.stringify(sam_template, custom_tags).toString().replaceAll(/- Version: 2012-10-17/g, "- Version: '2012-10-17'");
+        return YAML.stringify(sam_template, custom_tags).toString().replace(/- Version: 2012-10-17/g, "- Version: '2012-10-17'");
     }
 
     Clear() {
