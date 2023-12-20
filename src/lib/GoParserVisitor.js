@@ -1,4 +1,4 @@
-// Generated from grammars/GoParser.g4 by ANTLR 4.9.2
+// Generated from grammars/GoParser.g4 by ANTLR 4.13.1
 // jshint ignore: start
 import antlr4 from 'antlr4';
 
@@ -74,6 +74,42 @@ export default class GoParserVisitor extends antlr4.tree.ParseTreeVisitor {
 
 	// Visit a parse tree produced by GoParser#typeSpec.
 	visitTypeSpec(ctx) {
+	  return this.visitChildren(ctx);
+	}
+
+
+	// Visit a parse tree produced by GoParser#aliasDecl.
+	visitAliasDecl(ctx) {
+	  return this.visitChildren(ctx);
+	}
+
+
+	// Visit a parse tree produced by GoParser#typeDef.
+	visitTypeDef(ctx) {
+	  return this.visitChildren(ctx);
+	}
+
+
+	// Visit a parse tree produced by GoParser#typeParameters.
+	visitTypeParameters(ctx) {
+	  return this.visitChildren(ctx);
+	}
+
+
+	// Visit a parse tree produced by GoParser#typeParameterDecl.
+	visitTypeParameterDecl(ctx) {
+	  return this.visitChildren(ctx);
+	}
+
+
+	// Visit a parse tree produced by GoParser#typeElement.
+	visitTypeElement(ctx) {
+	  return this.visitChildren(ctx);
+	}
+
+
+	// Visit a parse tree produced by GoParser#typeTerm.
+	visitTypeTerm(ctx) {
 	  return this.visitChildren(ctx);
 	}
 
@@ -164,12 +200,6 @@ export default class GoParserVisitor extends antlr4.tree.ParseTreeVisitor {
 
 	// Visit a parse tree produced by GoParser#shortVarDecl.
 	visitShortVarDecl(ctx) {
-	  return this.visitChildren(ctx);
-	}
-
-
-	// Visit a parse tree produced by GoParser#emptyStmt.
-	visitEmptyStmt(ctx) {
 	  return this.visitChildren(ctx);
 	}
 
@@ -330,6 +360,12 @@ export default class GoParserVisitor extends antlr4.tree.ParseTreeVisitor {
 	}
 
 
+	// Visit a parse tree produced by GoParser#typeArgs.
+	visitTypeArgs(ctx) {
+	  return this.visitChildren(ctx);
+	}
+
+
 	// Visit a parse tree produced by GoParser#typeName.
 	visitTypeName(ctx) {
 	  return this.visitChildren(ctx);
@@ -440,12 +476,6 @@ export default class GoParserVisitor extends antlr4.tree.ParseTreeVisitor {
 
 	// Visit a parse tree produced by GoParser#conversion.
 	visitConversion(ctx) {
-	  return this.visitChildren(ctx);
-	}
-
-
-	// Visit a parse tree produced by GoParser#nonNamedType.
-	visitNonNamedType(ctx) {
 	  return this.visitChildren(ctx);
 	}
 
@@ -584,12 +614,6 @@ export default class GoParserVisitor extends antlr4.tree.ParseTreeVisitor {
 
 	// Visit a parse tree produced by GoParser#methodExpr.
 	visitMethodExpr(ctx) {
-	  return this.visitChildren(ctx);
-	}
-
-
-	// Visit a parse tree produced by GoParser#receiverType.
-	visitReceiverType(ctx) {
 	  return this.visitChildren(ctx);
 	}
 
