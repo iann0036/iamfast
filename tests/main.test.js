@@ -383,7 +383,10 @@ describe('main.js', function () {
                         "Effect": "Allow",
                         "Action": "iam:AttachRolePolicy",
                         "Resource": [
-                            "arn:aws:iam::123456789012:role/AmazonDynamoDBFullAccess"
+                            "arn:aws:iam::123456789012:role/SomeRole",
+                            "arn:aws:iam::123456789012:role/SomeVariableRoleName",
+                            "arn:aws:iam::123456789012:role/argvalue1",
+                            "arn:aws:iam::123456789012:role/argvalue2"
                         ]
                     }
                 ]

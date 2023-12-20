@@ -9,7 +9,7 @@ iam.attach_role_policy(
     RoleName='SomeRole'
 )
 
-myvar = 'AmazonDynamoDBFullAccess'
+myvar = 'SomeVariableRoleName'
 
 # Attach a role policy
 iam.attach_role_policy(
