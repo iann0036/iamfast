@@ -420,8 +420,17 @@ export default class IAMFast {
     }
 
     GenerateHCLTemplate(code, language) {
-        let policy = JSON.parse(this.generateJSONIAMPolicy(code, language, false));
+        this.aws_region = `##@##aws_region##@##`;
+        this.aws_accountid = `##@##aws_accountid##@##`;
+
+        let policy = JSON.parse(this.generateJSONIAMPolicy(code, language, true));
         let doc = `data "aws_iam_policy_document" "my_policy" {`;
+
+        this.tracked_environment_variables.forEach(env => {
+            let envkey = this.transformSAMEnvKey(env);
+
+            doc = `variable "${envkey}" {\n  type = string\n}\n\n` + doc;
+        });
 
         for (let stmt of policy['Statement']) {
             doc += `\n  statement {\n    effect = "Allow"\n    actions = [\n      "${stmt['Action']}",\n    ]\n    resources = [\n      "`;
@@ -430,6 +439,28 @@ export default class IAMFast {
         }
 
         doc += `}`;
+
+        let has_accountid_var = false;
+        let has_region_var = false;
+
+        if (doc.includes("##@##aws_region##@##")) {
+            doc = doc.replace(/##@##aws_region##@##/g, "${local.region}");
+            has_region_var = true;
+        }
+        if (doc.includes("##@##aws_accountid##@##")) {
+            doc = doc.replace(/##@##aws_accountid##@##/g, "${local.account_id}");
+            has_accountid_var = true;
+        }
+
+        if (has_accountid_var && has_region_var) {
+            doc = `data "aws_caller_identity" "current" {}\ndata "aws_region" "current" {}\n\nlocals {\n  account_id = data.aws_caller_identity.current.account_id\n  region = data.aws_region.current.name\n}\n\n` + doc;
+        } else if (has_accountid_var) {
+            doc = `data "aws_caller_identity" "current" {}\n\nlocals {\n  account_id = data.aws_caller_identity.current.account_id\n}\n\n` + doc;
+        } else if (has_region_var) {
+            doc = `data "aws_region" "current" {}\n\nlocals {\n  region = data.aws_region.current.name\n}\n\n` + doc;
+        }
+
+        doc = doc.replace(/##@##(.+?)##@##/g, "$${var.$1}");
 
         return doc;
     }

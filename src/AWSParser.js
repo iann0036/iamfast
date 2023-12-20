@@ -68,6 +68,7 @@ export default class AWSParser {
                 tokens = new antlr4.CommonTokenStream(lexer);
                 parser = new JavaScriptParser(tokens);
                 parser.buildParseTrees = true;
+                //parser._interp.predictionMode = antlr4.atn.PredictionMode.SLL;
 
                 tree = parser.program();
                 this.debug && this.treeWalker(tree, 0);

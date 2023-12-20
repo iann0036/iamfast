@@ -17,6 +17,16 @@ const generatePolicyAsJson = (filePath, awsAccountId = "123456789012") => {
     return JSON.parse(policy);
 }
 
+const generatePolicyAsHcl = (filePath, awsAccountId = "123456789012") => {
+    const sut = new IAMFast("aws", "us-east-1", awsAccountId);
+    
+    let language = IAMFast.getLanguageByPath(filePath);
+
+    let code = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' });
+    let template = sut.GenerateHCLTemplate(code, language);
+    return template;
+}
+
 
 describe('main.js', function () {
     this.timeout(10000);
@@ -358,6 +368,52 @@ describe('main.js', function () {
                     }
                 ]
             })
+        })
+        it('should produce a valid iam definition for TBC, outputting as HCL (JavaScript)', () => {
+            let policy = generatePolicyAsHcl("./tests/js/test10.js");
+            expect(policy).to.deep.equal(`data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+  region = data.aws_region.current.name
+}
+
+variable "TableName" {
+  type = string
+}
+
+data "aws_iam_policy_document" "my_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:GetItem",
+    ]
+    resources = [
+      "arn:aws:dynamodb:\${local.region}:\${local.account_id}:table/\${var.TableName}",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:PutItem",
+    ]
+    resources = [
+      "arn:aws:dynamodb:\${local.region}:\${local.account_id}:table/\${var.TableName}",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynamodb:DeleteItem",
+    ]
+    resources = [
+      "arn:aws:dynamodb:\${local.region}:\${local.account_id}:table/\${var.TableName}",
+    ]
+  }
+}`)
         })
         it('should produce a valid iam definition for TBC (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test11.js");
