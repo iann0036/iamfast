@@ -93,10 +93,10 @@ npm test
 * `src/EnvironmentVariable.js` - Dedicated class for environment variable type
 * `src/IAMFast.js` - Generates the actual policies / outputs by referencing the action map and calling `AWSParser.js` functions
 * `src/main.js` - CLI setup and entrypoint for non-module use
-* `src/lib/<Language>AWSListener.js` - Custom listener hooks to track client calls etc. (2nd pass)
 * `src/lib/<Language>ScopeListener.js` - Custom listener hooks to track variable and function declarations (1st pass)
+* `src/lib/<Language>AWSListener.js` - Custom listener hooks to track client calls etc. (2nd pass)
 * `src/lib/<Language>Parser.js` - Auto-generated (ANTLR) language parser logic
-* `grammars/<Language>Parser.js` - Individual ANTLR language definitions, used to generate `lib/<Language>Parser.js`
+* `grammars/<Language>Parser.js` - Individual ANTLR language definitions, used to generate `src/lib/<Language>Parser.js`
 
 ### General
 
@@ -104,6 +104,7 @@ npm test
 - [x] Environment variable referencing in SAM output
 - [ ] Online tool for quick evaluation
 - [ ] GitHub app
+- [ ] Variable redeclaration
 
 ### JavaScript
 

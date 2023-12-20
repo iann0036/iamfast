@@ -74,6 +74,7 @@ export function GetVariableDeclarationVariants(self) {
     }
 
     // TODO: dedup variants
+    // TODO: redeclarations
 
     return argsVariants;
 }

@@ -533,6 +533,13 @@ describe('main.js', function () {
                         "Resource": [
                             "arn:aws:s3:::*"
                         ]
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "cloudtrail:CreateTrail",
+                        "Resource": [
+                            "*"
+                        ]
                     }
                 ]
             })
