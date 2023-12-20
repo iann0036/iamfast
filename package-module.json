@@ -41,8 +41,5 @@
   },
   "bin": {
     "iamfast": "src/main.js"
-  },
-  "engines": {
-    "vscode": "^1.85.0"
   }
 }
