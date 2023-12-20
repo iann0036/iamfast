@@ -38,7 +38,7 @@ describe('main.js', function () {
             }
             )
         })
-        it('should produce a valid iam definition for synch stepfunction call', () => {
+        it('should produce a valid iam definition for sync stepfunction call (ASL)', () => {
             let policy = generatePolicyAsJson("./tests/asl/test2.json");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -75,7 +75,7 @@ describe('main.js', function () {
             }
             )
         })
-        it('should produce a valid iam definition for direct lambda call', () => {
+        it('should produce a valid iam definition for direct lambda call (ASL)', () => {
             let policy = generatePolicyAsJson("./tests/asl/test3.json");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -91,7 +91,7 @@ describe('main.js', function () {
             }
             )
         })
-        it('should produce a valid iam definition for API GW Invoke', () => {
+        it('should produce a valid iam definition for API GW Invoke (ASL)', () => {
             let policy = generatePolicyAsJson("./tests/asl/test4.json");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -107,7 +107,7 @@ describe('main.js', function () {
             }
             )
         })
-        it('should allow CDK Token to be passed as account Id', () => {
+        it('should allow CDK Token to be passed as account ID (ASL)', () => {
             let policy = generatePolicyAsJson("./tests/asl/test4.json", "${Token[AWS.AccountId.0]}");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -123,7 +123,7 @@ describe('main.js', function () {
             }
             )
         })
-        it('should collect permissions from within Asl Parallel', () => {
+        it('should collect permissions from within ASL Parallel (ASL)', () => {
             let policy = generatePolicyAsJson("./tests/asl/test5.json", "123123123123");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -139,7 +139,7 @@ describe('main.js', function () {
             }
             )
         })
-        it('should translate a ts2asl replacement in resource to function *', () => {
+        it('should translate a ts2asl replacement in resource to function * (ASL)', () => {
             let policy = generatePolicyAsJson("./tests/asl/test6.json", "123123123123");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
@@ -339,6 +339,51 @@ describe('main.js', function () {
                         "Action": "sqs:ReceiveMessage",
                         "Resource": [
                             "arn:aws:sqs:us-east-1:123456789012:*"
+                        ]
+                    }
+                ]
+            })
+        })
+        it('should produce a valid iam definition for TBC (JavaScript)', () => {
+            let policy = generatePolicyAsJson("./tests/js/test10.js");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "tbc:TBC",
+                        "Resource": [
+                            "*"
+                        ]
+                    }
+                ]
+            })
+        })
+        it('should produce a valid iam definition for TBC (JavaScript)', () => {
+            let policy = generatePolicyAsJson("./tests/js/test11.js");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "tbc:TBC",
+                        "Resource": [
+                            "*"
+                        ]
+                    }
+                ]
+            })
+        })
+        it('should produce a valid iam definition for TBC (JavaScript)', () => {
+            let policy = generatePolicyAsJson("./tests/js/test12.js");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "tbc:TBC",
+                        "Resource": [
+                            "*"
                         ]
                     }
                 ]
