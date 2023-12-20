@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/iann0036/iamfast#readme",
   "dependencies": {
-    "antlr4": "^4.9.3",
+    "antlr4": "^4.13.1",
     "commander": "^7.0.0",
     "yaml": "2.0.0-9"
   },

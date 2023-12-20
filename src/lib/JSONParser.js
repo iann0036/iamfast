@@ -1,54 +1,32 @@
-// Generated from grammars/JSON.g4 by ANTLR 4.9.2
+// Generated from grammars/JSON.g4 by ANTLR 4.13.1
 // jshint ignore: start
 import antlr4 from 'antlr4';
 import JSONListener from './JSONListener.js';
 import JSONVisitor from './JSONVisitor.js';
 
-
-const serializedATN = ["\u0003\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786",
-    "\u5964\u0003\u000e:\u0004\u0002\t\u0002\u0004\u0003\t\u0003\u0004\u0004",
-    "\t\u0004\u0004\u0005\t\u0005\u0004\u0006\t\u0006\u0003\u0002\u0003\u0002",
-    "\u0003\u0003\u0003\u0003\u0003\u0003\u0003\u0003\u0007\u0003\u0013\n",
-    "\u0003\f\u0003\u000e\u0003\u0016\u000b\u0003\u0003\u0003\u0003\u0003",
-    "\u0003\u0003\u0003\u0003\u0005\u0003\u001c\n\u0003\u0003\u0004\u0003",
-    "\u0004\u0003\u0004\u0003\u0004\u0003\u0005\u0003\u0005\u0003\u0005\u0003",
-    "\u0005\u0007\u0005&\n\u0005\f\u0005\u000e\u0005)\u000b\u0005\u0003\u0005",
-    "\u0003\u0005\u0003\u0005\u0003\u0005\u0005\u0005/\n\u0005\u0003\u0006",
-    "\u0003\u0006\u0003\u0006\u0003\u0006\u0003\u0006\u0003\u0006\u0003\u0006",
-    "\u0005\u00068\n\u0006\u0003\u0006\u0002\u0002\u0007\u0002\u0004\u0006",
-    "\b\n\u0002\u0002\u0002>\u0002\f\u0003\u0002\u0002\u0002\u0004\u001b",
-    "\u0003\u0002\u0002\u0002\u0006\u001d\u0003\u0002\u0002\u0002\b.\u0003",
-    "\u0002\u0002\u0002\n7\u0003\u0002\u0002\u0002\f\r\u0005\n\u0006\u0002",
-    "\r\u0003\u0003\u0002\u0002\u0002\u000e\u000f\u0007\u0003\u0002\u0002",
-    "\u000f\u0014\u0005\u0006\u0004\u0002\u0010\u0011\u0007\u0004\u0002\u0002",
-    "\u0011\u0013\u0005\u0006\u0004\u0002\u0012\u0010\u0003\u0002\u0002\u0002",
-    "\u0013\u0016\u0003\u0002\u0002\u0002\u0014\u0012\u0003\u0002\u0002\u0002",
-    "\u0014\u0015\u0003\u0002\u0002\u0002\u0015\u0017\u0003\u0002\u0002\u0002",
-    "\u0016\u0014\u0003\u0002\u0002\u0002\u0017\u0018\u0007\u0005\u0002\u0002",
-    "\u0018\u001c\u0003\u0002\u0002\u0002\u0019\u001a\u0007\u0003\u0002\u0002",
-    "\u001a\u001c\u0007\u0005\u0002\u0002\u001b\u000e\u0003\u0002\u0002\u0002",
-    "\u001b\u0019\u0003\u0002\u0002\u0002\u001c\u0005\u0003\u0002\u0002\u0002",
-    "\u001d\u001e\u0007\f\u0002\u0002\u001e\u001f\u0007\u0006\u0002\u0002",
-    "\u001f \u0005\n\u0006\u0002 \u0007\u0003\u0002\u0002\u0002!\"\u0007",
-    "\u0007\u0002\u0002\"\'\u0005\n\u0006\u0002#$\u0007\u0004\u0002\u0002",
-    "$&\u0005\n\u0006\u0002%#\u0003\u0002\u0002\u0002&)\u0003\u0002\u0002",
-    "\u0002\'%\u0003\u0002\u0002\u0002\'(\u0003\u0002\u0002\u0002(*\u0003",
-    "\u0002\u0002\u0002)\'\u0003\u0002\u0002\u0002*+\u0007\b\u0002\u0002",
-    "+/\u0003\u0002\u0002\u0002,-\u0007\u0007\u0002\u0002-/\u0007\b\u0002",
-    "\u0002.!\u0003\u0002\u0002\u0002.,\u0003\u0002\u0002\u0002/\t\u0003",
-    "\u0002\u0002\u000208\u0007\f\u0002\u000218\u0007\r\u0002\u000228\u0005",
-    "\u0004\u0003\u000238\u0005\b\u0005\u000248\u0007\t\u0002\u000258\u0007",
-    "\n\u0002\u000268\u0007\u000b\u0002\u000270\u0003\u0002\u0002\u00027",
-    "1\u0003\u0002\u0002\u000272\u0003\u0002\u0002\u000273\u0003\u0002\u0002",
-    "\u000274\u0003\u0002\u0002\u000275\u0003\u0002\u0002\u000276\u0003\u0002",
-    "\u0002\u00028\u000b\u0003\u0002\u0002\u0002\u0007\u0014\u001b\'.7"].join("");
+const serializedATN = [4,1,12,56,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,
+1,0,1,0,1,1,1,1,1,1,1,1,5,1,17,8,1,10,1,12,1,20,9,1,1,1,1,1,1,1,1,1,3,1,
+26,8,1,1,2,1,2,1,2,1,2,1,3,1,3,1,3,1,3,5,3,36,8,3,10,3,12,3,39,9,3,1,3,1,
+3,1,3,1,3,3,3,45,8,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,54,8,4,1,4,0,0,5,0,
+2,4,6,8,0,0,60,0,10,1,0,0,0,2,25,1,0,0,0,4,27,1,0,0,0,6,44,1,0,0,0,8,53,
+1,0,0,0,10,11,3,8,4,0,11,1,1,0,0,0,12,13,5,1,0,0,13,18,3,4,2,0,14,15,5,2,
+0,0,15,17,3,4,2,0,16,14,1,0,0,0,17,20,1,0,0,0,18,16,1,0,0,0,18,19,1,0,0,
+0,19,21,1,0,0,0,20,18,1,0,0,0,21,22,5,3,0,0,22,26,1,0,0,0,23,24,5,1,0,0,
+24,26,5,3,0,0,25,12,1,0,0,0,25,23,1,0,0,0,26,3,1,0,0,0,27,28,5,10,0,0,28,
+29,5,4,0,0,29,30,3,8,4,0,30,5,1,0,0,0,31,32,5,5,0,0,32,37,3,8,4,0,33,34,
+5,2,0,0,34,36,3,8,4,0,35,33,1,0,0,0,36,39,1,0,0,0,37,35,1,0,0,0,37,38,1,
+0,0,0,38,40,1,0,0,0,39,37,1,0,0,0,40,41,5,6,0,0,41,45,1,0,0,0,42,43,5,5,
+0,0,43,45,5,6,0,0,44,31,1,0,0,0,44,42,1,0,0,0,45,7,1,0,0,0,46,54,5,10,0,
+0,47,54,5,11,0,0,48,54,3,2,1,0,49,54,3,6,3,0,50,54,5,7,0,0,51,54,5,8,0,0,
+52,54,5,9,0,0,53,46,1,0,0,0,53,47,1,0,0,0,53,48,1,0,0,0,53,49,1,0,0,0,53,
+50,1,0,0,0,53,51,1,0,0,0,53,52,1,0,0,0,54,9,1,0,0,0,5,18,25,37,44,53];
 
 
 const atn = new antlr4.atn.ATNDeserializer().deserialize(serializedATN);
 
 const decisionsToDFA = atn.decisionToState.map( (ds, index) => new antlr4.dfa.DFA(ds, index) );
 
-const sharedContextCache = new antlr4.PredictionContextCache();
+const sharedContextCache = new antlr4.atn.PredictionContextCache();
 
 export default class JSONParser extends antlr4.Parser {
 
@@ -65,10 +43,6 @@ export default class JSONParser extends antlr4.Parser {
         this.ruleNames = JSONParser.ruleNames;
         this.literalNames = JSONParser.literalNames;
         this.symbolicNames = JSONParser.symbolicNames;
-    }
-
-    get atn() {
-        return atn;
     }
 
 
@@ -99,7 +73,7 @@ export default class JSONParser extends antlr4.Parser {
 	obj() {
 	    let localctx = new ObjContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 2, JSONParser.RULE_obj);
-	    var _la = 0; // Token type
+	    var _la = 0;
 	    try {
 	        this.state = 25;
 	        this._errHandler.sync(this);
@@ -114,7 +88,7 @@ export default class JSONParser extends antlr4.Parser {
 	            this.state = 18;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            while(_la===JSONParser.T__1) {
+	            while(_la===2) {
 	                this.state = 14;
 	                this.match(JSONParser.T__1);
 	                this.state = 15;
@@ -182,7 +156,7 @@ export default class JSONParser extends antlr4.Parser {
 	arr() {
 	    let localctx = new ArrContext(this, this._ctx, this.state);
 	    this.enterRule(localctx, 6, JSONParser.RULE_arr);
-	    var _la = 0; // Token type
+	    var _la = 0;
 	    try {
 	        this.state = 44;
 	        this._errHandler.sync(this);
@@ -197,7 +171,7 @@ export default class JSONParser extends antlr4.Parser {
 	            this.state = 37;
 	            this._errHandler.sync(this);
 	            _la = this._input.LA(1);
-	            while(_la===JSONParser.T__1) {
+	            while(_la===2) {
 	                this.state = 33;
 	                this.match(JSONParser.T__1);
 	                this.state = 34;
@@ -242,37 +216,37 @@ export default class JSONParser extends antlr4.Parser {
 	        this.state = 53;
 	        this._errHandler.sync(this);
 	        switch(this._input.LA(1)) {
-	        case JSONParser.STRING:
+	        case 10:
 	            this.enterOuterAlt(localctx, 1);
 	            this.state = 46;
 	            this.match(JSONParser.STRING);
 	            break;
-	        case JSONParser.NUMBER:
+	        case 11:
 	            this.enterOuterAlt(localctx, 2);
 	            this.state = 47;
 	            this.match(JSONParser.NUMBER);
 	            break;
-	        case JSONParser.T__0:
+	        case 1:
 	            this.enterOuterAlt(localctx, 3);
 	            this.state = 48;
 	            this.obj();
 	            break;
-	        case JSONParser.T__4:
+	        case 5:
 	            this.enterOuterAlt(localctx, 4);
 	            this.state = 49;
 	            this.arr();
 	            break;
-	        case JSONParser.T__6:
+	        case 7:
 	            this.enterOuterAlt(localctx, 5);
 	            this.state = 50;
 	            this.match(JSONParser.T__6);
 	            break;
-	        case JSONParser.T__7:
+	        case 8:
 	            this.enterOuterAlt(localctx, 6);
 	            this.state = 51;
 	            this.match(JSONParser.T__7);
 	            break;
-	        case JSONParser.T__8:
+	        case 9:
 	            this.enterOuterAlt(localctx, 7);
 	            this.state = 52;
 	            this.match(JSONParser.T__8);
