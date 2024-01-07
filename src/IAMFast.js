@@ -434,13 +434,6 @@ export default class IAMFast {
         this.visited_import_paths = [];
     }
 
-    ClearTracked() {
-        this.tracked_environment_variables = [];
-        this.privs = [];
-        this.last_privs = [];
-        this.visited_import_paths = [];
-    }
-
     GenerateYAMLPolicy(code, language, filepath) {
         return YAML.stringify(JSON.parse(this.generateJSONIAMPolicy(code, language, filepath, false)));
     }
