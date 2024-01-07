@@ -82,7 +82,7 @@ export default class GoAWSListener extends GoParserListener {
                 if (ctx.children[2].children[0].children[0].children && ctx.children[2].children[0].children[0].children.length == 2 && ctx.children[2].children[0].children[0].children[0] instanceof GoParser.PrimaryExprContext && ctx.children[2].children[0].children[0].children[1] instanceof GoParser.ArgumentsContext) {
                     if (ctx.children[2].children[0].children[0].children[0].children && ctx.children[2].children[0].children[0].children[0].children.length == 3 && ctx.children[2].children[0].children[0].children[0].children[1].getText() == "." && ctx.children[2].children[0].children[0].children[0].children[2].getText() == "New") { // x = ###y###.New(...)
                         let namespace = ctx.children[2].children[0].children[0].children[0].children[0];
-                        for (let sdkDeclaration of this.SDKDeclarations) {
+                        for (let sdkDeclaration of [...this.SDKDeclarations].reverse()) { // reverse to ensure last defined comes first
                             if (namespace.getText() == sdkDeclaration['variable']) {
                                 this.ClientDeclarations.push({
                                     'type': sdkDeclaration['service'],
@@ -113,7 +113,7 @@ export default class GoAWSListener extends GoParserListener {
                     let namespace = ctx.children[0].children[0].children[0];
                     let method = ctx.children[0].children[0].children[2];
                     
-                    for (let clientDeclaration of this.ClientDeclarations) {
+                    for (let clientDeclaration of [...this.ClientDeclarations].reverse()) { // reverse to ensure last defined comes first
                         if (namespace.getText() == clientDeclaration['variable']) {
                             this.ClientCalls.push({
                                 'client': clientDeclaration,

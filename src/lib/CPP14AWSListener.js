@@ -43,7 +43,7 @@ export default class CPP14AWSListener extends CPP14ParserListener {
             if (ctx.children[0].children.length == 3 && ctx.children[0].children[0] instanceof CPP14Parser.PostfixExpressionContext && ctx.children[0].children[0].children.length == 1 && ctx.children[0].children[0].children[0] instanceof CPP14Parser.PrimaryExpressionContext && ctx.children[0].children[0].children[0].children.length == 1 && ctx.children[0].children[0].children[0].children[0] instanceof CPP14Parser.IdExpressionContext && ctx.children[0].children[1].getText() == "." && ctx.children[0].children[2] instanceof CPP14Parser.IdExpressionContext) {
                 let namespace = ctx.children[0].children[0];
                 let method = ctx.children[0].children[2];
-                for (let clientDeclaration of this.ClientDeclarations) {
+                for (let clientDeclaration of [...this.ClientDeclarations].reverse()) { // reverse to ensure last defined comes first
                     if (namespace.getText() == clientDeclaration['variable']) {
                         this.ClientCalls.push({
                             'client': clientDeclaration,

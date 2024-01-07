@@ -65,7 +65,7 @@ export default class JavaAWSListener extends JavaParserListener {
                         if (declerator.children[2].children && declerator.children[2].children.length == 1 && declerator.children[2].children[0] instanceof JavaParser.ExpressionContext) {
                             if (declerator.children[2].children[0].children && declerator.children[2].children[0].children.length == 3 && declerator.children[2].children[0].children[0] instanceof JavaParser.ExpressionContext && declerator.children[2].children[0].children[1].getText() == "." && declerator.children[2].children[0].children[2].getText() == "build()") { // x = ###y###.build()
                                 let buildexpression = declerator.children[2].children[0].children[0];
-                                for (let sdkDeclaration of this.SDKDeclarations) {
+                                for (let sdkDeclaration of [...this.SDKDeclarations].reverse()) { // reverse to ensure last defined comes first
                                     if (buildexpression.getText().startsWith(sdkDeclaration['variable'] + ".builder()")) {
                                         this.ClientDeclarations.push({
                                             'type': sdkDeclaration['service'],
@@ -92,7 +92,7 @@ export default class JavaAWSListener extends JavaParserListener {
                 let method = ctx.children[2].children[0];
                 let argsRaw = ctx.children[2].children[2];
                 
-                for (let clientDeclaration of this.ClientDeclarations) {
+                for (let clientDeclaration of [...this.ClientDeclarations].reverse()) { // reverse to ensure last defined comes first
                     if (namespace.getText() == clientDeclaration['variable']) {
                         this.ClientCalls.push({
                             'client': clientDeclaration,

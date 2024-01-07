@@ -265,7 +265,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                             let method = rhs.children[1].children[1];
                             let argsRaw = rhs.children[2];
 
-                            for (let sdkDeclaration of this.SDKDeclarations) {
+                            for (let sdkDeclaration of [...this.SDKDeclarations].reverse()) { // reverse to ensure last defined comes first
                                 if (namespace.getText() == sdkDeclaration['variable'] && method.getText() == 'client') { // boto3.client('servicename', ...), session.client('servicename', ...)
                                     if (argsRaw.children.length == 3 && argsRaw.children[1] instanceof Python3Parser.ArglistContext && argsRaw.children[1].children && argsRaw.children[1].children[0].children) {
                                         let arg1 = this.drillToAtomExprs(argsRaw.children[1].children[0])[0];
@@ -319,7 +319,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                                 }
                             }
 
-                            for (let clientDeclaration of this.ClientDeclarations) {
+                            for (let clientDeclaration of [...this.ClientDeclarations].reverse()) { // reverse to ensure last defined comes first
                                 if (namespace.getText() == clientDeclaration['variable']) {
                                     let argsVariants = this.resolveArgsVariants(argsRaw);
 
@@ -399,7 +399,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                             let method = rhs.children[2].children[1];
                             let argsRaw = rhs.children[3];
 
-                            for (let resourceObject of this.ResourceObjects) {
+                            for (let resourceObject of [...this.ResourceObjects].reverse()) { // reverse to ensure last defined comes first
                                 if (namespace.getText() == resourceObject['variable']) {
                                     let argsVariants = this.resolveArgsVariants(argsRaw, { resourceObject: resourceObject, method: method.getText(), subnamespace: subnamespace.getText() });
 
@@ -446,7 +446,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                         let method = rhs.children[1].children[1];
                         let argsRaw = rhs.children[2];
 
-                        for (let sdkDeclaration of this.SDKDeclarations) {
+                        for (let sdkDeclaration of [...this.SDKDeclarations].reverse()) { // reverse to ensure last defined comes first
                             if (namespace.getText() == sdkDeclaration['variable'] && method.getText() == 'client') { // boto3.client('servicename', ...)
                                 if (argsRaw.children.length == 3 && argsRaw.children[1] instanceof Python3Parser.ArglistContext && argsRaw.children[1].children && argsRaw.children[1].children[0].children) {
                                     let arg1 = this.drillToAtomExprs(argsRaw.children[1].children[0])[0];
@@ -463,7 +463,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                             }
                         }
 
-                        for (let clientDeclaration of this.ClientDeclarations) {
+                        for (let clientDeclaration of [...this.ClientDeclarations].reverse()) { // reverse to ensure last defined comes first
                             if (namespace.getText() == clientDeclaration['variable']) {
                                 let argsVariants = this.resolveArgsVariants(argsRaw);
 
@@ -499,7 +499,7 @@ export default class Python3AWSListener extends Python3ParserListener {
                             }
                         }
 
-                        for (let resourceDeclaration of this.ResourceDeclarations) {
+                        for (let resourceDeclaration of [...this.ResourceDeclarations].reverse()) { // reverse to ensure last defined comes first
                             if (namespace.getText() == resourceDeclaration['variable']) {
                                 if (method.getText()[0] == method.getText()[0].toLowerCase()) {
                                     let argsVariants = this.resolveArgsVariants(argsRaw, { resource: resourceDeclaration, method: method.getText() });

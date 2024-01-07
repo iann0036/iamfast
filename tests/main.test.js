@@ -220,7 +220,6 @@ describe('main.js', function () {
                             "arn:aws:ec2:us-east-1:123456789012:subnet/*",
                             "arn:aws:ec2:us-east-1:123456789012:volume/*",
                             "arn:aws:ec2:us-east-1:123456789012:elastic-gpu/*",
-                            "arn:aws:elastic-inference:us-east-1:123456789012:elastic-inference-accelerator/*",
                             "arn:aws:ec2:us-east-1:123456789012:key-pair/KEY_PAIR_NAME"
                         ]
                     },
@@ -243,7 +242,7 @@ describe('main.js', function () {
                         "Effect": "Allow",
                         "Action": "s3:GetObject",
                         "Resource": [
-                            "arn:aws:s3:::*"
+                            "arn:aws:s3:::*/*"
                         ]
                     }
                 ]
@@ -258,21 +257,21 @@ describe('main.js', function () {
                         "Effect": "Allow",
                         "Action": "chime:PutVoiceConnectorProxy",
                         "Resource": [
-                            "*"
+                            "arn:aws:chime:us-east-1:*:vc/*"
                         ]
                     },
                     {
                         "Effect": "Allow",
                         "Action": "chime:CreateProxySession",
                         "Resource": [
-                            "*"
+                            "arn:aws:chime:us-east-1:*:vc/*"
                         ]
                     },
                     {
                         "Effect": "Allow",
                         "Action": "chime:DeleteProxySession",
                         "Resource": [
-                            "*"
+                            "arn:aws:chime:us-east-1:*:vc/*"
                         ]
                     }
                 ]
@@ -288,12 +287,7 @@ describe('main.js', function () {
                         "Effect": "Allow",
                         "Action": "apigateway:DELETE",
                         "Resource": [
-                            "arn:aws:apigateway:us-east-1::/restapis/*/integration",
-                            "arn:aws:apigateway:us-east-1::/restapis/models/*/template",
-                            "arn:aws:apigateway:us-east-1::/usageplans/myusageplanid",
-                            "arn:aws:apigateway:us-east-1::/apis/*/accesslogsettings",
-                            "arn:aws:apigateway:us-east-1::/apis/*/cache/authorizers",
-                            "arn:aws:apigateway:us-east-1::/apis/*/cors"
+                            "arn:aws:apigateway:us-east-1::/usageplans/myusageplanid/keys/mykeyid"
                         ]
                     }
                 ]
@@ -313,9 +307,7 @@ describe('main.js', function () {
                         ]
                     }
                 ]
-            }
-
-            )
+            })
         })
         it('should produce a valid iam definition for Route53 (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test8.js");
@@ -330,8 +322,7 @@ describe('main.js', function () {
                         ]
                     }
                 ]
-            }
-            )
+            })
         })
         it('should produce a valid iam definition for SQS and Lambda (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test9.js");
@@ -362,22 +353,36 @@ describe('main.js', function () {
                 ]
             })
         })
-        it('should produce a valid iam definition for TBC (JavaScript)', () => {
+        it('should produce a valid iam definition for DDB various (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test10.js");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "dynamodb:GetItem",
                         "Resource": [
-                            "*"
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/*"
+                        ]
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "dynamodb:PutItem",
+                        "Resource": [
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/*"
+                        ]
+                    },
+                    {
+                        "Effect": "Allow",
+                        "Action": "dynamodb:DeleteItem",
+                        "Resource": [
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/*"
                         ]
                     }
                 ]
             })
         })
-        it('should produce a valid iam definition for TBC, outputting as HCL (JavaScript)', () => {
+        it('should produce a valid iam definition for DDB various, outputting as HCL (JavaScript)', () => {
             let policy = generatePolicyAsHcl("./tests/js/test10.js");
             expect(policy).to.deep.equal(`data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
@@ -423,14 +428,14 @@ data "aws_iam_policy_document" "my_policy" {
   }
 }`)
         })
-        it('should produce a valid iam definition for TBC (JavaScript)', () => {
+        it('should produce a valid iam definition for ECR (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test11.js");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "ecr:ListTagsForResource",
                         "Resource": [
                             "*"
                         ]
@@ -438,31 +443,36 @@ data "aws_iam_policy_document" "my_policy" {
                 ]
             })
         })
-        it('should produce a valid iam definition for TBC (JavaScript)', () => {
+        it('should produce a valid iam definition for DDB puts (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test12.js");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "dynamodb:PutItem",
                         "Resource": [
-                            "*"
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/STATIC_NAME",
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/CUSTOMER_LIST",
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/OTHER_TABLE_NAME",
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/OTHER_TABLE_NAME_AGAIN",
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/hij",
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/ANON_TABLE"
                         ]
                     }
                 ]
             })
         })
-        it('should produce a valid iam definition for TBC (JavaScript)', () => {
+        it('should produce a valid iam definition for Dynamo Delete Item (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test14.js");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "dynamodb:DeleteItem",
                         "Resource": [
-                            "*"
+                            "arn:aws:dynamodb:us-east-1:123456789012:table/*"
                         ]
                     }
                 ]
@@ -490,7 +500,7 @@ data "aws_iam_policy_document" "my_policy" {
                 "Statement": [
                     {
                         "Effect": "Allow",
-                        "Action": "tbc:TBC",
+                        "Action": "cloudwatch:TBC",
                         "Resource": [
                             "*"
                         ]
@@ -622,14 +632,13 @@ data "aws_iam_policy_document" "my_policy" {
                         "Effect": "Allow",
                         "Action": "ec2:RunInstances",
                         "Resource": [
-                            "arn:aws:ec2:us-east-1::image/*",
+                            "arn:aws:ec2:us-east-1::image/ami-e7527ed7",
                             "arn:aws:ec2:us-east-1:123456789012:instance/*",
                             "arn:aws:ec2:us-east-1:123456789012:network-interface/*",
                             "arn:aws:ec2:us-east-1:123456789012:security-group/*",
                             "arn:aws:ec2:us-east-1:123456789012:subnet/*",
                             "arn:aws:ec2:us-east-1:123456789012:volume/*",
-                            "arn:aws:ec2:us-east-1:123456789012:elastic-gpu/*",
-                            "arn:aws:elastic-inference:us-east-1:123456789012:elastic-inference-accelerator/*"
+                            "arn:aws:ec2:us-east-1:123456789012:elastic-gpu/*"
                         ]
                     },
                     {
@@ -665,7 +674,7 @@ data "aws_iam_policy_document" "my_policy" {
                         "Effect": "Allow",
                         "Action": "cloudtrail:CreateTrail",
                         "Resource": [
-                            "*"
+                            "arn:aws:cloudtrail:us-east-1:123456789012:trail/*"
                         ]
                     }
                 ]
@@ -716,8 +725,7 @@ data "aws_iam_policy_document" "my_policy" {
                             "arn:aws:ec2:us-east-1:123456789012:security-group/*",
                             "arn:aws:ec2:us-east-1:123456789012:subnet/*",
                             "arn:aws:ec2:us-east-1:123456789012:volume/*",
-                            "arn:aws:ec2:us-east-1:123456789012:elastic-gpu/*",
-                            "arn:aws:elastic-inference:us-east-1:123456789012:elastic-inference-accelerator/*"
+                            "arn:aws:ec2:us-east-1:123456789012:elastic-gpu/*"
                         ]
                     },
                     {

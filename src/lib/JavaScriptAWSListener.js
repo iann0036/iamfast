@@ -280,7 +280,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                             let foundDeclaration = false;
                             let clientDeclaration;
 
-                            for (let sdkDeclaration of this.getSDKDeclarations()) {
+                            for (let sdkDeclaration of [...this.getSDKDeclarations()].reverse()) { // reverse to ensure last defined comes first
                                 if (namespace.getText() == sdkDeclaration['variable']) {
                                     clientDeclaration = {
                                         'type': method.getText(),
@@ -337,7 +337,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                                 let childNamespace = namespace.getText().split(".")[1];
                                 let resourceDeclaration;
 
-                                for (let sdkDeclaration of this.getSDKDeclarations()) {
+                                for (let sdkDeclaration of [...this.getSDKDeclarations()].reverse()) { // reverse to ensure last defined comes first
                                     if (parentNamespace == sdkDeclaration['variable']) {
                                         resourceDeclaration = {
                                             'type': method.getText(),
@@ -411,7 +411,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
 
             if (namespace instanceof JavaScriptParser.IdentifierExpressionContext) {
                 for (let variablesVariant of GetVariableDeclarationVariants(this)) {
-                    for (let variable of Object.values(variablesVariant)) {
+                    for (let variable of Object.values(variablesVariant).reverse()) {
                         if (variable.variable == namespaceText) {
                             if (variable.type == 'clientdeclaration') {
                                 let argsVariants = this.resolveArgsVariants(argsRaw);
