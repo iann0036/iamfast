@@ -431,6 +431,14 @@ export default class IAMFast {
         this.tracked_environment_variables = [];
         this.privs = [];
         this.last_privs = [];
+        this.visited_import_paths = [];
+    }
+
+    ClearTracked() {
+        this.tracked_environment_variables = [];
+        this.privs = [];
+        this.last_privs = [];
+        this.visited_import_paths = [];
     }
 
     GenerateYAMLPolicy(code, language, filepath) {
