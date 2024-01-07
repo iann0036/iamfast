@@ -1,0 +1,5 @@
+{
+  "name": "lib",
+  "main": "error.js",
+  "type": "module"
+}
