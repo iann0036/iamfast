@@ -303,7 +303,7 @@ describe('main.js', function () {
                         "Effect": "Allow",
                         "Action": "ecr:ListTagsForResource",
                         "Resource": [
-                            "arn:aws:ecr:us-east-1:123456789012:repository/*"
+                            "arn:aws:ecr:us-east-1:123456789012:repository/myrepo"
                         ]
                     }
                 ]

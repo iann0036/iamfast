@@ -5,7 +5,7 @@ AWS.config.update({region: 'us-east-2'});
 
 ecr = new AWS.ECR({apiVersion: '2015-09-21'});
 
-ecr.listTagsForResource({resourceArn: "notValid"}, function(err, data) {
+ecr.listTagsForResource({resourceArn: undefined}, function(err, data) {
   if (err) {
     console.log("Error", err);
   } else {

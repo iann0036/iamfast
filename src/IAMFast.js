@@ -130,13 +130,10 @@ export default class IAMFast {
                         return [arn.substr(0, start_index) + arn.substr(end_index + 2)];
                     }
 
-                    /*
-                    template := regexp.MustCompile(`\\\$\\\{.+?\\\}`).ReplaceAllString(regexp.QuoteMeta(*resourceArnTemplate), ".*?")
-            
-                        if regexp.MustCompile(template).MatchString(arns[0]) {
-                            return []string{arn[0:startIndex] + arns[0] + arn[endIndex+2:]}
-                        }
-                    */
+                    let re = new RegExp(parts[1], "g");
+                    if (arns[0].match(re)) {
+                        return [arn.substr(0, start_index) + arns[0] + arn.substr(end_index + 2)];
+                    }
 
                     return [arn.substr(0, start_index) + arn.substr(end_index + 2)];
                 case "many":
