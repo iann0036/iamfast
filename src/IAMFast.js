@@ -49,6 +49,19 @@ export default class IAMFast {
         return language;
     }
 
+    GetVisitedFileCount() {
+        return this.visited_import_paths.length + 1;
+    }
+
+    generateImportsOnlyCode(input, language) {
+        let lines = input.split("\n");
+        if (language == "js") {
+            return lines.filter((line) => line.match(/^\s*import |require\s*\(/g)).join("\n");
+        }
+
+        return input;
+    }
+
     resolveSpecials(arn, call, mandatory, mapped_priv) {
         let start_index = arn.indexOf("%%");
         let end_index = arn.lastIndexOf("%%");
@@ -489,9 +502,11 @@ export default class IAMFast {
             code = lines.join("\n");
         }
 
+        let import_only_code = this.generateImportsOnlyCode(code, language);
+
         let import_parser = new AWSParser(); // TODO: replace with minimal imports parser
         import_parser.debug = false;
-        import_parser.ParseInput(code, language);
+        import_parser.ParseInput(import_only_code, language);
 
         for (let import_inst of import_parser.imports) {
             // https://www.bennadel.com/blog/2169-where-does-node-js-and-require-look-for-modules.htm
@@ -584,6 +599,8 @@ export default class IAMFast {
                 }
             }
         }
+
+        this.debug && console.log("Evaluated file:", filepath);
 
         // basic pre-checks
         if (language == "asl" && !code.includes("\"StartAt\"")) {
@@ -690,8 +707,6 @@ export default class IAMFast {
                 console.warn(`WARNING: Could not find privilege match for ${tracked_call.service}:${tracked_call.method}`);
             }
         }
-
-        this.debug && console.log("For filepath: ", filepath);
         this.debug && console.log("Privs: ", privs);
 
         this.last_privs = privs;

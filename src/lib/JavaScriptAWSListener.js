@@ -211,8 +211,26 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         this.aggregateVariableOrAssignmentDeclaration(ctx);
     }
 
-    exitImportStatement(ctx) {
-        // TODO
+    exitImportFromBlock(ctx) {
+        let import_identifier = ctx.children[ctx.children.length - 2];
+
+        if (import_identifier instanceof JavaScriptParser.ImportFromContext) {
+            import_identifier = import_identifier.children[1];
+
+            this.Imports.push({
+                'scope': [...this.currentScope],
+                'variable': import_identifier.getText().replace(/['"]/g, ""),
+                'type': 'importfrom',
+                'value': import_identifier.getText().replace(/['"]/g, "")
+            });
+        } else {
+            this.Imports.push({
+                'scope': [...this.currentScope],
+                'variable': import_identifier.getText().replace(/['"]/g, ""),
+                'type': 'import',
+                'value': import_identifier.getText().replace(/['"]/g, "")
+            });    
+        }
 	}
 
     getSDKDeclarations() {

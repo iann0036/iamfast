@@ -64,10 +64,12 @@ export default class AWSParser {
         switch (language) {
             case 'js':
                 lexer = new JavaScriptLexer(chars);
+                lexer.removeErrorListeners();
                 lexer.strictMode = false;
 
                 tokens = new antlr4.CommonTokenStream(lexer);
                 parser = new JavaScriptParser(tokens);
+                parser.removeErrorListeners();
                 parser.buildParseTrees = true;
                 //parser._interp.predictionMode = antlr4.atn.PredictionMode.SLL;
 
@@ -90,10 +92,12 @@ export default class AWSParser {
                 break;
             case 'python':
                 lexer = new Python3Lexer(chars);
+                lexer.removeErrorListeners();
                 lexer.strictMode = false;
     
                 tokens = new antlr4.CommonTokenStream(lexer);
                 parser = new Python3Parser(tokens);
+                parser.removeErrorListeners();
                 parser.buildParseTrees = true;
     
                 tree = parser.file_input();
@@ -115,10 +119,12 @@ export default class AWSParser {
                 break;
             case 'java':
                 lexer = new JavaLexer(chars);
+                lexer.removeErrorListeners();
                 lexer.strictMode = false;
     
                 tokens = new antlr4.CommonTokenStream(lexer);
                 parser = new JavaParser(tokens);
+                parser.removeErrorListeners();
                 parser.buildParseTrees = true;
     
                 tree = parser.compilationUnit();
@@ -139,10 +145,12 @@ export default class AWSParser {
                 break;
             case 'go':
                 lexer = new GoLexer(chars);
+                lexer.removeErrorListeners();
                 lexer.strictMode = false;
     
                 tokens = new antlr4.CommonTokenStream(lexer);
                 parser = new GoParser(tokens);
+                parser.removeErrorListeners();
                 parser.buildParseTrees = true;
     
                 tree = parser.sourceFile();
@@ -160,10 +168,12 @@ export default class AWSParser {
                 break;
             case 'cplusplus':
                 lexer = new CPP14Lexer(chars);
+                lexer.removeErrorListeners();
                 lexer.strictMode = false;
     
                 tokens = new antlr4.CommonTokenStream(lexer);
                 parser = new CPP14Parser(tokens);
+                parser.removeErrorListeners();
                 parser.buildParseTrees = true;
     
                 tree = parser.translationUnit();
@@ -181,10 +191,12 @@ export default class AWSParser {
                 break;
             case 'asl':
                 lexer = new JSONLexer(chars);
+                lexer.removeErrorListeners();
                 lexer.strictMode = false;
     
                 tokens = new antlr4.CommonTokenStream(lexer);
                 parser = new JSONParser(tokens);
+                parser.removeErrorListeners();
                 parser.buildParseTrees = true;
     
                 tree = parser.json();
