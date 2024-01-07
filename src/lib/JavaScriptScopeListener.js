@@ -372,6 +372,24 @@ export default class JavaScriptScopeListener extends JavaScriptParserListener {
                     });
                 }
             }
+        } else if (assignable.children.length && assignable.children[0] instanceof JavaScriptParser.ObjectLiteralContext) { // {XXX} = blah
+            if (ctx.children.length == 3) {
+                const expression = ctx.children[2]; // {blah} = ###
+
+                if (expression.getText() == "process.env") {
+                    for (let objproperty of assignable.children[0].children) {
+                        if (objproperty instanceof JavaScriptParser.PropertyShorthandContext && objproperty.children[0] instanceof JavaScriptParser.IdentifierExpressionContext && objproperty.children[0].children[0] instanceof JavaScriptParser.IdentifierContext) { // {###, ###} == process.env
+                            this.VariableDeclarations.push({
+                                'scope': [...this.currentScope],
+                                'variable': objproperty.getText(),
+                                'type': 'envvar',
+                                'name': objproperty.getText()
+                            });
+                            this.EnvironmentVariables.push(objproperty.getText());
+                        }
+                    }
+                }
+            }
         }
     }
 }

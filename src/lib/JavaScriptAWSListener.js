@@ -244,7 +244,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                 const expression = ctx.children[2]; // blah = ###
 
                 if (expression instanceof JavaScriptParser.ArgumentsExpressionContext) { // find SDK requires
-                    if (expression.children[0].getText() == "require" && ["('aws-sdk')", "(\"aws-sdk\")"].includes(expression.children[1].getText())) {
+                    if ((expression.children[0].getText() == "require" && ["('aws-sdk')", "(\"aws-sdk\")"].includes(expression.children[1].getText())) || expression.getText().match(/captureAWS\s*\(\s*require\s*\(\s*["']aws-sdk["']\s*\)/g)) {
                         this.SDKDeclarations.push({
                             'variable': assignable.getText()
                         });
