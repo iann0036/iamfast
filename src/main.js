@@ -53,7 +53,14 @@ if (stat.isDirectory()) {
         process.exit(1);
     }
 
-    files = walk(filename);
+    try { // try as a package, otherwise deep walk
+        let packagejson_path = path.join(filename, 'package.json');
+        let packagejson = JSON.parse(fs.readFileSync(packagejson_path, { encoding: 'utf8', flag: 'r' }));
+        let resolved_import_path = path.join(filename, packagejson.main);
+        files.push(resolved_import_path);
+    } catch(e) {
+        files = walk(filename);
+    }
 
     if (files.length == 0) {
         console.log("error: no known files found");
@@ -83,13 +90,13 @@ for (let file of files) {
     let language = IAMFast.getLanguageByPath(file);
 
     if (format == "sam") {
-        output = iamfast.GenerateSAMTemplate(code, language);
+        output = iamfast.GenerateSAMTemplate(code, language, file);
     } else if (format == "yaml") {
-        output = iamfast.GenerateYAMLPolicy(code, language);
+        output = iamfast.GenerateYAMLPolicy(code, language, file);
     } else if (format == "json") {
-        output = iamfast.GenerateIAMPolicy(code, language);
+        output = iamfast.GenerateIAMPolicy(code, language, file);
     } else if (format == "hcl") {
-        output = iamfast.GenerateHCLTemplate(code, language);
+        output = iamfast.GenerateHCLTemplate(code, language, file);
     }
 }
 

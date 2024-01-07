@@ -5,6 +5,7 @@ export default class GoAWSListener extends GoParserListener {
 
     constructor() {
         super();
+        this.Imports = [];
         this.SDKDeclarations = [];
         this.ClientDeclarations = [];
         this.ClientCalls = [];

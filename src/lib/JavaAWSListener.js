@@ -5,6 +5,7 @@ export default class JavaAWSListener extends JavaParserListener {
 
     constructor(variableDeclarations, functionDeclarations, functionCalls) {
         super();
+        this.Imports = [];
         this.SDKDeclarations = [];
         this.ClientDeclarations = [];
         this.ClientCalls = [];

@@ -5,6 +5,9 @@ import AWSParser from './AWSParser.js';
 import iam_def from './lib/iam_definition.js';
 import mappings from './lib/map.js';
 import EnvironmentVariable from './EnvironmentVariable.js';
+import path from "path";
+import fs from "fs";
+import repl from "repl"
 
 export default class IAMFast {
 
@@ -21,6 +24,7 @@ export default class IAMFast {
         this.debug = false;
         this.privs = [];
         this.last_privs = [];
+        this.visited_import_paths = [];
     }
 
     static getLanguageByPath(path) {
@@ -305,7 +309,7 @@ export default class IAMFast {
         return envkey;
     }
 
-    GenerateSAMTemplate(code, language) {
+    GenerateSAMTemplate(code, language, filepath) {
         const custom_tags = {
             customTags: [{
                 identify: value => value,
@@ -359,7 +363,7 @@ export default class IAMFast {
         this.aws_region = `##@##AWS::Region##@##`;
         this.aws_accountid = `##@##AWS::AccountId##@##`;
 
-        let iam_policy = JSON.parse(this.generateJSONIAMPolicy(code, language, true));
+        let iam_policy = JSON.parse(this.generateJSONIAMPolicy(code, language, filepath, true));
 
         sam_template.setIn(['Resources', 'LambdaFunction', 'Properties', 'Policies', 0], new YAML.Document(iam_policy));
         sam_template = YAML.parseDocument(YAML.stringify(sam_template), custom_tags); // flatten
@@ -415,15 +419,15 @@ export default class IAMFast {
         this.last_privs = [];
     }
 
-    GenerateYAMLPolicy(code, language) {
-        return YAML.stringify(JSON.parse(this.generateJSONIAMPolicy(code, language, false)));
+    GenerateYAMLPolicy(code, language, filepath) {
+        return YAML.stringify(JSON.parse(this.generateJSONIAMPolicy(code, language, filepath, false)));
     }
 
-    GenerateHCLTemplate(code, language) {
+    GenerateHCLTemplate(code, language, filepath) {
         this.aws_region = `##@##aws_region##@##`;
         this.aws_accountid = `##@##aws_accountid##@##`;
 
-        let policy = JSON.parse(this.generateJSONIAMPolicy(code, language, true));
+        let policy = JSON.parse(this.generateJSONIAMPolicy(code, language, filepath, true));
         let doc = `data "aws_iam_policy_document" "my_policy" {`;
 
         this.tracked_environment_variables.forEach(env => {
@@ -465,25 +469,97 @@ export default class IAMFast {
         return doc;
     }
 
-    GenerateIAMPolicy(code, language) {
-        return this.generateJSONIAMPolicy(code, language, false)
+    GenerateIAMPolicy(code, language, filepath) {
+        return this.generateJSONIAMPolicy(code, language, filepath, false)
     }
 
-    generateJSONIAMPolicy(code, language, variable_replacement) {
-        const GENERIC_SERVICE_METHODS = new Set([
-            "endpoint",
-            "defineservice",
-            "makerequest",
-            "makeunauthenticatedrequest",
-            "setuprequestlisteners",
-            "waitfor"]);
+    generateJSONIAMPolicy(code, language, filepath, variable_replacement) {
+        this.generatePrivs(code, language, filepath, variable_replacement);
 
+        return this.toIAMPolicy(this.privs);
+    }
+
+    generatePrivs(code, language, filepath, variable_replacement) {
         let privs = [];
 
-        if (code.trim()[0] == '#') {
+        if (code.trim()[0] == '#') { // trim shebang
             let lines = code.split("\n");
             lines.shift();
             code = lines.join("\n");
+        }
+
+        let import_parser = new AWSParser(); // TODO: replace with minimal imports parser
+        import_parser.debug = false;
+        import_parser.ParseInput(code, language);
+
+        for (let import_inst of import_parser.imports) {
+            if (repl._builtinLibs.includes(import_inst.value)) { // core modules
+                continue;
+            }
+
+            // Local imports
+            let import_path = path.join(path.dirname(filepath), import_inst.value);
+
+            if (!fs.existsSync(import_path) && path.extname(import_path) == "") { // https://www.bennadel.com/blog/2169-where-does-node-js-and-require-look-for-modules.htm
+                import_path = path.format({ ...path.parse(import_path), base: '', ext: '.js' })
+            }
+
+            if (this.visited_import_paths.includes(import_path)) {
+                continue;
+            } else {
+                this.visited_import_paths.push(import_path);
+            }
+
+            try {
+                let stat = fs.statSync(import_path);
+                if (stat.isFile()) {
+                    let import_code = fs.readFileSync(import_path, { encoding: 'utf8', flag: 'r' });
+                    let import_language = IAMFast.getLanguageByPath(import_path);
+
+                    if (import_language == language) {
+                        this.generatePrivs(import_code, language, import_path, variable_replacement);
+                    }
+                    continue
+                } else if (stat.isDirectory()) {
+                    let packagejson_path = path.join(import_path, 'package.json');
+                    if (fs.existsSync(packagejson_path)) {
+                        let packagejson = JSON.parse(fs.readFileSync(packagejson_path, { encoding: 'utf8', flag: 'r' }));
+                        let resolved_import_path = path.join(import_path, packagejson.main);
+                        let import_code = fs.readFileSync(resolved_import_path, { encoding: 'utf8', flag: 'r' });
+                        let import_language = IAMFast.getLanguageByPath(resolved_import_path);
+
+                        if (import_language == language) {
+                            this.generatePrivs(import_code, language, resolved_import_path, variable_replacement);
+                        }
+                    }
+                    let defaultindex_path = path.join(import_path, 'index.js');
+                    let import_code = fs.readFileSync(defaultindex_path, { encoding: 'utf8', flag: 'r' });
+                    let import_language = IAMFast.getLanguageByPath(defaultindex_path);
+
+                    if (import_language == language) {
+                        this.generatePrivs(import_code, language, defaultindex_path, variable_replacement);
+                    }
+                    continue
+                }
+            } catch(e) {}
+
+            // Standard imports
+            // TODO
+        }
+
+        // basic pre-checks
+        if (language == "asl" && !code.includes("\"StartAt\"")) {
+            return;
+        } else if (language == "js" && !code.includes("aws-sdk")) {
+            return;
+        } else if (language == "python" && !code.includes("boto3")) {
+            return;
+        } else if (language == "java" && !code.includes("software.amazon.awssdk.services.")) {
+            return;
+        } else if (language == "go" && !code.includes("/aws-sdk-go/")) {
+            return;
+        } else if (language == "cplusplus" && !code.includes("<aws/")) {
+            return;
         }
 
         let parser = new AWSParser();
@@ -555,12 +631,21 @@ export default class IAMFast {
                             'action': service.prefix.toLowerCase() + ":" + privilege.sarpriv.privilege,
                             'explanation': privilege.sarpriv.description,
                             'resource': resource_arns,
-                            'position': tracked_call.position
+                            'position': tracked_call.position,
+                            'filepath': filepath
                         });
                     }
                     break;
                 }
             }
+
+            const GENERIC_SERVICE_METHODS = new Set([
+                "endpoint",
+                "defineservice",
+                "makerequest",
+                "makeunauthenticatedrequest",
+                "setuprequestlisteners",
+                "waitfor"]);
 
             if (!found_match &&
                 !GENERIC_SERVICE_METHODS.has(tracked_call.method)) {
@@ -568,11 +653,10 @@ export default class IAMFast {
             }
         }
 
+        this.debug && console.log("For filepath: ", filepath);
         this.debug && console.log("Privs: ", privs);
 
         this.last_privs = privs;
         this.privs = this.privs.concat(privs);
-
-        return this.toIAMPolicy(this.privs);
     }
 }

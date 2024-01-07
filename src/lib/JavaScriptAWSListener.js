@@ -7,6 +7,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
 
     constructor(variableDeclarations, functionDeclarations, functionCalls) {
         super();
+        this.Imports = [];
         this.SDKDeclarations = [];
         this.ClientCalls = [];
         this.ResourceObjects = [];
@@ -210,6 +211,10 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
         this.aggregateVariableOrAssignmentDeclaration(ctx);
     }
 
+    exitImportStatement(ctx) {
+        // TODO
+	}
+
     getSDKDeclarations() {
         return this.SDKDeclarations;
     }
@@ -231,6 +236,15 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                             'type': 'sdkdeclaration',
                             'value': this.SDKDeclarations[this.SDKDeclarations.length - 1]
                         });
+                    } else if (expression.children[0].getText() == "require") {
+                        if (expression.children[1].children.length == 3 && expression.children[1].children[1] instanceof JavaScriptParser.ArgumentContext && expression.children[1].children[1].children.length == 1 && expression.children[1].children[1].children[0] instanceof JavaScriptParser.LiteralExpressionContext) {
+                            this.Imports.push({
+                                'scope': [...this.currentScope],
+                                'variable': assignable.getText(),
+                                'type': 'require',
+                                'value': expression.children[1].children[1].children[0].getText().replace(/['"]/g, "")
+                            });
+                        }
                     }
                 } else if (expression instanceof JavaScriptParser.NewExpressionContext) { // find client instantiations
                     let className = expression.children[1]; // new ### (...)

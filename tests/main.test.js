@@ -166,6 +166,14 @@ describe('main.js', function () {
             }
             )
         })
+        it('should fail (ASL)', () => {
+            let policy = generatePolicyAsJson("./tests/asl/test7.json", "123123123123");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": []
+            }
+            )
+        })
         it('should produce a valid iam definition for DynamoDB (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test1.js");
             expect(policy).to.deep.equal({

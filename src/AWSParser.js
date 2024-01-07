@@ -41,6 +41,7 @@ export default class AWSParser {
         this.client_calls = [];
         this.resource_calls = [];
         this.environmental_variables = [];
+        this.imports = [];
         this.debug = false;
     }
 
@@ -81,6 +82,7 @@ export default class AWSParser {
 
                 this.client_calls = listener.ClientCalls;
                 this.resource_calls = listener.ResourceCalls;
+                this.imports = listener.Imports;
                 this.environmental_variables = [...new Set(scopeListener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.dir(listener, {depth: 3});
@@ -105,6 +107,7 @@ export default class AWSParser {
 
                 this.client_calls = listener.ClientCalls;
                 this.resource_calls = listener.ResourceCalls;
+                this.imports = listener.Imports;
                 this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
@@ -128,6 +131,7 @@ export default class AWSParser {
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+                this.imports = listener.Imports;
                 this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
@@ -148,6 +152,7 @@ export default class AWSParser {
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+                this.imports = listener.Imports;
                 this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);
@@ -168,6 +173,7 @@ export default class AWSParser {
                 antlr4.tree.ParseTreeWalker.DEFAULT.walk(listener, tree);
 
                 this.client_calls = listener.ClientCalls;
+                this.imports = listener.Imports;
                 this.environmental_variables = [...new Set(listener.EnvironmentVariables)]; // no dupes
 
                 this.debug && console.log(listener);

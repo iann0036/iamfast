@@ -18,6 +18,7 @@ export default class Python3AWSListener extends Python3ParserListener {
 
     constructor(variableDeclarations, functionDeclarations, functionCalls) {
         super();
+        this.Imports = [];
         this.SDKDeclarations = [];
         this.ClientDeclarations = [];
         this.ResourceDeclarations = [];

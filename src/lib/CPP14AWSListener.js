@@ -5,6 +5,7 @@ export default class CPP14AWSListener extends CPP14ParserListener {
 
     constructor() {
         super();
+        this.Imports = [];
         this.SDKDeclarations = [];
         this.ClientDeclarations = [];
         this.ClientCalls = [];
