@@ -26,6 +26,8 @@ iamfast [supports](#development-progress) the following programming languages:
 * Python 3 (Boto3 SDK)
 * Go (v1 SDK)
 * Java (v2 SDK)
+* C/C++ (v1 SDK)
+* Amazon States Language / Step Functions State Machines (JSON)
 
 #### Optional Flags
 
