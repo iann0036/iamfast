@@ -572,7 +572,13 @@ export default class IAMFast {
                     continue;
                 }
 
-                const require_temp = createRequire(path.resolve(filepath));
+                let resolved_import_path = path.resolve(filepath);
+                if (!resolved_import_path) {
+                    console.warn("Could not resolve import path:", filepath);
+                    continue;
+                }
+
+                const require_temp = createRequire(resolved_import_path);
                 //const require_temp = await import.meta.resolve(import_path); // for future Node versions
                 const package_basepaths = require_temp.resolve.paths(import_path);
 
