@@ -13,7 +13,7 @@ const generatePolicyAsJson = (filePath, awsAccountId = "123456789012") => {
     let language = IAMFast.getLanguageByPath(filePath);
 
     let code = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' });
-    let policy = sut.GenerateIAMPolicy(code, language);
+    let policy = sut.GenerateIAMPolicy(code, language, filePath);
     return JSON.parse(policy);
 }
 
@@ -23,7 +23,7 @@ const generatePolicyAsHcl = (filePath, awsAccountId = "123456789012") => {
     let language = IAMFast.getLanguageByPath(filePath);
 
     let code = fs.readFileSync(filePath, { encoding: 'utf8', flag: 'r' });
-    let template = sut.GenerateHCLTemplate(code, language);
+    let template = sut.GenerateHCLTemplate(code, language, filePath);
     return template;
 }
 
@@ -440,6 +440,21 @@ data "aws_iam_policy_document" "my_policy" {
         })
         it('should produce a valid iam definition for TBC (JavaScript)', () => {
             let policy = generatePolicyAsJson("./tests/js/test12.js");
+            expect(policy).to.deep.equal({
+                "Version": "2012-10-17",
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": "tbc:TBC",
+                        "Resource": [
+                            "*"
+                        ]
+                    }
+                ]
+            })
+        })
+        it('should produce a valid iam definition for TBC (JavaScript)', () => {
+            let policy = generatePolicyAsJson("./tests/js/test14.js");
             expect(policy).to.deep.equal({
                 "Version": "2012-10-17",
                 "Statement": [

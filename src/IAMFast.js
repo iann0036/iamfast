@@ -7,7 +7,8 @@ import mappings from './lib/map.js';
 import EnvironmentVariable from './EnvironmentVariable.js';
 import path from "path";
 import fs from "fs";
-import repl from "repl"
+import repl from "repl";
+import { createRequire } from 'node:module';
 
 export default class IAMFast {
 
@@ -493,58 +494,95 @@ export default class IAMFast {
         import_parser.ParseInput(code, language);
 
         for (let import_inst of import_parser.imports) {
-            if (repl._builtinLibs.includes(import_inst.value)) { // core modules
-                continue;
-            }
+            // https://www.bennadel.com/blog/2169-where-does-node-js-and-require-look-for-modules.htm
+            let is_local_import = import_inst.value.startsWith(".") || import_inst.value.startsWith("/") || import_inst.value.startsWith("\\");
 
-            // Local imports
             let import_path = path.join(path.dirname(filepath), import_inst.value);
 
-            if (!fs.existsSync(import_path) && path.extname(import_path) == "") { // https://www.bennadel.com/blog/2169-where-does-node-js-and-require-look-for-modules.htm
-                import_path = path.format({ ...path.parse(import_path), base: '', ext: '.js' })
-            }
-
-            if (this.visited_import_paths.includes(import_path)) {
+            if (this.visited_import_paths.includes(import_path)) { // anti cyclic
                 continue;
             } else {
                 this.visited_import_paths.push(import_path);
             }
 
-            try {
-                let stat = fs.statSync(import_path);
-                if (stat.isFile()) {
-                    let import_code = fs.readFileSync(import_path, { encoding: 'utf8', flag: 'r' });
-                    let import_language = IAMFast.getLanguageByPath(import_path);
+            if (is_local_import) { // Local imports
+                let local_import_path = import_path;
 
-                    if (import_language == language) {
-                        this.generatePrivs(import_code, language, import_path, variable_replacement);
-                    }
-                    continue
-                } else if (stat.isDirectory()) {
-                    let packagejson_path = path.join(import_path, 'package.json');
-                    if (fs.existsSync(packagejson_path)) {
-                        let packagejson = JSON.parse(fs.readFileSync(packagejson_path, { encoding: 'utf8', flag: 'r' }));
-                        let resolved_import_path = path.join(import_path, packagejson.main);
-                        let import_code = fs.readFileSync(resolved_import_path, { encoding: 'utf8', flag: 'r' });
-                        let import_language = IAMFast.getLanguageByPath(resolved_import_path);
+                if (!fs.existsSync(local_import_path) && path.extname(local_import_path) == "") {
+                    local_import_path = path.format({ ...path.parse(local_import_path), base: '', ext: '.js' })
+                }
+
+                try {
+                    let stat = fs.statSync(local_import_path);
+                    if (stat.isFile()) {
+                        let import_code = fs.readFileSync(local_import_path, { encoding: 'utf8', flag: 'r' });
+                        let import_language = IAMFast.getLanguageByPath(local_import_path);
 
                         if (import_language == language) {
-                            this.generatePrivs(import_code, language, resolved_import_path, variable_replacement);
+                            this.generatePrivs(import_code, language, local_import_path, variable_replacement);
+                        }
+                        continue
+                    } else if (stat.isDirectory()) {
+                        let packagejson_path = path.join(local_import_path, 'package.json');
+                        if (fs.existsSync(packagejson_path)) {
+                            let packagejson = JSON.parse(fs.readFileSync(packagejson_path, { encoding: 'utf8', flag: 'r' }));
+                            let resolved_import_path = path.join(local_import_path, packagejson.main);
+                            let import_code = fs.readFileSync(resolved_import_path, { encoding: 'utf8', flag: 'r' });
+                            let import_language = IAMFast.getLanguageByPath(resolved_import_path);
+
+                            if (import_language == language) {
+                                this.generatePrivs(import_code, language, resolved_import_path, variable_replacement);
+                            }
+                        }
+                        let defaultindex_path = path.join(local_import_path, 'index.js');
+                        let import_code = fs.readFileSync(defaultindex_path, { encoding: 'utf8', flag: 'r' });
+                        let import_language = IAMFast.getLanguageByPath(defaultindex_path);
+
+                        if (import_language == language) {
+                            this.generatePrivs(import_code, language, defaultindex_path, variable_replacement);
+                        }
+                        continue
+                    }
+                } catch(e) {}
+            } else { // Standard imports
+                if (repl._builtinLibs.includes(import_inst.value)) { // core modules
+                    continue;
+                }
+
+                const require_temp = createRequire(path.resolve(filepath));
+                //const require_temp = await import.meta.resolve(import_path); // for future Node versions
+                const package_basepaths = require_temp.resolve.paths(import_path);
+
+                for (let package_basepath of package_basepaths) {
+                    let package_path = path.join(package_basepath, import_path);
+                    // let stupidtoplevel_path = path.join(package_basepath, import_path + ".js");
+                    if (fs.existsSync(package_path)) {
+                        let packagejson_path = path.join(package_basepath, import_path, "package.json");
+                        let defaultindex_path = path.join(package_basepath, import_path, "index.js");
+                        if (fs.existsSync(packagejson_path)) {
+                            let packagejson = JSON.parse(fs.readFileSync(packagejson_path, { encoding: 'utf8', flag: 'r' }));
+                            let resolved_import_path = path.join(local_import_path, packagejson.main);
+                            let import_code = fs.readFileSync(resolved_import_path, { encoding: 'utf8', flag: 'r' });
+                            let import_language = IAMFast.getLanguageByPath(local_import_path);
+
+                            if (import_language == language) {
+                                this.generatePrivs(import_code, language, local_import_path, variable_replacement);
+                            }
+                            
+                            break;
+                        } else if (fs.existsSync(defaultindex_path)) {
+                            let import_code = fs.readFileSync(defaultindex_path, { encoding: 'utf8', flag: 'r' });
+                            let import_language = IAMFast.getLanguageByPath(local_import_path);
+
+                            if (import_language == language) {
+                                this.generatePrivs(import_code, language, local_import_path, variable_replacement);
+                            }
+                            
+                            break;
                         }
                     }
-                    let defaultindex_path = path.join(import_path, 'index.js');
-                    let import_code = fs.readFileSync(defaultindex_path, { encoding: 'utf8', flag: 'r' });
-                    let import_language = IAMFast.getLanguageByPath(defaultindex_path);
-
-                    if (import_language == language) {
-                        this.generatePrivs(import_code, language, defaultindex_path, variable_replacement);
-                    }
-                    continue
                 }
-            } catch(e) {}
-
-            // Standard imports
-            // TODO
+            }
         }
 
         // basic pre-checks
