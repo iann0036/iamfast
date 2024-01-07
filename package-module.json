@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha tests/*.test.js",
-    "prepare": "./node_modules/esbuild/bin/esbuild --bundle src/index.js --outdir=dist --format=cjs"
+    "prepare": "./node_modules/esbuild/bin/esbuild --bundle src/index.js --outdir=dist --format=cjs --platform=node"
   },
   "repository": {
     "type": "git",
