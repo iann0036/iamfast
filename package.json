@@ -42,11 +42,5 @@
   },
   "bin": {
     "iamfast": "src/main.js"
-  },
-  "browser": {
-    "path": "path-browserify",
-    "fs": false,
-    "repl": false,
-    "node:module": false
   }
 }
