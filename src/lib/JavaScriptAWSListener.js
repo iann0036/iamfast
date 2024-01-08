@@ -263,6 +263,7 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                                 'value': expression.children[1].children[1].children[0].getText().replace(/['"]/g, "")
                             });
                         }
+                        // TODO: check for double usage for above ^
                     }
                 } else if (expression instanceof JavaScriptParser.NewExpressionContext) { // find client instantiations
                     let className = expression.children[1]; // new ### (...)
@@ -445,6 +446,20 @@ export default class JavaScriptAWSListener extends JavaScriptParserListener {
                         }
                     }
                 }
+            }
+        } else if (callMethod instanceof JavaScriptParser.IdentifierExpressionContext && callMethod.getText() == "require") {
+            if (argsRaw.children.length == 3 && argsRaw.children[1] instanceof JavaScriptParser.ArgumentContext && argsRaw.children[1].children.length == 1 && argsRaw.children[1].children[0] instanceof JavaScriptParser.LiteralExpressionContext) { // require('###')
+                this.Imports.push({
+                    'scope': [...this.currentScope],
+                    'type': 'require',
+                    'value': argsRaw.children[1].children[0].getText().replace(/['"]/g, "")
+                });
+            } else if (argsRaw.children.length == 3 && argsRaw.children[1] instanceof JavaScriptParser.ArgumentContext && argsRaw.children[1].children.length == 1 && argsRaw.children[1].children[0] instanceof JavaScriptParser.AdditiveExpressionContext && argsRaw.children[1].children[0].children.length == 3 && argsRaw.children[1].children[0].children[0].getText() == "__dirname" && argsRaw.children[1].children[0].children[1].getText() == "+" && argsRaw.children[1].children[0].children[2] instanceof JavaScriptParser.LiteralExpressionContext) { // require(__dirname + '###')
+                this.Imports.push({
+                    'scope': [...this.currentScope],
+                    'type': 'require',
+                    'value': "./" + argsRaw.children[1].children[0].children[2].getText().replace(/['"]/g, "")
+                });
             }
         }
 	}

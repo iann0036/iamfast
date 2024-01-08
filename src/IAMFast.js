@@ -503,7 +503,7 @@ export default class IAMFast {
         let import_only_code = this.generateImportsOnlyCode(code, language);
 
         let import_parser = new AWSParser(); // TODO: replace with minimal imports parser
-        import_parser.debug = false;
+        import_parser.debug = this.debug;
         import_parser.ParseInput(import_only_code, language);
 
         for (let import_inst of import_parser.imports) {
