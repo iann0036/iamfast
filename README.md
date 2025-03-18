@@ -4,7 +4,7 @@
 
 ## About
 
-This is an issues-only repo for **iamfast**, a toolset which generates AWS IAM policies from application code.
+This is an issues-only repo for **iamfast**, a toolset which generates IAM policies from application code.
 
 ## Installation
 
